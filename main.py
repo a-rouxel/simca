@@ -1,7 +1,7 @@
 import sys
 import yaml
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QPushButton, QFileDialog, QLabel, QLineEdit, QWidget, QFormLayout, QScrollArea, QGroupBox)
-from PyQt5.QtWidgets import QRadioButton, QButtonGroup
+from PyQt5.QtWidgets import QRadioButton, QButtonGroup,QComboBox
 
 
 class ConfigEditor(QMainWindow):
@@ -49,6 +49,7 @@ class ConfigEditor(QMainWindow):
             with open(file_name, 'r') as file:
                 self.config = yaml.safe_load(file)
                 self.show_config()
+                self.toggle_fov_fields(str(self.config['FOV']['field_of_view_mode']))
 
     def show_config(self):
         self.input_fields = {}
@@ -58,35 +59,57 @@ class ConfigEditor(QMainWindow):
             group_box.setLayout(form_layout)
 
             for sub_key, value in section.items():
-                full_key = f"{key}_{sub_key}"
-                label = QLabel(sub_key)
+                if isinstance(value, dict):
+                    for nested_sub_key, nested_value in value.items():
+                        full_key = f"{key}_{sub_key}_{nested_sub_key}"
+                        label = QLabel(f"{sub_key} - {nested_sub_key}")
 
-                if full_key == "FOV_field_of_view_mode":
-                    input_field = QButtonGroup(self)
-                    radio1 = QRadioButton("1")
-                    radio2 = QRadioButton("0")
-                    if value == 1:
-                        radio1.setChecked(True)
-                    else:
-                        radio2.setChecked(True)
-
-                    radio_layout = QHBoxLayout()
-                    radio_layout.addWidget(radio1)
-                    radio_layout.addWidget(radio2)
-                    input_field.addButton(radio1, 1)
-                    input_field.addButton(radio2, 0)
-                    input_field.buttonClicked.connect(self.fov_mode_changed)
-
-                    form_layout.addRow(label, radio_layout)
+                        input_field = QLineEdit(str(nested_value))
+                        form_layout.addRow(label, input_field)
+                        self.input_fields[full_key] = input_field
                 else:
-                    input_field = QLineEdit(str(value))
-                    if key == "FOV" and self.config["FOV"]["field_of_view_mode"] == 1:
-                        input_field.setEnabled(False)
-                    form_layout.addRow(label, input_field)
+                    full_key = f"{key}_{sub_key}"
+                    label = QLabel(sub_key)
 
-                self.input_fields[full_key] = input_field
+                    if full_key == "FOV_field_of_view_mode":
+                        input_field = QComboBox(self)
+                        input_field.addItem("0")
+                        input_field.addItem("1")
+                        input_field.setCurrentText(str(value))
+                        input_field.currentTextChanged.connect(self.toggle_fov_fields)
+                        form_layout.addRow(QLabel(sub_key), input_field)
+
+                    elif full_key == "system_architecture_name":
+                        input_field = QComboBox(self)
+                        input_field.addItem("SD-CASSI")
+                        input_field.addItem("DD-CASSI")
+                        input_field.setCurrentText(value)
+                        input_field.currentTextChanged.connect(self.toggle_system_architecture_fields)
+                        form_layout.addRow(QLabel(sub_key), input_field)
+                    else:
+                        label = QLabel(sub_key)
+                        input_field = QLineEdit(str(value))
+                        if key == "FOV" and self.config["FOV"]["field_of_view_mode"] == 1:
+                            input_field.setEnabled(False)
+                        form_layout.addRow(label, input_field)
+                        self.input_fields[full_key] = input_field
 
             self.group_layout.addWidget(group_box)
+
+
+    def toggle_system_architecture_fields(self, system_name):
+        lens_keys = ["system_architecture_lens_focal_length_3", "system_architecture_lens_focal_length_4"]
+        enable_fields = system_name == "DD-CASSI"
+        for key in lens_keys:
+            if key in self.input_fields:
+                self.input_fields[key].setEnabled(enable_fields)
+
+    def toggle_fov_fields(self, mode):
+        fov_keys = ["FOV_FOV_ACT", "FOV_FOV_ALT", "FOV_FOV_center_ACT", "FOV_FOV_center_ALT"]
+        enable_fields = mode == "0"
+        for key in fov_keys:
+            if key in self.input_fields:
+                self.input_fields[key].setEnabled(enable_fields)
 
     def fov_mode_changed(self, button):
         mode = button.group().checkedId()
@@ -111,19 +134,38 @@ class ConfigEditor(QMainWindow):
 
     def update_config(self):
         for key, section in self.config.items():
-            for sub_key, _ in section.items():
-                full_key = f"{key}_{sub_key}"
-                if full_key in self.input_fields:
-                    input_field = self.input_fields[full_key]
-                    new_value = input_field.text()
-                    try:
-                        new_value = int(new_value)
-                    except ValueError:
-                        try:
-                            new_value = float(new_value)
-                        except ValueError:
-                            pass
-                    self.config[key][sub_key] = new_value
+            for sub_key, value in section.items():
+                if isinstance(value, dict):
+                    for nested_sub_key, _ in value.items():
+                        full_key = f"{key}_{sub_key}_{nested_sub_key}"
+                        if full_key in self.input_fields:
+                            input_field = self.input_fields[full_key]
+                            new_value = input_field.text()
+                            try:
+                                new_value = int(new_value)
+                            except ValueError:
+                                try:
+                                    new_value = float(new_value)
+                                except ValueError:
+                                    pass
+                            self.config[key][sub_key][nested_sub_key] = new_value
+                else:
+                    full_key = f"{key}_{sub_key}"
+                    if full_key in self.input_fields:
+                        if full_key == "system_architecture_name" or full_key == "FOV_field_of_view_mode":
+                            input_field = self.input_fields[full_key]
+                            new_value = input_field.currentText()
+                        else:
+                            input_field = self.input_fields[full_key]
+                            new_value = input_field.text()
+                            try:
+                                new_value = int(new_value)
+                            except ValueError:
+                                try:
+                                    new_value = float(new_value)
+                                except ValueError:
+                                    pass
+                        self.config[key][sub_key] = new_value
 
 
 

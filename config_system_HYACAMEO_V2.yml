@@ -6,12 +6,28 @@ name:
     
 system_architecture:
     name: SD-CASSI   # or DD-CASSI
-    
     lens_focal_length_1: 165000
+    dispersive_element_1:
+    # dispersive element caracteristics
+        type: prism        # name of the dispersive element
+        alpha_c: 49.441  # incident angle on the dispersive surface 			          -- in degrees
+        delta_alpha_c: 0
+        delta_beta_c: 0
+        A: 60              # apex angle of the prism in degrees      (only used if type == 'prism')   -- in degrees
+        m: 1               # grating order to consider         (only used if type == 'grating')       -- no units
+        G: 160             # grating density                   (only used if type == 'grating')       -- in lines/mm
     lens_focal_length_2: 165000
     lens_focal_length_3: 165000
+    dispersive_element_2:
+    # dispersive element caracteristics
+        type: prism        # name of the dispersive element
+        alpha_c: 49.441  # incident angle on the dispersive surface 			          -- in degrees
+        delta_alpha_c: 0
+        delta_beta_c: 0
+        A: 60              # apex angle of the prism in degrees      (only used if type == 'prism')   -- in degrees
+        m: 1               # grating order to consider         (only used if type == 'grating')       -- no units
+        G: 160             # grating density                   (only used if type == 'grating')       -- in lines/mm
     lens_focal_length_4: 165000
-
 FOV:
 # The field diaphragm dimensions
 
