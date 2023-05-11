@@ -3,7 +3,7 @@ import yaml
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QDockWidget,QHBoxLayout, QPushButton, QFileDialog, QLabel, QLineEdit, QWidget, QFormLayout, QScrollArea, QGroupBox,QRadioButton, QButtonGroup,QComboBox)
 from PyQt5.QtCore import Qt
 
-class ConfigEditor(QWidget):
+class EditorSystemConfig(QWidget):
 
     def __init__(self):
         super().__init__()
@@ -13,7 +13,7 @@ class ConfigEditor(QWidget):
 
 
     def init_ui(self):
-        self.setWindowTitle('Config Editor')
+        # self.setWindowTitle('Editor for system config')
 
         # Create layout and widgets
         main_layout = QVBoxLayout()
@@ -106,7 +106,7 @@ class ConfigEditor(QWidget):
                     full_key = f"{key}_{sub_key}"
                     label = QLabel(sub_key)
 
-                    if full_key == "system_architecture_name":
+                    if full_key == "system_architecture_type":
                         input_field = QComboBox(self)
                         input_field.addItem("SD-CASSI")
                         input_field.addItem("DD-CASSI")
@@ -124,6 +124,20 @@ class ConfigEditor(QWidget):
 
             self.group_layout.addWidget(group_box)
 
+            # Simulate the change events
+            if key == 'system_architecture':
+                system_architecture_type = section.get('type')
+                if system_architecture_type:
+                    self.toggle_system_architecture_fields(system_architecture_type)
+
+                dispersive_element_1_type = section.get('dispersive_element_1', {}).get('type')
+                if dispersive_element_1_type:
+                    self.toggle_dispersive_element_fields(dispersive_element_1_type, f"{key}_dispersive_element_1")
+
+                dispersive_element_2_type = section.get('dispersive_element_2', {}).get('type')
+                if dispersive_element_2_type:
+                    self.toggle_dispersive_element_fields(dispersive_element_2_type, f"{key}_dispersive_element_2")
+
     def toggle_fields(self, keys, enable_fields, input_fields_dict, labels_dict):
         for key in keys:
             if key in input_fields_dict:
@@ -136,32 +150,22 @@ class ConfigEditor(QWidget):
             if key in labels_dict:  # Add this check to prevent KeyError
                 labels_dict[key].setVisible(enable_fields)
 
-    # def toggle_system_architecture_fields(self, system_name):
-    #     enable_fields = system_name == "DD-CASSI"
-    #     lens_keys = ["system_architecture_lens_focal_length_3", "system_architecture_lens_focal_length_4"]
-    #     self.toggle_fields(lens_keys, enable_fields, self.input_fields, self.input_labels)
-    #
-    #     dispersive_element_2_key = 'system_architecture_dispersive_element_2'
-    #     if dispersive_element_2_key in self.input_groups:
-    #         self.input_groups[dispersive_element_2_key].setVisible(
-    #             enable_fields)  # Toggle the visibility of the QGroupBox
-
-    # Add this method to your class
-
     # Modify this method
-    def toggle_system_architecture_fields(self, system_name):
+    def toggle_system_architecture_fields(self, system_type):
         lens_keys = ["system_architecture_lens_focal_length_3", "system_architecture_lens_focal_length_4"]
         dispersive_element_2_keys = [f"system_architecture_dispersive_element_2_{key}" for key in
                                      self.config['system_architecture']['dispersive_element_2'].keys()]
 
-        enable_fields = system_name == "DD-CASSI"
+        enable_fields = system_type == "DD-CASSI"
 
         self.toggle_fields(lens_keys, enable_fields, self.input_fields, self.input_labels)
         self.toggle_fields(dispersive_element_2_keys, enable_fields, self.input_fields, self.input_labels)
 
+
+
         # If system name is SD-CASSI, set all dispersive_element_2 values to None
-        if system_name == "SD-CASSI":
-            self.input_groups["system_architecture_dispersive_element_2"].hide()  # Add this line
+        if system_type == "SD-CASSI":
+            self.input_groups["system_architecture_dispersive_element_2"].hide()
         else:
             self.input_groups["system_architecture_dispersive_element_2"].show()  # Add this line
 
@@ -260,9 +264,9 @@ class MainWindow(QMainWindow):
         self.setWindowTitle('App')
 
         # Create the ConfigEditor and add it as a dock widget
-        self.config_editor = ConfigEditor()
-        self.config_dock = QDockWidget("Config Editor")
-        self.config_dock.setWidget(self.config_editor)
+        self.editor_system_config = EditorSystemConfig()
+        self.config_dock = QDockWidget("Editor for system config")
+        self.config_dock.setWidget(self.editor_system_config)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.config_dock)
 
         # Create the ResultDisplay and set it as the central widget
@@ -287,8 +291,4 @@ if __name__ == '__main__':
     main_window.show()
     sys.exit(app.exec_())
 
-if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    config_editor = ConfigEditor()
-    config_editor.show()
-    sys.exit(app.exec_())
+
