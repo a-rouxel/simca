@@ -5,7 +5,7 @@ name:
     system_name: HYACAMEO
     
 system_architecture:
-    name: SD-CASSI   # or DD-CASSI
+    name: DD-CASSI   # or DD-CASSI
     lens_focal_length_1: 165000
     dispersive_element_1:
     # dispersive element caracteristics
@@ -50,73 +50,19 @@ spectral_range:
     lba_min: 450     # minimum wavelength -- in nm
     lba_max: 750      # maximum wavelength -- in nm
 
-lenses:
-# lenses parameters
-
-    focal_length: 165000   # focal length of the lenses (all lenses are identical for now) -- in um
-    L2_name: TL165         # name of the lens before the DMD
-
-dispersive_element:
-# dispersive element caracteristics
-
-    type: prism        # name of the dispersive element
-    alpha_c: 49.441  # incident angle on the dispersive surface 			          -- in degrees
-    delta_alpha_c: 0
-    delta_beta_c: 0
-
-    # used when using prism type
-    A: 60              # apex angle of the prism in degrees      (only used if type == 'prism')   -- in degrees
-
-    # used when using grating type
-    m: 1               # grating order to consider         (only used if type == 'grating')       -- no units
-    G: 160             # grating density                   (only used if type == 'grating')       -- in lines/mm
-
-# Used for PSF calculation
-aperture :
-    D_a: 10000           # circular aperture diameter  -- in um
 
 camera:
 # camera caracteristics
     nb_of_camera_pixels_ACT: 30                  # nb_of_camera_pixels_ACT -- no units
     nb_of_camera_pixels_ALT: 10                  # nb_of_camera_pixels_ALT -- no units
-    number_of_bits: 12                             # encodable bits   -- in bits
-    max_codable_number_of_electrons: 9700          # full well charge -- in e-
     pixel_size: 4.8                              # pixel_size       -- in um   # A FAIRE , passer aux pixels rectangulaires ????
-
-    # when implementing caracteristics from datasheet
-    read_noise: 0                                  # read noise       -- in e-
-    dark_noise_RMS: 13                             # dark noise RMS   -- in e-
-    dark_current: 125                              # dark current      -- in e-
-
-    #when implementing a gaussian noise with a std_dev depending on flux (poisson noise dominant)
-    offset_final_noise: 0
-    variance_final_noise_factor: 1
-
-    # when implementing data from real measurements with the model,  std_dev = slope*flux_in_pixel_values + offset
-    slope_noise: 0.0065                            # slope  -- no units
-    offset_noise: 15.8                             # offset -- pixel values
-
-   # If use_quantum_efficiency is set to True, the relevent quantum efficiency has to be set in the cam_caracteristics class
-    use_quantum_efficiency: False                 # using a camera quantum efficiency ?   #A FAIRE , expliciter l'interpolation lineaire
 
 DMD:
 # DMD caracteristics
-    diamond_shape: False       # boolean on wether or not the micromirrors are tilted at 45° ? (diagonal shape)  -- boolean
     um_size: 5.4               # micromirror side size  -- in um
     nb_um_ALT: 500              # number of micromirrors in the direction perpendicular to the dispersion ("along-track" if used in pushbroom) -- no units
     nb_um_ACT: 1500             # number of micromirrors in the direction of the dispersion ("across-track" if used in pushbroom)              -- no units
-    fill_factor: 0.98           # fill factor of the DMD, between 0 and 1 -- no units
-    tilt_angle: 17              # mechanical tilt angle in relation to the DMD surface
 
-DMD_diffraction:
-    
-    input_axis_angle_x: 0
-    input_axis_angle_y: 0
-    output_axis_angle_x: 34
-    output_axis_angle_y: 0
-    nb_datapoints: 400
-    lens_NA: 0.05
-    central_wavelength_for_approx: 600
 
 
 

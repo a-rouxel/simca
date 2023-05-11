@@ -1,7 +1,6 @@
 import sys
 import yaml
-from PyQt5.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QPushButton, QFileDialog, QLabel, QLineEdit, QWidget, QFormLayout, QScrollArea, QGroupBox)
-from PyQt5.QtWidgets import QRadioButton, QButtonGroup,QComboBox
+from PyQt5.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QPushButton, QFileDialog, QLabel, QLineEdit, QWidget, QFormLayout, QScrollArea, QGroupBox,QRadioButton, QButtonGroup,QComboBox)
 
 
 class ConfigEditor(QMainWindow):
@@ -53,20 +52,49 @@ class ConfigEditor(QMainWindow):
 
     def show_config(self):
         self.input_fields = {}
+        self.input_labels = {}
+        self.input_groups = {}
         for key, section in self.config.items():
             group_box = QGroupBox(key)
             form_layout = QFormLayout()
             group_box.setLayout(form_layout)
 
             for sub_key, value in section.items():
-                if isinstance(value, dict):
-                    for nested_sub_key, nested_value in value.items():
-                        full_key = f"{key}_{sub_key}_{nested_sub_key}"
-                        label = QLabel(f"{sub_key} - {nested_sub_key}")
+                full_key = f"{key}_{sub_key}"
+                label = QLabel(sub_key)
 
-                        input_field = QLineEdit(str(nested_value))
-                        form_layout.addRow(label, input_field)
-                        self.input_fields[full_key] = input_field
+                if sub_key in ['dispersive_element_1', 'dispersive_element_2']:
+                    sub_group_box = QGroupBox(sub_key)
+                    sub_form_layout = QFormLayout()
+                    sub_group_box.setLayout(sub_form_layout)
+                    self.input_groups[full_key] = sub_group_box  # Save a reference to the QGroupBox
+
+                    self.input_fields[sub_key] = {}  # Store the fields in a separate dictionary
+                    self.input_labels[sub_key] = {}  # Store the labels in a separate dictionary
+
+                    for nested_sub_key, nested_value in value.items():
+                        nested_full_key = f"{full_key}_{nested_sub_key}"
+                        nested_label = QLabel(nested_sub_key)
+
+                        # input_field = QLineEdit(str(nested_value))
+                        # sub_form_layout.addRow(nested_label, input_field)
+                        # self.input_fields[sub_key][nested_full_key] = input_field  # Store the field in the new dictionary
+                        # self.input_labels[sub_key][nested_full_key] = nested_label  # Store the label in the new dictionary
+
+                        if nested_sub_key == "type":
+                            input_field = QComboBox(self)
+                            input_field.addItem("prism")
+                            input_field.addItem("grating")
+                            input_field.setCurrentText(nested_value)
+                            input_field.currentTextChanged.connect(
+                                lambda value, full_key=full_key: self.toggle_dispersive_element_fields(value, full_key))
+                        else:
+                            input_field = QLineEdit(str(nested_value))
+                        sub_form_layout.addRow(nested_label, input_field)
+                        self.input_fields[nested_full_key] = input_field
+
+                    form_layout.addRow(sub_group_box)
+
                 else:
                     full_key = f"{key}_{sub_key}"
                     label = QLabel(sub_key)
@@ -93,23 +121,47 @@ class ConfigEditor(QMainWindow):
                             input_field.setEnabled(False)
                         form_layout.addRow(label, input_field)
                         self.input_fields[full_key] = input_field
+                        self.input_labels[full_key] = label
 
             self.group_layout.addWidget(group_box)
 
+    def toggle_fields(self, keys, enable_fields, input_fields_dict, labels_dict):
+        for key in keys:
+            if key in input_fields_dict:
+                input_fields_dict[key].setEnabled(enable_fields)
+                if enable_fields:
+                    input_fields_dict[key].show()
+                else:
+                    input_fields_dict[key].hide()
+
+            if key in labels_dict:  # Add this check to prevent KeyError
+                labels_dict[key].setVisible(enable_fields)
 
     def toggle_system_architecture_fields(self, system_name):
-        lens_keys = ["system_architecture_lens_focal_length_3", "system_architecture_lens_focal_length_4"]
         enable_fields = system_name == "DD-CASSI"
-        for key in lens_keys:
-            if key in self.input_fields:
-                self.input_fields[key].setEnabled(enable_fields)
+        lens_keys = ["system_architecture_lens_focal_length_3", "system_architecture_lens_focal_length_4"]
+        self.toggle_fields(lens_keys, enable_fields, self.input_fields, self.input_labels)
+
+        dispersive_element_2_key = 'system_architecture_dispersive_element_2'
+        if dispersive_element_2_key in self.input_groups:
+            self.input_groups[dispersive_element_2_key].setVisible(
+                enable_fields)  # Toggle the visibility of the QGroupBox
+
+    def toggle_dispersive_element_fields(self, dispersive_element_type, dispersive_element_key):
+        prism_keys = [f"{dispersive_element_key}_A"]
+        grating_keys = [f"{dispersive_element_key}_m", f"{dispersive_element_key}_G"]
+
+        if dispersive_element_type == "prism":
+            self.toggle_fields(prism_keys, True, self.input_fields, self.input_labels)
+            self.toggle_fields(grating_keys, False, self.input_fields, self.input_labels)
+        else:
+            self.toggle_fields(prism_keys, False, self.input_fields, self.input_labels)
+            self.toggle_fields(grating_keys, True, self.input_fields, self.input_labels)
 
     def toggle_fov_fields(self, mode):
         fov_keys = ["FOV_FOV_ACT", "FOV_FOV_ALT", "FOV_FOV_center_ACT", "FOV_FOV_center_ALT"]
         enable_fields = mode == "0"
-        for key in fov_keys:
-            if key in self.input_fields:
-                self.input_fields[key].setEnabled(enable_fields)
+        self.toggle_fields(fov_keys, enable_fields, self.input_fields, self.input_labels)
 
     def fov_mode_changed(self, button):
         mode = button.group().checkedId()
@@ -140,14 +192,20 @@ class ConfigEditor(QMainWindow):
                         full_key = f"{key}_{sub_key}_{nested_sub_key}"
                         if full_key in self.input_fields:
                             input_field = self.input_fields[full_key]
-                            new_value = input_field.text()
-                            try:
-                                new_value = int(new_value)
-                            except ValueError:
+                            if input_field.isHidden():
+                                new_value = None
+                            else:
+                                if isinstance(input_field, QComboBox):
+                                    new_value = input_field.currentText()  # Changed line
+                                else:
+                                    new_value = input_field.text()
                                 try:
-                                    new_value = float(new_value)
+                                    new_value = int(new_value)
                                 except ValueError:
-                                    pass
+                                    try:
+                                        new_value = float(new_value)
+                                    except ValueError:
+                                        pass
                             self.config[key][sub_key][nested_sub_key] = new_value
                 else:
                     full_key = f"{key}_{sub_key}"
@@ -157,16 +215,21 @@ class ConfigEditor(QMainWindow):
                             new_value = input_field.currentText()
                         else:
                             input_field = self.input_fields[full_key]
-                            new_value = input_field.text()
-                            try:
-                                new_value = int(new_value)
-                            except ValueError:
+                            if input_field.isHidden():
+                                new_value = None
+                            else:
+                                if isinstance(input_field, QComboBox):
+                                    new_value = input_field.currentText()  # Changed line
+                                else:
+                                    new_value = input_field.text()
                                 try:
-                                    new_value = float(new_value)
+                                    new_value = int(new_value)
                                 except ValueError:
-                                    pass
+                                    try:
+                                        new_value = float(new_value)
+                                    except ValueError:
+                                        pass
                         self.config[key][sub_key] = new_value
-
 
 
 if __name__ == '__main__':
