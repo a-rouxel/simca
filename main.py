@@ -1,14 +1,16 @@
 import sys
 import yaml
-from PyQt5.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QPushButton, QFileDialog, QLabel, QLineEdit, QWidget, QFormLayout, QScrollArea, QGroupBox,QRadioButton, QButtonGroup,QComboBox)
+from PyQt5.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QDockWidget,QHBoxLayout, QPushButton, QFileDialog, QLabel, QLineEdit, QWidget, QFormLayout, QScrollArea, QGroupBox,QRadioButton, QButtonGroup,QComboBox)
+from PyQt5.QtCore import Qt
 
-
-class ConfigEditor(QMainWindow):
+class ConfigEditor(QWidget):
 
     def __init__(self):
         super().__init__()
 
         self.init_ui()
+        self.load_config("init_config.yml")  # Add this line
+
 
     def init_ui(self):
         self.setWindowTitle('Config Editor')
@@ -33,22 +35,27 @@ class ConfigEditor(QMainWindow):
         scroll_area.setWidgetResizable(True)
         scroll_area.setWidget(scroll_widget)
 
-        main_widget = QWidget()
         main_layout.addLayout(buttons_layout)
         main_layout.addWidget(scroll_area)
-        main_widget.setLayout(main_layout)
-        self.setCentralWidget(main_widget)
 
-    def open_config(self):
-        options = QFileDialog.Options()
-        options |= QFileDialog.ReadOnly
-        file_name, _ = QFileDialog.getOpenFileName(self, "Open Config", "", "YAML Files (*.yml *.yaml);;All Files (*)", options=options)
+        self.setLayout(main_layout)  # Set the layout for the current widget
 
+
+    def load_config(self, file_name):
         if file_name:
             with open(file_name, 'r') as file:
                 self.config = yaml.safe_load(file)
                 self.show_config()
-                self.toggle_fov_fields(str(self.config['FOV']['field_of_view_mode']))
+
+    def open_config(self):
+        options = QFileDialog.Options()
+        options |= QFileDialog.ReadOnly
+        file_name, _ = QFileDialog.getOpenFileName(self, "Open Config", "", "YAML Files (*.yml *.yaml);;All Files (*)",
+                                                   options=options)
+
+        if file_name:
+            self.load_config(file_name)
+
 
     def show_config(self):
         self.input_fields = {}
@@ -99,26 +106,18 @@ class ConfigEditor(QMainWindow):
                     full_key = f"{key}_{sub_key}"
                     label = QLabel(sub_key)
 
-                    if full_key == "FOV_field_of_view_mode":
-                        input_field = QComboBox(self)
-                        input_field.addItem("0")
-                        input_field.addItem("1")
-                        input_field.setCurrentText(str(value))
-                        input_field.currentTextChanged.connect(self.toggle_fov_fields)
-                        form_layout.addRow(QLabel(sub_key), input_field)
-
-                    elif full_key == "system_architecture_name":
+                    if full_key == "system_architecture_name":
                         input_field = QComboBox(self)
                         input_field.addItem("SD-CASSI")
                         input_field.addItem("DD-CASSI")
                         input_field.setCurrentText(value)
                         input_field.currentTextChanged.connect(self.toggle_system_architecture_fields)
                         form_layout.addRow(QLabel(sub_key), input_field)
+                        self.input_fields[full_key] = input_field  # This line is added to store the QComboBox in input_fields
+
                     else:
                         label = QLabel(sub_key)
                         input_field = QLineEdit(str(value))
-                        if key == "FOV" and self.config["FOV"]["field_of_view_mode"] == 1:
-                            input_field.setEnabled(False)
                         form_layout.addRow(label, input_field)
                         self.input_fields[full_key] = input_field
                         self.input_labels[full_key] = label
@@ -137,15 +136,34 @@ class ConfigEditor(QMainWindow):
             if key in labels_dict:  # Add this check to prevent KeyError
                 labels_dict[key].setVisible(enable_fields)
 
-    def toggle_system_architecture_fields(self, system_name):
-        enable_fields = system_name == "DD-CASSI"
-        lens_keys = ["system_architecture_lens_focal_length_3", "system_architecture_lens_focal_length_4"]
-        self.toggle_fields(lens_keys, enable_fields, self.input_fields, self.input_labels)
+    # def toggle_system_architecture_fields(self, system_name):
+    #     enable_fields = system_name == "DD-CASSI"
+    #     lens_keys = ["system_architecture_lens_focal_length_3", "system_architecture_lens_focal_length_4"]
+    #     self.toggle_fields(lens_keys, enable_fields, self.input_fields, self.input_labels)
+    #
+    #     dispersive_element_2_key = 'system_architecture_dispersive_element_2'
+    #     if dispersive_element_2_key in self.input_groups:
+    #         self.input_groups[dispersive_element_2_key].setVisible(
+    #             enable_fields)  # Toggle the visibility of the QGroupBox
 
-        dispersive_element_2_key = 'system_architecture_dispersive_element_2'
-        if dispersive_element_2_key in self.input_groups:
-            self.input_groups[dispersive_element_2_key].setVisible(
-                enable_fields)  # Toggle the visibility of the QGroupBox
+    # Add this method to your class
+
+    # Modify this method
+    def toggle_system_architecture_fields(self, system_name):
+        lens_keys = ["system_architecture_lens_focal_length_3", "system_architecture_lens_focal_length_4"]
+        dispersive_element_2_keys = [f"system_architecture_dispersive_element_2_{key}" for key in
+                                     self.config['system_architecture']['dispersive_element_2'].keys()]
+
+        enable_fields = system_name == "DD-CASSI"
+
+        self.toggle_fields(lens_keys, enable_fields, self.input_fields, self.input_labels)
+        self.toggle_fields(dispersive_element_2_keys, enable_fields, self.input_fields, self.input_labels)
+
+        # If system name is SD-CASSI, set all dispersive_element_2 values to None
+        if system_name == "SD-CASSI":
+            self.input_groups["system_architecture_dispersive_element_2"].hide()  # Add this line
+        else:
+            self.input_groups["system_architecture_dispersive_element_2"].show()  # Add this line
 
     def toggle_dispersive_element_fields(self, dispersive_element_type, dispersive_element_key):
         prism_keys = [f"{dispersive_element_key}_A"]
@@ -158,19 +176,6 @@ class ConfigEditor(QMainWindow):
             self.toggle_fields(prism_keys, False, self.input_fields, self.input_labels)
             self.toggle_fields(grating_keys, True, self.input_fields, self.input_labels)
 
-    def toggle_fov_fields(self, mode):
-        fov_keys = ["FOV_FOV_ACT", "FOV_FOV_ALT", "FOV_FOV_center_ACT", "FOV_FOV_center_ALT"]
-        enable_fields = mode == "0"
-        self.toggle_fields(fov_keys, enable_fields, self.input_fields, self.input_labels)
-
-    def fov_mode_changed(self, button):
-        mode = button.group().checkedId()
-        for sub_key in ["FOV_ACT", "FOV_ALT", "FOV_center_ACT", "FOV_center_ALT"]:
-            full_key = f"FOV_{sub_key}"
-            input_field = self.input_fields.get(full_key, None)
-            if input_field:
-                input_field.setEnabled(mode == 0)
-        self.config["FOV"]["field_of_view_mode"] = mode
 
     def save_config(self):
         if hasattr(self, 'config'):
@@ -231,6 +236,56 @@ class ConfigEditor(QMainWindow):
                                         pass
                         self.config[key][sub_key] = new_value
 
+
+class ResultDisplay(QWidget):
+    # This is a new class for displaying results
+
+    def __init__(self):
+        super().__init__()
+
+        layout = QVBoxLayout()
+        self.label = QLabel("Results will be displayed here.")
+        layout.addWidget(self.label)
+        self.setLayout(layout)
+
+    def display_results(self, results):
+        self.label.setText(str(results))
+
+class MainWindow(QMainWindow):
+    # This is your new main window class
+
+    def __init__(self):
+        super().__init__()
+
+        self.setWindowTitle('App')
+
+        # Create the ConfigEditor and add it as a dock widget
+        self.config_editor = ConfigEditor()
+        self.config_dock = QDockWidget("Config Editor")
+        self.config_dock.setWidget(self.config_editor)
+        self.addDockWidget(Qt.LeftDockWidgetArea, self.config_dock)
+
+        # Create the ResultDisplay and set it as the central widget
+        self.result_display = ResultDisplay()
+        self.setCentralWidget(self.result_display)
+
+        # Create the "Run Dimensioning" button and add it to the toolbar
+        run_button = QPushButton('Run Dimensioning')
+        run_button.clicked.connect(self.run_dimensioning)
+        self.toolbar = self.addToolBar("Run Dimensioning")
+        self.toolbar.addWidget(run_button)
+
+    def run_dimensioning(self):
+        # This function will be run when the "Run Dimensioning" button is clicked
+        results = "Results go here."  # Replace this with your actual function
+        self.result_display.display_results(results)
+
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    main_window = MainWindow()
+    main_window.show()
+    sys.exit(app.exec_())
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
