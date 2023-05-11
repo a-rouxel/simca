@@ -1,7 +1,18 @@
 import sys
 import yaml
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QDockWidget,QHBoxLayout, QPushButton, QFileDialog, QLabel, QLineEdit, QWidget, QFormLayout, QScrollArea, QGroupBox,QRadioButton, QButtonGroup,QComboBox)
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QThread, pyqtSignal, pyqtSlot
+
+from Dimensionner import Dimensionner
+
+from PyQt5.QtWidgets import QVBoxLayout, QToolBar
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+import matplotlib.pyplot as plt
+import matplotlib
+import numpy as np
+
+
 
 class EditorSystemConfig(QWidget):
 
@@ -106,7 +117,7 @@ class EditorSystemConfig(QWidget):
                     full_key = f"{key}_{sub_key}"
                     label = QLabel(sub_key)
 
-                    if full_key == "system_architecture_type":
+                    if full_key == "system architecture_type":
                         input_field = QComboBox(self)
                         input_field.addItem("SD-CASSI")
                         input_field.addItem("DD-CASSI")
@@ -125,7 +136,7 @@ class EditorSystemConfig(QWidget):
             self.group_layout.addWidget(group_box)
 
             # Simulate the change events
-            if key == 'system_architecture':
+            if key == 'system architecture':
                 system_architecture_type = section.get('type')
                 if system_architecture_type:
                     self.toggle_system_architecture_fields(system_architecture_type)
@@ -152,12 +163,11 @@ class EditorSystemConfig(QWidget):
 
     # Modify this method
     def toggle_system_architecture_fields(self, system_type):
-        lens_keys = ["system_architecture_lens_focal_length_3", "system_architecture_lens_focal_length_4"]
-        dispersive_element_2_keys = [f"system_architecture_dispersive_element_2_{key}" for key in
-                                     self.config['system_architecture']['dispersive_element_2'].keys()]
+        lens_keys = ["system architecture_focal_lens_3", "system architecture_focal_lens_4"]
+        dispersive_element_2_keys = [f"system architecture_dispersive_element_2_{key}" for key in
+                                     self.config['system architecture']['dispersive_element_2'].keys()]
 
         enable_fields = system_type == "DD-CASSI"
-
         self.toggle_fields(lens_keys, enable_fields, self.input_fields, self.input_labels)
         self.toggle_fields(dispersive_element_2_keys, enable_fields, self.input_fields, self.input_labels)
 
@@ -165,9 +175,9 @@ class EditorSystemConfig(QWidget):
 
         # If system name is SD-CASSI, set all dispersive_element_2 values to None
         if system_type == "SD-CASSI":
-            self.input_groups["system_architecture_dispersive_element_2"].hide()
+            self.input_groups["system architecture_dispersive_element_2"].hide()
         else:
-            self.input_groups["system_architecture_dispersive_element_2"].show()  # Add this line
+            self.input_groups["system architecture_dispersive_element_2"].show()  # Add this line
 
     def toggle_dispersive_element_fields(self, dispersive_element_type, dispersive_element_key):
         prism_keys = [f"{dispersive_element_key}_A"]
@@ -192,6 +202,38 @@ class EditorSystemConfig(QWidget):
                     yaml.dump(self.config, file)
         else:
             pass
+
+    def get_config(self):
+        config = {}  # Create an empty dictionary
+        print(self.input_fields.items())
+        # Loop over all input fields and add their values to the config
+        for key, input_field in self.input_fields.items():
+            # Split the key into section and sub_key
+            section, sub_key = key.split("_", 1)
+            if section not in config:
+                config[section] = {}
+
+            # Get the value from the input field
+            if isinstance(input_field, QLineEdit):
+                value = input_field.text()
+            elif isinstance(input_field, QComboBox):
+                value = input_field.currentText()
+            else:
+                continue
+
+            # If the value can be converted to a number, do so
+            try:
+                value = int(value)
+            except ValueError:
+                try:
+                    value = float(value)
+                except ValueError:
+                    pass
+
+            # Add the value to the config
+            config[section][sub_key] = value
+
+        return config
 
     def update_config(self):
         for key, section in self.config.items():
@@ -242,18 +284,78 @@ class EditorSystemConfig(QWidget):
 
 
 class ResultDisplay(QWidget):
-    # This is a new class for displaying results
-
     def __init__(self):
         super().__init__()
 
         layout = QVBoxLayout()
-        self.label = QLabel("Results will be displayed here.")
-        layout.addWidget(self.label)
         self.setLayout(layout)
 
-    def display_results(self, results):
-        self.label.setText(str(results))
+        self.figure_cam = plt.figure()
+        self.canvas_cam = FigureCanvas(self.figure_cam)
+        self.toolbar_cam = NavigationToolbar(self.canvas_cam, self)
+
+        self.figure_dmd = plt.figure()
+        self.canvas_dmd = FigureCanvas(self.figure_dmd)
+        self.toolbar_dmd = NavigationToolbar(self.canvas_dmd, self)
+
+        layout.addWidget(self.toolbar_cam)
+        layout.addWidget(self.canvas_cam)
+        layout.addWidget(self.toolbar_dmd)
+        layout.addWidget(self.canvas_dmd)
+
+    def display_results_cam(self, X_cam, Y_cam):
+        self.figure_cam.clear()
+
+        ax = self.figure_cam.add_subplot(111)
+        scatter = ax.scatter(X_cam, Y_cam)
+
+        # Set labels with LaTeX font.
+        ax.set_xlabel(f'X_cam', fontsize=12)
+        ax.set_ylabel(f'Y_cam', fontsize=12)
+        ax.set_title(f'Camera sampling', fontsize=12)
+
+        self.canvas_cam.draw()
+
+
+    def display_results_dmd(self, X_dmd, Y_dmd):
+        self.figure_dmd.clear()
+
+        ax = self.figure_dmd.add_subplot(111)
+
+        # Draw a grid using the plot method
+        for i in range(X_dmd.shape[0]):
+            ax.plot(X_dmd[i, :], Y_dmd[i, :], color='k')
+
+        for j in range(X_dmd.shape[1]):
+            ax.plot(X_dmd[:, j], Y_dmd[:, j], color='k')
+
+        # Set labels with LaTeX font.
+        ax.set_xlabel(f'X_dmd', fontsize=12)
+        ax.set_ylabel(f'Y_dmd', fontsize=12)
+        ax.set_title(f'DMD sampling', fontsize=12)
+
+
+        self.canvas_dmd.draw()
+
+class Worker(QThread):
+    finished_cam = pyqtSignal(tuple)  # For camera sampling results
+    finished_dmd = pyqtSignal(tuple)  # For DMD sampling results
+
+    def __init__(self, config):
+        super().__init__()
+        self.config = config
+
+    def run(self):
+        # Put your analysis here
+        dimensioner = Dimensionner(config=self.config)
+
+        X_cam, Y_cam = dimensioner.define_camera_sampling()
+        self.finished_cam.emit((X_cam, Y_cam))  # Emit a tuple of arrays
+        # X_dmd, Y_dmd = dimensioner.define_DMD_sampling()
+        X_dmd, Y_dmd = dimensioner.retropropagate()
+        self.finished_dmd.emit((X_dmd, Y_dmd))
+
+
 
 class MainWindow(QMainWindow):
     # This is your new main window class
@@ -280,9 +382,26 @@ class MainWindow(QMainWindow):
         self.toolbar.addWidget(run_button)
 
     def run_dimensioning(self):
-        # This function will be run when the "Run Dimensioning" button is clicked
-        results = "Results go here."  # Replace this with your actual function
-        self.result_display.display_results(results)
+        # Get the config from the editor
+        config = self.editor_system_config.get_config()
+
+        import pprint
+        pprint.pprint(config)
+
+        # Create a new worker thread and start it
+        self.worker = Worker(config)
+        self.worker.finished_cam.connect(self.display_results_cam)
+        self.worker.finished_dmd.connect(self.display_results_dmd)
+        self.worker.start()
+    @pyqtSlot(tuple)
+    def display_results_cam(self, arrays):
+        X_cam, Y_cam = arrays  # Unpack the tuple
+        self.result_display.display_results_cam(X_cam, Y_cam)
+
+    @pyqtSlot(tuple)
+    def display_results_dmd(self, arrays):
+        X_dmd, Y_dmd = arrays  # Unpack the tuple
+        self.result_display.display_results_dmd(X_dmd, Y_dmd)
 
 
 if __name__ == '__main__':
