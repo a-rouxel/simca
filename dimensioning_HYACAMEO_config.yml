@@ -1,0 +1,35 @@
+DMD:
+  micromirror size: 5.4
+  number of micromirrors across dispersion: 500
+  number of micromirrors along dispersion: 1500
+camera:
+  number of pixels across dispersion: 35
+  number of pixels along dispersion: 31
+  pixel size: 130
+infos:
+  results_directory: ./dimensionning_results
+  system name: HYACAMEO_dimensioning
+spectral range:
+  wavelength center: 550
+  wavelength max: 750
+  wavelength min: 450
+system architecture:
+  dispersive_element_1:
+    A: 60
+    G: null
+    delta_alpha_c: 0
+    delta_beta_c: 0
+    m: null
+    type: prism
+  dispersive_element_2:
+    A: null
+    G: null
+    delta_alpha_c: null
+    delta_beta_c: null
+    m: null
+    type: null
+  focal_lens_1: 165000
+  focal_lens_2: 165000
+  focal_lens_3: null
+  focal_lens_4: null
+  type: SD-CASSI

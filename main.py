@@ -1,7 +1,7 @@
 import sys
 import yaml
-from PyQt5.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QDockWidget,QHBoxLayout, QPushButton, QFileDialog, QLabel, QLineEdit, QWidget, QFormLayout, QScrollArea, QGroupBox,QRadioButton, QButtonGroup,QComboBox)
-from PyQt5.QtCore import Qt, QThread, pyqtSignal, pyqtSlot
+from PyQt5.QtWidgets import (QApplication, QGridLayout,QMainWindow, QSpinBox,QVBoxLayout, QDockWidget,QHBoxLayout, QPushButton, QFileDialog, QLabel, QLineEdit, QWidget, QFormLayout, QScrollArea, QGroupBox,QRadioButton, QButtonGroup,QComboBox)
+from PyQt5.QtCore import Qt, QThread, pyqtSignal, pyqtSlot, QSize
 
 from Dimensionner import Dimensionner
 
@@ -282,26 +282,27 @@ class EditorSystemConfig(QWidget):
                                         pass
                         self.config[key][sub_key] = new_value
 
+class SquareLayout(QVBoxLayout):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
-class ResultDisplay(QWidget):
+    def setGeometry(self, rect):
+        square_size = min(rect.width(), rect.height())
+        rect.setSize(QSize(square_size, square_size))
+        super().setGeometry(rect)
+class CameraResultDisplay(QWidget):
     def __init__(self):
         super().__init__()
 
-        layout = QVBoxLayout()
-        self.setLayout(layout)
+        self.layout = SquareLayout()
+        self.setLayout(self.layout)
 
         self.figure_cam = plt.figure()
         self.canvas_cam = FigureCanvas(self.figure_cam)
         self.toolbar_cam = NavigationToolbar(self.canvas_cam, self)
 
-        self.figure_dmd = plt.figure()
-        self.canvas_dmd = FigureCanvas(self.figure_dmd)
-        self.toolbar_dmd = NavigationToolbar(self.canvas_dmd, self)
-
-        layout.addWidget(self.toolbar_cam)
-        layout.addWidget(self.canvas_cam)
-        layout.addWidget(self.toolbar_dmd)
-        layout.addWidget(self.canvas_dmd)
+        self.layout.addWidget(self.toolbar_cam)
+        self.layout.addWidget(self.canvas_cam)
 
     def display_results_cam(self, X_cam, Y_cam):
         self.figure_cam.clear()
@@ -312,34 +313,173 @@ class ResultDisplay(QWidget):
         # Set labels with LaTeX font.
         ax.set_xlabel(f'X_cam', fontsize=12)
         ax.set_ylabel(f'Y_cam', fontsize=12)
-        ax.set_title(f'Camera sampling', fontsize=12)
+        ax.set_title(f'Camera Pixelization', fontsize=12)
 
         self.canvas_cam.draw()
 
+class DMDResultDisplay(QWidget):
+    def __init__(self):
+        super().__init__()
 
-    def display_results_dmd(self, X_dmd, Y_dmd):
+        self.layout = SquareLayout()
+        self.setLayout(self.layout)
+
+        self.figure_dmd = plt.figure()
+        self.canvas_dmd = FigureCanvas(self.figure_dmd)
+        self.toolbar_dmd = NavigationToolbar(self.canvas_dmd, self)
+
+        self.layout .addWidget(self.toolbar_dmd)
+        self.layout .addWidget(self.canvas_dmd)
+
+    def display_results_dmd(self, list_X_dmd, list_Y_dmd,list_wavelengths):
+
         self.figure_dmd.clear()
 
         ax = self.figure_dmd.add_subplot(111)
 
-        # Draw a grid using the plot method
-        for i in range(X_dmd.shape[0]):
-            ax.plot(X_dmd[i, :], Y_dmd[i, :], color='k')
+        for idx in range(len(list_X_dmd)):
 
-        for j in range(X_dmd.shape[1]):
-            ax.plot(X_dmd[:, j], Y_dmd[:, j], color='k')
+           if idx ==0 or idx == len(list_X_dmd)//2  or idx == len(list_X_dmd)-1:
+            X_dmd = list_X_dmd[idx]
+            Y_dmd = list_Y_dmd[idx]
+            wavelength = list_wavelengths[idx]
 
-        # Set labels with LaTeX font.
+            X_dmd = X_dmd.reshape(-1,1)
+            Y_dmd = Y_dmd.reshape(-1,1)
+
+
+            scatter = ax.scatter(X_dmd, Y_dmd,label=f'{int(wavelength[0,0])} nm')
+
+
         ax.set_xlabel(f'X_dmd', fontsize=12)
         ax.set_ylabel(f'Y_dmd', fontsize=12)
-        ax.set_title(f'DMD sampling', fontsize=12)
-
+        ax.set_title(f'Retropropagation to DMD', fontsize=12)
+        ax.legend()
 
         self.canvas_dmd.draw()
 
+class DispersionResultDisplay(QWidget):
+    def __init__(self):
+        super().__init__()
+
+        self.layout = SquareLayout()
+        self.setLayout(self.layout)
+
+        self.figure_dispersion= plt.figure()
+        self.canvas_dispersion = FigureCanvas(self.figure_dispersion)
+        self.toolbar_dispersion = NavigationToolbar(self.canvas_dispersion, self)
+
+        self.layout.addWidget(self.toolbar_dispersion)
+        self.layout.addWidget(self.canvas_dispersion)
+
+    def display_results_dispersion(self, list_X_dmd, list_Y_dmd,list_wavelengths):
+        self.figure_dispersion.clear()
+
+        ax_center = self.figure_dispersion.add_subplot(111)
+
+        list_wavelength_center = list()
+        list_X_dmd_center = list()
+        list_Y_dmd_center = list()
+        list_X_dmd_corner_hleft = list()
+        list_Y_dmd_corner_hleft = list()
+        list_X_dmd_corner_lright = list()
+        list_Y_dmd_corner_lright = list()
+
+        for wavelength_array in list_wavelengths:
+            list_wavelength_center.append(wavelength_array[0,0])
+
+        for idx in range(len(list_X_dmd)):
+            X_dmd = list_X_dmd[idx]
+            Y_dmd = list_Y_dmd[idx]
+
+            print(X_dmd.shape)
+            X_dmd_center = X_dmd[X_dmd.shape[0]//2,X_dmd.shape[1]//2]
+            Y_dmd_center = Y_dmd[X_dmd.shape[0]//2,X_dmd.shape[1]//2]
+
+            X_dmd_corner_hleft = X_dmd[0,0]
+            Y_dmd_corner_hleft = Y_dmd[0,0]
+
+            X_dmd_corner_lright = X_dmd[X_dmd.shape[0]-1,X_dmd.shape[1]-1]
+            Y_dmd_corner_lright = Y_dmd[X_dmd.shape[0]-1,X_dmd.shape[1]-1]
+
+            list_X_dmd_center.append(X_dmd_center)
+            list_Y_dmd_center.append(Y_dmd_center)
+            list_X_dmd_corner_hleft.append(X_dmd_corner_hleft)
+            list_Y_dmd_corner_hleft.append(Y_dmd_corner_hleft)
+            list_X_dmd_corner_lright.append(X_dmd_corner_lright)
+            list_Y_dmd_corner_lright.append(Y_dmd_corner_lright)
+
+        for idx in range(len(list_X_dmd_center)):
+            list_X_dmd_corner_hleft[idx] = list_X_dmd_corner_hleft[idx] + list_X_dmd_center[len(list_X_dmd_center)//2]
+            list_Y_dmd_corner_hleft[idx] = list_Y_dmd_corner_hleft[idx] + list_Y_dmd_center[len(list_Y_dmd_center)//2]
+            list_X_dmd_corner_lright[idx] = list_X_dmd_corner_lright[idx] + list_X_dmd_center[len(list_X_dmd_center)//2]
+            list_Y_dmd_corner_lright[idx] = list_Y_dmd_corner_lright[idx] + list_Y_dmd_center[len(list_Y_dmd_center)//2]
+
+        plot = ax_center.plot(list_X_dmd_center, list_wavelength_center, label='Center')
+        plot = ax_center.plot(list_X_dmd_corner_hleft, list_wavelength_center, label='Corner up left')
+        plot = ax_center.plot(list_X_dmd_corner_lright, list_wavelength_center,label='Corner up left')
+
+        # Set labels with LaTeX font.
+        ax_center.set_xlabel(f'x_dmd', fontsize=12)
+        ax_center.set_ylabel(f'Wavelength', fontsize=12)
+        ax_center.set_title(f'Spectral Dispersion', fontsize=12)
+
+        self.canvas_dispersion.draw()
+
+class DistorsionResultDisplay(QWidget):
+    def __init__(self):
+        super().__init__()
+
+        self.layout = SquareLayout()
+        self.setLayout(self.layout)
+
+        self.figure_distorsion= plt.figure()
+        self.canvas_distorsion = FigureCanvas(self.figure_distorsion)
+        self.toolbar_distorsion = NavigationToolbar(self.canvas_distorsion, self)
+
+        self.layout.addWidget(self.toolbar_distorsion)
+        self.layout.addWidget(self.canvas_distorsion)
+
+    def display_results_distorsion(self, X_cam, Y_cam,list_X_dmd, list_Y_dmd,list_wavelengths):
+
+        self.figure_distorsion.clear()
+
+        ax = self.figure_distorsion.add_subplot(111)
+
+        for idx in range(len(list_X_dmd)):
+
+           if idx ==0 :
+            X_dmd = list_X_dmd[idx]
+            Y_dmd = list_Y_dmd[idx]
+            wavelength = list_wavelengths[idx]
+
+            print(X_dmd[X_dmd.shape[0]//2,X_dmd.shape[1]//2])
+            print(X_dmd[X_dmd.shape[0]//2,X_dmd.shape[1]//2],X_cam[X_dmd.shape[0]//2,X_dmd.shape[1]//2])
+
+            X_ref = -1*X_cam + X_dmd[X_dmd.shape[0]//2,Y_dmd.shape[1]//2]
+            Y_ref = -1*Y_cam + Y_dmd[Y_dmd.shape[0]//2,Y_dmd.shape[1]//2]
+
+            dist = np.sqrt((X_dmd-X_ref)**2 + (Y_dmd-Y_ref)**2)
+
+        print(X_dmd[X_dmd.shape[0]//2,X_dmd.shape[1]//2],Y_dmd[X_dmd.shape[0]//2,X_dmd.shape[1]//2],X_ref[X_dmd.shape[0]//2,X_dmd.shape[1]//2],Y_ref[X_dmd.shape[0]//2,X_dmd.shape[1]//2],dist[X_dmd.shape[0]//2,X_dmd.shape[1]//2])
+
+        imshow = ax.imshow(dist)
+
+        cbar = self.figure_distorsion.colorbar(imshow, ax=ax)
+        cbar.set_label('Distorsion')
+
+        ax.set_xlabel(f'X_dmd', fontsize=12)
+        ax.set_ylabel(f'Y_dmd', fontsize=12)
+        ax.set_title(f'Retropropagation to DMD', fontsize=12)
+        ax.legend()
+
+        self.canvas_distorsion.draw()
+
 class Worker(QThread):
-    finished_cam = pyqtSignal(tuple)  # For camera sampling results
-    finished_dmd = pyqtSignal(tuple)  # For DMD sampling results
+    finished_cam = pyqtSignal(tuple)
+    finished_dmd = pyqtSignal(tuple)
+    finished_dispersion = pyqtSignal(tuple)
+    finished_distorsion = pyqtSignal(tuple)
 
     def __init__(self, config):
         super().__init__()
@@ -352,56 +492,115 @@ class Worker(QThread):
         X_cam, Y_cam = dimensioner.define_camera_sampling()
         self.finished_cam.emit((X_cam, Y_cam))  # Emit a tuple of arrays
         # X_dmd, Y_dmd = dimensioner.define_DMD_sampling()
-        X_dmd, Y_dmd = dimensioner.retropropagate()
-        self.finished_dmd.emit((X_dmd, Y_dmd))
+        list_X_dmd, list_Y_dmd, list_wavelengths = dimensioner.propagate()
+        self.finished_dmd.emit((list_X_dmd, list_Y_dmd,list_wavelengths))
+        self.finished_dispersion.emit((list_X_dmd, list_Y_dmd, list_wavelengths))
+
+        self.finished_distorsion.emit((X_cam, Y_cam,list_X_dmd, list_Y_dmd, list_wavelengths))
 
 
-
-class MainWindow(QMainWindow):
-    # This is your new main window class
-
+class DimensioningConfigEditor(QWidget):
+    # A new class for editing dimensioning parameters
     def __init__(self):
         super().__init__()
 
-        self.setWindowTitle('App')
+        layout = QHBoxLayout()
 
-        # Create the ConfigEditor and add it as a dock widget
+        # Add your dimensioning parameters here
+        self.results_directory = QLineEdit()
+        self.spectral_samples = QSpinBox()
+
+
+        layout.addWidget(QLabel("results directory"))
+        layout.addWidget(self.results_directory)
+        layout.addWidget(QLabel("number of spectral samples"))
+        layout.addWidget(self.spectral_samples)
+
+        self.setLayout(layout)
+
+    def get_config(self):
+        # This method returns the current settings
+        return {
+            'results_directory': self.results_directory.text(),
+            'spectral_samples': self.spectral_samples.value(),
+            # add more key-value pairs for other parameters...
+        }
+
+
+class MainWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
+
+        self.setWindowTitle('SIMCA -- Dimensioning -- V0.1')
+
         self.editor_system_config = EditorSystemConfig()
-        self.config_dock = QDockWidget("Editor for system config")
-        self.config_dock.setWidget(self.editor_system_config)
-        self.addDockWidget(Qt.LeftDockWidgetArea, self.config_dock)
+        self.system_config_dock = QDockWidget("Editor for system config")
+        self.system_config_dock.setWidget(self.editor_system_config)
+        self.addDockWidget(Qt.LeftDockWidgetArea, self.system_config_dock)
 
-        # Create the ResultDisplay and set it as the central widget
-        self.result_display = ResultDisplay()
-        self.setCentralWidget(self.result_display)
+        self.dimensioning_config_editor = DimensioningConfigEditor()
+        self.dimensioning_config_dock = QDockWidget("Dimensioning Config")
+        self.dimensioning_config_dock.setWidget(self.dimensioning_config_editor)
+        self.addDockWidget(Qt.LeftDockWidgetArea, self.dimensioning_config_dock)
 
-        # Create the "Run Dimensioning" button and add it to the toolbar
+        # Create the ResultDisplay widgets
+        self.camera_result_display = CameraResultDisplay()
+        self.dmd_result_display = DMDResultDisplay()
+        self.dispersion_result_display = DispersionResultDisplay()
+        self.distorsion_result_display = DistorsionResultDisplay()
+
+        # Create a widget and grid layout to hold the result widgets
+        self.result_widget = QWidget()
+        self.result_layout = QGridLayout(self.result_widget)
+
+        # Add the result widgets to the grid layout
+        self.result_layout.addWidget(self.camera_result_display, 0, 0)
+        self.result_layout.addWidget(self.dmd_result_display, 0, 1)
+        self.result_layout.addWidget(self.dispersion_result_display, 1, 0)
+        self.result_layout.addWidget(self.distorsion_result_display, 1, 1)
+
+        # Set the grid layout as the central widget
+        self.setCentralWidget(self.result_widget)
+
         run_button = QPushButton('Run Dimensioning')
         run_button.clicked.connect(self.run_dimensioning)
         self.toolbar = self.addToolBar("Run Dimensioning")
         self.toolbar.addWidget(run_button)
-
     def run_dimensioning(self):
-        # Get the config from the editor
-        config = self.editor_system_config.get_config()
+        # Get the configs from the editors
+        system_config = self.editor_system_config.get_config()
+        dimensioning_config = self.dimensioning_config_editor.get_config()
 
-        import pprint
-        pprint.pprint(config)
+        config = {**system_config, **dimensioning_config}  # Merge the configs
 
-        # Create a new worker thread and start it
+        # pprint.pprint(config)
+
         self.worker = Worker(config)
         self.worker.finished_cam.connect(self.display_results_cam)
         self.worker.finished_dmd.connect(self.display_results_dmd)
+        self.worker.finished_dispersion.connect(self.display_results_dispersion)
+        self.worker.finished_distorsion.connect(self.display_results_distorsion)
         self.worker.start()
-    @pyqtSlot(tuple)
-    def display_results_cam(self, arrays):
-        X_cam, Y_cam = arrays  # Unpack the tuple
-        self.result_display.display_results_cam(X_cam, Y_cam)
 
     @pyqtSlot(tuple)
-    def display_results_dmd(self, arrays):
-        X_dmd, Y_dmd = arrays  # Unpack the tuple
-        self.result_display.display_results_dmd(X_dmd, Y_dmd)
+    def display_results_cam(self, arrays_cam):
+        X_cam, Y_cam = arrays_cam  # Unpack the tuple
+        self.camera_result_display.display_results_cam(X_cam, Y_cam)
+
+    @pyqtSlot(tuple)
+    def display_results_dmd(self, arrays_dmd):
+        list_X_dmd, list_Y_dmd, list_wavelengths = arrays_dmd  # Unpack the tuple
+        self.dmd_result_display.display_results_dmd(list_X_dmd, list_Y_dmd, list_wavelengths)
+
+    @pyqtSlot(tuple)
+    def display_results_dispersion(self, arrays_dmd):
+        list_X_dmd, list_Y_dmd, list_wavelengths = arrays_dmd  # Unpack the tuple
+        self.dispersion_result_display.display_results_dispersion(list_X_dmd, list_Y_dmd, list_wavelengths)
+
+    @pyqtSlot(tuple)
+    def display_results_distorsion(self, arrays_dmd_and_cam):
+        X_cam, Y_cam,list_X_dmd, list_Y_dmd, list_wavelengths = arrays_dmd_and_cam  # Unpack the tuple
+        self.distorsion_result_display.display_results_distorsion(X_cam, Y_cam,list_X_dmd, list_Y_dmd, list_wavelengths)
 
 
 if __name__ == '__main__':
