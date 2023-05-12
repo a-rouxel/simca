@@ -1,28 +1,37 @@
 # SIMCA -- Dimensioning -- V0.1
 
-This Python/Qt application allows users to run dimensioning analysis on various datasets.
+This Python/Qt application allows users to run dimensioning analysis on CASSI systems.
 
 ## Features
 
 The application provides the following features:
 
-1. Allows users to specify various parameters related to the dimensioning analysis.
-2. Displays results of the analysis in different forms, such as camera pixelization, retropropagation to DMD -- mapping, spectral dispersion, and distorsion map.
+1. Allows users to specify various system parameters.
+2. Displays results of the analysis in different forms, such as camera pixelization,  mapping in the DMD plane, spectral dispersion, and distorsion map.
 
-## Installation
 
-To install and run the application, you will need to have Python installed on your computer. You can download Python from [here](https://www.python.org/downloads/).
-
-After installing Python, you will also need to install PyQt and other dependencies. This can be done by running the following commands in your terminal:
+## Install
 
 ```bash
-pip install pyqt5 matplotlib numpy
+# Clone the repository 
+git clone git@gitlab.laas.fr:arouxel/simca-revival.git
+cd simca-revival
 ```
 
-After installing the dependencies, you can run the application by navigating to the directory containing the python script and running:
+Once the repository has been cloned, create a dedicated python environment with python=3.9. In these instructions, the python environment is created using Miniconda. It can be installed by following the instructions [here](https://docs.conda.io/projects/conda/en/latest/user-guide/install/linux.html).
 
 ```bash
-python main.py
+# create a new python environment
+conda create -n simca-revival-env python=3.9
+# activate the environment
+conda activate simca-revival-env
+```
+
+Now we have to install the packages we use:
+
+```bash
+# install packages contained in the "requirements.txt" with pip:
+pip install -r requirements.txt
 ```
 
 ## Usage
@@ -39,7 +48,7 @@ The application provides a graphical interface for running dimensioning analysis
 
 ### Input Parameters
 
-- **Results directory:** This is the directory where the results of the analysis will be saved.
+- **system parameters:** This is the CASSI system parameters that will be used for propagation
 - **Number of spectral samples:** This is the number of spectral samples to be used in the analysis.
 
 ### Output Results
@@ -48,11 +57,3 @@ The application provides a graphical interface for running dimensioning analysis
 - **Retropropagation to DMD -- mapping:** This is a graph showing the mapping of the retropropagation to the DMD.
 - **Spectral Dispersion:** This graph shows the spectral dispersion.
 - **Distorsion map:** This is a graph showing the distorsion map.
-
-## Contributing
-
-If you would like to contribute to this project, please feel free to fork the repository, make your changes and then create a pull request. If you have any questions, please feel free to contact the maintainers of this project.
-
-## License
-
-This project is licensed under the MIT License. Please see the LICENSE file for more details.
