@@ -1,0 +1,4 @@
+matplotlib==3.7.1
+pip-chill==1.0.3
+pyqt5==5.15.9
+pyyaml==6.0

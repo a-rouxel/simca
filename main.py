@@ -28,14 +28,14 @@ class EditorSystemConfig(QWidget):
 
         # Create layout and widgets
         main_layout = QVBoxLayout()
-        buttons_layout = QHBoxLayout()
-
-        open_button = QPushButton('Open')
-        open_button.clicked.connect(self.open_config)
-        save_button = QPushButton('Save')
-        save_button.clicked.connect(self.save_config)
-        buttons_layout.addWidget(open_button)
-        buttons_layout.addWidget(save_button)
+        # buttons_layout = QHBoxLayout()
+        #
+        # open_button = QPushButton('Open')
+        # open_button.clicked.connect(self.open_config)
+        # save_button = QPushButton('Save')
+        # save_button.clicked.connect(self.save_config)
+        # buttons_layout.addWidget(open_button)
+        # buttons_layout.addWidget(save_button)
 
         self.group_layout = QVBoxLayout()
 
@@ -46,7 +46,7 @@ class EditorSystemConfig(QWidget):
         scroll_area.setWidgetResizable(True)
         scroll_area.setWidget(scroll_widget)
 
-        main_layout.addLayout(buttons_layout)
+        # main_layout.addLayout(buttons_layout)
         main_layout.addWidget(scroll_area)
 
         self.setLayout(main_layout)  # Set the layout for the current widget
@@ -191,21 +191,23 @@ class EditorSystemConfig(QWidget):
             self.toggle_fields(grating_keys, True, self.input_fields, self.input_labels)
 
 
-    def save_config(self):
-        if hasattr(self, 'config'):
-            options = QFileDialog.Options()
-            file_name, _ = QFileDialog.getSaveFileName(self, "Save Config", "", "YAML Files (*.yml *.yaml);;All Files (*)", options=options)
-
-            if file_name:
-                self.update_config()
-                with open(file_name, 'w') as file:
-                    yaml.dump(self.config, file)
-        else:
-            pass
+    # def save_config(self):
+    #     if hasattr(self, 'config'):
+    #         options = QFileDialog.Options()
+    #         file_name, _ = QFileDialog.getSaveFileName(self, "Save Config", "", "YAML Files (*.yml *.yaml);;All Files (*)", options=options)
+    #
+    #         system_config = self.get_config()
+    #         self.config = system_config
+    #         if file_name:
+    #             # self.update_config()
+    #             with open(file_name, 'w') as file:
+    #                 yaml.dump(self.config, file)
+    #     else:
+    #         pass
 
     def get_config(self):
         config = {}  # Create an empty dictionary
-        print(self.input_fields.items())
+        # print(self.input_fields.items())
         # Loop over all input fields and add their values to the config
         for key, input_field in self.input_fields.items():
             # Split the key into section and sub_key
@@ -235,52 +237,52 @@ class EditorSystemConfig(QWidget):
 
         return config
 
-    def update_config(self):
-        for key, section in self.config.items():
-            for sub_key, value in section.items():
-                if isinstance(value, dict):
-                    for nested_sub_key, _ in value.items():
-                        full_key = f"{key}_{sub_key}_{nested_sub_key}"
-                        if full_key in self.input_fields:
-                            input_field = self.input_fields[full_key]
-                            if input_field.isHidden():
-                                new_value = None
-                            else:
-                                if isinstance(input_field, QComboBox):
-                                    new_value = input_field.currentText()  # Changed line
-                                else:
-                                    new_value = input_field.text()
-                                try:
-                                    new_value = int(new_value)
-                                except ValueError:
-                                    try:
-                                        new_value = float(new_value)
-                                    except ValueError:
-                                        pass
-                            self.config[key][sub_key][nested_sub_key] = new_value
-                else:
-                    full_key = f"{key}_{sub_key}"
-                    if full_key in self.input_fields:
-                        if full_key == "system_architecture_name" or full_key == "FOV_field_of_view_mode":
-                            input_field = self.input_fields[full_key]
-                            new_value = input_field.currentText()
-                        else:
-                            input_field = self.input_fields[full_key]
-                            if input_field.isHidden():
-                                new_value = None
-                            else:
-                                if isinstance(input_field, QComboBox):
-                                    new_value = input_field.currentText()  # Changed line
-                                else:
-                                    new_value = input_field.text()
-                                try:
-                                    new_value = int(new_value)
-                                except ValueError:
-                                    try:
-                                        new_value = float(new_value)
-                                    except ValueError:
-                                        pass
-                        self.config[key][sub_key] = new_value
+    # def update_config(self):
+    #     for key, section in self.config.items():
+    #         for sub_key, value in section.items():
+    #             if isinstance(value, dict):
+    #                 for nested_sub_key, _ in value.items():
+    #                     full_key = f"{key}_{sub_key}_{nested_sub_key}"
+    #                     if full_key in self.input_fields:
+    #                         input_field = self.input_fields[full_key]
+    #                         if input_field.isHidden():
+    #                             new_value = None
+    #                         else:
+    #                             if isinstance(input_field, QComboBox):
+    #                                 new_value = input_field.currentText()  # Changed line
+    #                             else:
+    #                                 new_value = input_field.text()
+    #                             try:
+    #                                 new_value = int(new_value)
+    #                             except ValueError:
+    #                                 try:
+    #                                     new_value = float(new_value)
+    #                                 except ValueError:
+    #                                     pass
+    #                         self.config[key][sub_key][nested_sub_key] = new_value
+    #             else:
+    #                 full_key = f"{key}_{sub_key}"
+    #                 if full_key in self.input_fields:
+    #                     if full_key == "system_architecture_name" or full_key == "FOV_field_of_view_mode":
+    #                         input_field = self.input_fields[full_key]
+    #                         new_value = input_field.currentText()
+    #                     else:
+    #                         input_field = self.input_fields[full_key]
+    #                         if input_field.isHidden():
+    #                             new_value = None
+    #                         else:
+    #                             if isinstance(input_field, QComboBox):
+    #                                 new_value = input_field.currentText()  # Changed line
+    #                             else:
+    #                                 new_value = input_field.text()
+    #                             try:
+    #                                 new_value = int(new_value)
+    #                             except ValueError:
+    #                                 try:
+    #                                     new_value = float(new_value)
+    #                                 except ValueError:
+    #                                     pass
+    #                     self.config[key][sub_key] = new_value
 
 class SquareLayout(QVBoxLayout):
     def __init__(self, *args, **kwargs):
@@ -353,7 +355,7 @@ class DMDResultDisplay(QWidget):
 
         ax.set_xlabel(f'X_dmd', fontsize=12)
         ax.set_ylabel(f'Y_dmd', fontsize=12)
-        ax.set_title(f'Retropropagation to DMD', fontsize=12)
+        ax.set_title(f'Retropropagation to DMD -- mapping', fontsize=12)
         ax.legend()
 
         self.canvas_dmd.draw()
@@ -385,6 +387,8 @@ class DispersionResultDisplay(QWidget):
         list_X_dmd_corner_lright = list()
         list_Y_dmd_corner_lright = list()
 
+
+
         for wavelength_array in list_wavelengths:
             list_wavelength_center.append(wavelength_array[0,0])
 
@@ -392,7 +396,6 @@ class DispersionResultDisplay(QWidget):
             X_dmd = list_X_dmd[idx]
             Y_dmd = list_Y_dmd[idx]
 
-            print(X_dmd.shape)
             X_dmd_center = X_dmd[X_dmd.shape[0]//2,X_dmd.shape[1]//2]
             Y_dmd_center = Y_dmd[X_dmd.shape[0]//2,X_dmd.shape[1]//2]
 
@@ -415,9 +418,10 @@ class DispersionResultDisplay(QWidget):
             list_X_dmd_corner_lright[idx] = list_X_dmd_corner_lright[idx] + list_X_dmd_center[len(list_X_dmd_center)//2]
             list_Y_dmd_corner_lright[idx] = list_Y_dmd_corner_lright[idx] + list_Y_dmd_center[len(list_Y_dmd_center)//2]
 
-        plot = ax_center.plot(list_X_dmd_center, list_wavelength_center, label='Center')
-        plot = ax_center.plot(list_X_dmd_corner_hleft, list_wavelength_center, label='Corner up left')
-        plot = ax_center.plot(list_X_dmd_corner_lright, list_wavelength_center,label='Corner up left')
+        plot = ax_center.plot(list_X_dmd_center, list_wavelength_center, label='X_cam center')
+        ax_center.legend()
+        # plot = ax_center.plot(list_X_dmd_corner_hleft, list_wavelength_center, label='Corner up left')
+        # plot = ax_center.plot(list_X_dmd_corner_lright, list_wavelength_center,label='Corner up left')
 
         # Set labels with LaTeX font.
         ax_center.set_xlabel(f'x_dmd', fontsize=12)
@@ -463,14 +467,14 @@ class DistorsionResultDisplay(QWidget):
 
         print(X_dmd[X_dmd.shape[0]//2,X_dmd.shape[1]//2],Y_dmd[X_dmd.shape[0]//2,X_dmd.shape[1]//2],X_ref[X_dmd.shape[0]//2,X_dmd.shape[1]//2],Y_ref[X_dmd.shape[0]//2,X_dmd.shape[1]//2],dist[X_dmd.shape[0]//2,X_dmd.shape[1]//2])
 
-        imshow = ax.imshow(dist)
+        imshow = ax.imshow(dist,extent=[X_dmd.min(),X_dmd.max(),Y_dmd.min(),Y_dmd.max()],cmap='viridis')
 
         cbar = self.figure_distorsion.colorbar(imshow, ax=ax)
         cbar.set_label('Distorsion')
 
         ax.set_xlabel(f'X_dmd', fontsize=12)
         ax.set_ylabel(f'Y_dmd', fontsize=12)
-        ax.set_title(f'Retropropagation to DMD', fontsize=12)
+        ax.set_title(f'Distorsion map', fontsize=12)
         ax.legend()
 
         self.canvas_distorsion.draw()
