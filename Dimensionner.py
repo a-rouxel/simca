@@ -31,8 +31,8 @@ class Dimensionner():
         self.Y_cam_flatten = self.Y_cam.flatten()
 
         self.Dm = D_m(sellmeier(self.config["spectral range"]["wavelength center"]),
-                      np.radians(self.config["system architecture"]["dispersive_element_1_A"]))
-        self.alpha_c = alpha_c(np.radians(self.config["system architecture"]["dispersive_element_1_A"]), self.Dm)
+                      np.radians(self.config["system architecture"]["dispersive element 1"]["A"]))
+        self.alpha_c = alpha_c(np.radians(self.config["system architecture"]["dispersive element 1"]["A"]), self.Dm)
 
         self.list_wavelengths= list()
         self.list_X_dmd = list()
@@ -41,7 +41,7 @@ class Dimensionner():
         for lba in np.linspace(self.config["spectral range"]["wavelength min"],self.config["spectral range"]["wavelength max"],self.config["spectral_samples"]):
             n_array_flatten = np.full(self.X_cam_flatten.shape, sellmeier(lba))
 
-            X_dmd, Y_dmd = find_cam_position_curve_fit_new_model_no_A_oneinput(self.X_cam_flatten , self.Y_cam_flatten,n_array_flatten, np.radians(self.config["system architecture"]["dispersive_element_1_A"]), self.config["system architecture"]["focal_lens_1"], self.alpha_c, np.radians(self.config["system architecture"]["dispersive_element_1_delta_alpha_c"]), np.radians(self.config["system architecture"]["dispersive_element_1_delta_beta_c"]))
+            X_dmd, Y_dmd = find_cam_position_curve_fit_new_model_no_A_oneinput(self.X_cam_flatten , self.Y_cam_flatten,n_array_flatten, np.radians(self.config["system architecture"]["dispersive element 1"]["A"]), self.config["system architecture"]["focal lens 1"], self.alpha_c, np.radians(self.config["system architecture"]["dispersive element 1"]["delta alpha c"]), np.radians(self.config["system architecture"]["dispersive element 1"]["delta beta c"]))
             self.list_X_dmd.append(X_dmd.reshape(self.X_cam.shape))
             self.list_Y_dmd.append(Y_dmd.reshape(self.Y_cam.shape))
             self.list_wavelengths.append(np.full(self.X_cam.shape, lba).reshape(self.Y_cam.shape))
@@ -98,9 +98,9 @@ class Dimensionner():
     #         self.Dm = D_m(sellmeier(self.config["spectral range"]["wavelength center"]), np.radians(self.config["system architecture"]["dispersive_element_1_A"]))
     #         self.alpha_c = alpha_c(np.radians(self.config["system architecture"]["dispersive_element_1_A"]), self.Dm)
     #
-    #         X_dmd_center, Y_dmd_center = find_cam_position_curve_fit_new_model_no_A_oneinput(self.X_cam_flatten , self.Y_cam_flatten,self.n_array_center.flatten(), np.radians(self.config["system architecture"]["dispersive_element_1_A"]), self.config["system architecture"]["focal_lens_1"], self.alpha_c, np.radians(self.config["system architecture"]["dispersive_element_1_delta_alpha_c"]), np.radians(self.config["system architecture"]["dispersive_element_1_delta_beta_c"]))
-    #         X_dmd_min, Y_dmd_min = find_cam_position_curve_fit_new_model_no_A_oneinput(self.X_cam_flatten , self.Y_cam_flatten,self.n_array_min.flatten(), np.radians(self.config["system architecture"]["dispersive_element_1_A"]), self.config["system architecture"]["focal_lens_1"], self.alpha_c, np.radians(self.config["system architecture"]["dispersive_element_1_delta_alpha_c"]), np.radians(self.config["system architecture"]["dispersive_element_1_delta_beta_c"]))
-    #         X_dmd_max, Y_dmd_max = find_cam_position_curve_fit_new_model_no_A_oneinput(self.X_cam_flatten , self.Y_cam_flatten,self.n_array_max.flatten(), np.radians(self.config["system architecture"]["dispersive_element_1_A"]), self.config["system architecture"]["focal_lens_1"], self.alpha_c, np.radians(self.config["system architecture"]["dispersive_element_1_delta_alpha_c"]), np.radians(self.config["system architecture"]["dispersive_element_1_delta_beta_c"]))
+    #         X_dmd_center, Y_dmd_center = find_cam_position_curve_fit_new_model_no_A_oneinput(self.X_cam_flatten , self.Y_cam_flatten,self.n_array_center.flatten(), np.radians(self.config["system architecture"]["dispersive_element_1_A"]), self.config["system architecture"]["focal_lens_1"], self.alpha_c, np.radians(self.config["system architecture"]["dispersive_element_1_delta alpha c"]), np.radians(self.config["system architecture"]["dispersive_element_1_delta beta c"]))
+    #         X_dmd_min, Y_dmd_min = find_cam_position_curve_fit_new_model_no_A_oneinput(self.X_cam_flatten , self.Y_cam_flatten,self.n_array_min.flatten(), np.radians(self.config["system architecture"]["dispersive_element_1_A"]), self.config["system architecture"]["focal_lens_1"], self.alpha_c, np.radians(self.config["system architecture"]["dispersive_element_1_delta alpha c"]), np.radians(self.config["system architecture"]["dispersive_element_1_delta beta c"]))
+    #         X_dmd_max, Y_dmd_max = find_cam_position_curve_fit_new_model_no_A_oneinput(self.X_cam_flatten , self.Y_cam_flatten,self.n_array_max.flatten(), np.radians(self.config["system architecture"]["dispersive_element_1_A"]), self.config["system architecture"]["focal_lens_1"], self.alpha_c, np.radians(self.config["system architecture"]["dispersive_element_1_delta alpha c"]), np.radians(self.config["system architecture"]["dispersive_element_1_delta beta c"]))
     #
     #
     #         X_dmd_center = X_dmd_center.reshape((self.X_cam.shape))

@@ -1,5 +1,6 @@
 import sys
 import yaml
+import pprint
 from PyQt5.QtWidgets import (QApplication, QGridLayout,QMainWindow, QSpinBox,QVBoxLayout, QDockWidget,QHBoxLayout, QPushButton, QFileDialog, QLabel, QLineEdit, QWidget, QFormLayout, QScrollArea, QGroupBox,QRadioButton, QButtonGroup,QComboBox)
 from PyQt5.QtCore import Qt, QThread, pyqtSignal, pyqtSlot, QSize
 
@@ -72,6 +73,7 @@ class EditorSystemConfig(QWidget):
         self.input_fields = {}
         self.input_labels = {}
         self.input_groups = {}
+
         for key, section in self.config.items():
             group_box = QGroupBox(key)
             form_layout = QFormLayout()
@@ -81,7 +83,7 @@ class EditorSystemConfig(QWidget):
                 full_key = f"{key}_{sub_key}"
                 label = QLabel(sub_key)
 
-                if sub_key in ['dispersive_element_1', 'dispersive_element_2']:
+                if sub_key in ['dispersive element 1', 'dispersive element 2']:
                     sub_group_box = QGroupBox(sub_key)
                     sub_form_layout = QFormLayout()
                     sub_group_box.setLayout(sub_form_layout)
@@ -164,8 +166,8 @@ class EditorSystemConfig(QWidget):
     # Modify this method
     def toggle_system_architecture_fields(self, system_type):
         lens_keys = ["system architecture_focal_lens_3", "system architecture_focal_lens_4"]
-        dispersive_element_2_keys = [f"system architecture_dispersive_element_2_{key}" for key in
-                                     self.config['system architecture']['dispersive_element_2'].keys()]
+        dispersive_element_2_keys = [f"system architecture_dispersive element 2_{key}" for key in
+                                     self.config['system architecture']['dispersive element 2'].keys()]
 
         enable_fields = system_type == "DD-CASSI"
         self.toggle_fields(lens_keys, enable_fields, self.input_fields, self.input_labels)
@@ -175,9 +177,10 @@ class EditorSystemConfig(QWidget):
 
         # If system name is SD-CASSI, set all dispersive_element_2 values to None
         if system_type == "SD-CASSI":
-            self.input_groups["system architecture_dispersive_element_2"].hide()
+
+            self.input_groups["system architecture_dispersive element 2"].hide()
         else:
-            self.input_groups["system architecture_dispersive_element_2"].show()  # Add this line
+            self.input_groups["system architecture_dispersive element 2"].show()  # Add this line
 
     def toggle_dispersive_element_fields(self, dispersive_element_type, dispersive_element_key):
         prism_keys = [f"{dispersive_element_key}_A"]
@@ -207,13 +210,30 @@ class EditorSystemConfig(QWidget):
 
     def get_config(self):
         config = {}  # Create an empty dictionary
-        # print(self.input_fields.items())
+        print(self.input_fields)
         # Loop over all input fields and add their values to the config
         for key, input_field in self.input_fields.items():
-            # Split the key into section and sub_key
-            section, sub_key = key.split("_", 1)
-            if section not in config:
-                config[section] = {}
+            # Split the key into parts
+            key_parts = key.split("_")
+
+            if len(key_parts) == 3:
+                section, sub_section, sub_key = key_parts
+                print(section, sub_section, sub_key)
+                # Ensure the section exists in the config
+                if section not in config:
+                    config[section] = {}
+                # Ensure the sub_section exists in the config
+                if sub_section not in config[section]:
+                    config[section][sub_section] = {}
+                target_dict = config[section][sub_section]
+            elif len(key_parts) == 2:
+                section, sub_key = key_parts
+                # Ensure the section exists in the config
+                if section not in config:
+                    config[section] = {}
+                target_dict = config[section]
+            else:
+                continue  # Skip this key, it doesn't follow the expected structure
 
             # Get the value from the input field
             if isinstance(input_field, QLineEdit):
@@ -233,7 +253,9 @@ class EditorSystemConfig(QWidget):
                     pass
 
             # Add the value to the config
-            config[section][sub_key] = value
+            target_dict[sub_key] = value
+
+        pprint.pprint(config)
 
         return config
 

@@ -30,7 +30,7 @@ def configure_logging(result_directory, log_directory="logs"):
 
 def initialize_directory(config):
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    result_directory = os.path.join(config["infos"]["results_directory"], timestamp)
+    result_directory = os.path.join(config["infos"]["results directory"], timestamp)
     os.makedirs(result_directory, exist_ok=True)
     return result_directory
 

@@ -2,30 +2,30 @@
 
 infos:
     system name: HYACAMEO
-    results_directory: ./dimensionning_results
+    results directory: ./dimensionning_results
 
 system architecture:
     type: SD-CASSI   # or DD-CASSI
-    focal_lens_1: 165000
-    dispersive_element_1:
+    focal lens 1: 165000
+    dispersive element 1:
     # dispersive element caracteristics
         type: prism        # name of the dispersive element
-        delta_alpha_c: 0
-        delta_beta_c: 0
+        delta alpha c: 0
+        delta beta c: 0
         A: 60              # apex angle of the prism in degrees      (only used if type == 'prism')   -- in degrees
         m: 1               # grating order to consider         (only used if type == 'grating')       -- no units
         G: 160             # grating density                   (only used if type == 'grating')       -- in lines/mm
-    focal_lens_2: 165000
-    focal_lens_3: 165000
-    dispersive_element_2:
+    focal lens 2: 165000
+    focal lens 3: 165000
+    dispersive element 2:
     # dispersive element caracteristics
         type: prism        # name of the dispersive element
-        delta_alpha_c: 0
-        delta_beta_c: 0
+        delta alpha c: 0
+        delta beta c: 0
         A: 60              # apex angle of the prism in degrees      (only used if type == 'prism')   -- in degrees
         m: 1               # grating order to consider         (only used if type == 'grating')       -- no units
         G: 160             # grating density                   (only used if type == 'grating')       -- in lines/mm
-    focal_lens_4: 165000
+    focal lens 4: 165000
 
 spectral range:
 # the spectral range of the optical system
@@ -35,9 +35,9 @@ spectral range:
 
 camera:
 # camera caracteristics
-    number of pixels along dispersion: 30                  # nb_of_camera_pixels_ACT -- no units
-    number of pixels across dispersion: 10                  # nb_of_camera_pixels_ALT -- no units
-    pixel size: 4.8                              # pixel_size       -- in um   # A FAIRE , passer aux pixels rectangulaires ????
+    number of pixels along dispersion: 55                  # nb_of_camera_pixels_ACT -- no units
+    number of pixels across dispersion: 37                  # nb_of_camera_pixels_ALT -- no units
+    pixel size: 200                              # pixel_size       -- in um   # A FAIRE , passer aux pixels rectangulaires ????
 
 DMD:
 # DMD caracteristics
