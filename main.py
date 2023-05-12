@@ -511,12 +511,12 @@ class DimensioningConfigEditor(QWidget):
         layout = QHBoxLayout()
 
         # Add your dimensioning parameters here
-        self.results_directory = QLineEdit()
+        # self.results_directory = QLineEdit()
         self.spectral_samples = QSpinBox()
 
 
-        layout.addWidget(QLabel("results directory"))
-        layout.addWidget(self.results_directory)
+        # layout.addWidget(QLabel("results directory"))
+        # layout.addWidget(self.results_directory)
         layout.addWidget(QLabel("number of spectral samples"))
         layout.addWidget(self.spectral_samples)
 
@@ -525,7 +525,7 @@ class DimensioningConfigEditor(QWidget):
     def get_config(self):
         # This method returns the current settings
         return {
-            'results_directory': self.results_directory.text(),
+            # 'results_directory': self.results_directory.text(),
             'spectral_samples': self.spectral_samples.value(),
             # add more key-value pairs for other parameters...
         }
