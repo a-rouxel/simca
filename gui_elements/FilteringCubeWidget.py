@@ -274,7 +274,7 @@ class FilteringCubeWidget(QWidget):
 
         # Add the result displays to the tab widget
         self.result_display_widget.addTab(self.camera_result_display, "Mask Grid")
-        self.result_display_widget.addTab(self.propagated_mask_display, "Propagated Mask Grid")
+        self.result_display_widget.addTab(self.propagated_mask_display, "Filtering cube")
 
 
         # Create the run button
