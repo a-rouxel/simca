@@ -2,15 +2,13 @@ import logging
 import os
 import yaml
 from datetime import datetime
-# import h5py
-import numpy as np
 import math
+import h5py
 def configure_logging(result_directory, log_directory="logs"):
     log_directory = os.path.join(result_directory, log_directory)
     os.makedirs(log_directory, exist_ok=True)
 
     log_formatter = logging.Formatter("%(asctime)s [%(levelname)s] %(message)s")
-
 
     root_logger = logging.getLogger()
     root_logger.setLevel(logging.DEBUG)
@@ -151,97 +149,6 @@ def rotation_x(theta):
                   (0, math.sin(theta), math.cos(theta))));
 
     return r
-
-
-def _find_nearest(arrayX, X_s):
-    """
-    Find the nearest sample in the arrayX to the value X_s.
-
-    Parameters
-    ----------
-    arrayX : 1D numpy array
-        Array of values.
-    X_s : float
-        The value for which we want to find the nearest in the array.
-
-    Returns
-    -------
-    value : float
-        The corresponding nearest value in the array.
-    idx_x : int
-        The index of the corresponding nearest value.
-
-    """
-
-    arrayX = np.asarray(arrayX);
-    idx_x = (np.abs(arrayX - X_s)).argmin();
-
-    return (arrayX[idx_x], idx_x)
-
-
-
-
-def rescale_array(vector_to_rescale, new_size):
-    """
-    Rescale (resample) an array to get a different number of sample.
-
-    Parameters
-    ----------
-    vector_to_rescale : 1D numpy array
-        The array to resample.
-    new_size : int
-        The new number of sample.
-
-    Returns
-    -------
-    array_rescaled : 1D numpy array
-        The rescaled array.
-
-    """
-    # Note: different interpolation possible (linear, cubic...)
-    x = np.linspace(0, 1, num=len(vector_to_rescale), endpoint=True)
-    f = interp1d(x, vector_to_rescale)
-    xnew = np.linspace(0, 1, num=new_size, endpoint=True)
-    array_rescaled = f(xnew)
-
-    return array_rescaled
-
-
-def voxel_exist(id_row, id_col, id_band, nb_row, nb_col, nb_band):
-    """
-    Check if the voxel at the position (id_row, id_col, id_band)
-    exist in the cube of the cube of size (nb_row, nb_col, nb_band).
-
-    Parameters
-    ----------
-    id_row : int
-        Row index.
-    id_col : int
-        Column index.
-    id_band : int
-        Spectral band (wavelength) index.
-    nb_row : int
-        The number of rows of the cube.
-    nb_col : int
-        The number of columns of the cube.
-    nb_band : int
-        The number of spectral bands of the cube.
-
-    Returns
-    -------
-    bool
-        True if the pixel exist.
-
-    """
-    if (id_row < 0) or (id_col < 0) or (id_band < 0):
-        return False
-
-    if (nb_row - 1 < id_row) or (nb_col - 1 < id_col) or (nb_band - 1 < id_band):
-        return False
-
-    return True
-
-
 
 def sellmeier(lambda_):
     """

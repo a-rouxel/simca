@@ -81,7 +81,6 @@ class EditorSystemConfig(QWidget):
 
             for sub_key, value in section.items():
                 full_key = f"{key}_{sub_key}"
-                label = QLabel(sub_key)
 
                 if sub_key in ['dispersive element 1', 'dispersive element 2']:
                     sub_group_box = QGroupBox(sub_key)
@@ -118,38 +117,26 @@ class EditorSystemConfig(QWidget):
                 else:
                     full_key = f"{key}_{sub_key}"
                     label = QLabel(sub_key)
-
-                    if full_key == "system architecture_type":
-                        input_field = QComboBox(self)
-                        input_field.addItem("SD-CASSI")
-                        input_field.addItem("DD-CASSI")
-                        input_field.setCurrentText(value)
-                        input_field.currentTextChanged.connect(self.toggle_system_architecture_fields)
-                        form_layout.addRow(QLabel(sub_key), input_field)
-                        self.input_fields[full_key] = input_field  # This line is added to store the QComboBox in input_fields
-
-                    else:
-                        label = QLabel(sub_key)
-                        input_field = QLineEdit(str(value))
-                        form_layout.addRow(label, input_field)
-                        self.input_fields[full_key] = input_field
-                        self.input_labels[full_key] = label
+                    input_field = QLineEdit(str(value))
+                    form_layout.addRow(label, input_field)
+                    self.input_fields[full_key] = input_field
+                    self.input_labels[full_key] = label
 
             self.group_layout.addWidget(group_box)
 
             # Simulate the change events
-            if key == 'system architecture':
-                system_architecture_type = section.get('type')
-                if system_architecture_type:
-                    self.toggle_system_architecture_fields(system_architecture_type)
-
-                dispersive_element_1_type = section.get('dispersive_element_1', {}).get('type')
-                if dispersive_element_1_type:
-                    self.toggle_dispersive_element_fields(dispersive_element_1_type, f"{key}_dispersive_element_1")
-
-                dispersive_element_2_type = section.get('dispersive_element_2', {}).get('type')
-                if dispersive_element_2_type:
-                    self.toggle_dispersive_element_fields(dispersive_element_2_type, f"{key}_dispersive_element_2")
+            # if key == 'system architecture':
+            #     system_architecture_type = section.get('type')
+            #     if system_architecture_type:
+            #         self.toggle_system_architecture_fields(system_architecture_type)
+            #
+            #     dispersive_element_1_type = section.get('dispersive_element_1', {}).get('type')
+            #     if dispersive_element_1_type:
+            #         self.toggle_dispersive_element_fields(dispersive_element_1_type, f"{key}_dispersive_element_1")
+            #
+            #     dispersive_element_2_type = section.get('dispersive_element_2', {}).get('type')
+            #     if dispersive_element_2_type:
+            #         self.toggle_dispersive_element_fields(dispersive_element_2_type, f"{key}_dispersive_element_2")
 
     def toggle_fields(self, keys, enable_fields, input_fields_dict, labels_dict):
         for key in keys:
@@ -479,24 +466,33 @@ class DistorsionResultDisplay(QWidget):
             Y_dmd = list_Y_dmd[idx]
             wavelength = list_wavelengths[idx]
 
-            print(X_dmd[X_dmd.shape[0]//2,X_dmd.shape[1]//2])
-            print(X_dmd[X_dmd.shape[0]//2,X_dmd.shape[1]//2],X_cam[X_dmd.shape[0]//2,X_dmd.shape[1]//2])
-
-            X_ref = -1*X_cam + X_dmd[X_dmd.shape[0]//2,Y_dmd.shape[1]//2]
-            Y_ref = -1*Y_cam + Y_dmd[Y_dmd.shape[0]//2,Y_dmd.shape[1]//2]
+            # print(X_dmd[X_dmd.shape[0]//2,X_dmd.shape[1]//2])
+            # print(X_dmd[X_dmd.shape[0]//2,X_dmd.shape[1]//2],X_cam[X_dmd.shape[0]//2,X_dmd.shape[1]//2])
+            # print(X_dmd[X_dmd.shape[0]//2,Y_dmd.shape[1]//2])
+            print(X_dmd.shape,Y_dmd.shape,X_cam.shape,Y_cam.shape)
+            X_ref = -1*X_cam + X_dmd[X_dmd.shape[0]//2+0,X_dmd.shape[1]//2]
+            Y_ref = -1*Y_cam + Y_dmd[Y_dmd.shape[0]//2+0,Y_dmd.shape[1]//2]
 
             dist = np.sqrt((X_dmd-X_ref)**2 + (Y_dmd-Y_ref)**2)
+            dist_x = np.sqrt(abs(X_dmd-X_ref))
+
+            print(dist_x[:,X_dmd.shape[1]//2])
 
         print(X_dmd[X_dmd.shape[0]//2,X_dmd.shape[1]//2],Y_dmd[X_dmd.shape[0]//2,X_dmd.shape[1]//2],X_ref[X_dmd.shape[0]//2,X_dmd.shape[1]//2],Y_ref[X_dmd.shape[0]//2,X_dmd.shape[1]//2],dist[X_dmd.shape[0]//2,X_dmd.shape[1]//2])
 
-        imshow = ax.imshow(dist,extent=[X_dmd.min(),X_dmd.max(),Y_dmd.min(),Y_dmd.max()],cmap='viridis')
+
+        imshow = ax.imshow(dist)
+        # plot = ax.plot(X_dmd[X_dmd.shape[0]//2,:],dist_x[X_dmd.shape[0]//2,:],label='X_dmd center')
+
+        # imshow = ax.scatter(X_ref[:,X_dmd.shape[1]//2],Y_ref[:,X_dmd.shape[1]//2])
+        # imshow = ax.scatter(X_dmd[:,X_dmd.shape[1]//2],Y_dmd[:,X_dmd.shape[1]//2])
 
         cbar = self.figure_distorsion.colorbar(imshow, ax=ax)
         cbar.set_label('Distorsion')
 
         ax.set_xlabel(f'X_dmd', fontsize=12)
         ax.set_ylabel(f'Y_dmd', fontsize=12)
-        ax.set_title(f'Distorsion map', fontsize=12)
+        ax.set_title(f'Distorsion map -- wavelength min', fontsize=12)
         ax.legend()
 
         self.canvas_distorsion.draw()

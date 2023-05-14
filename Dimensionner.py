@@ -1,8 +1,3 @@
-import numpy as np
-
-from utils import *
-import logging
-import matplotlib.pyplot as plt
 from utils.functions_retropropagating import *
 class Dimensionner():
 
@@ -41,24 +36,174 @@ class Dimensionner():
         for lba in np.linspace(self.config["spectral range"]["wavelength min"],self.config["spectral range"]["wavelength max"],self.config["spectral_samples"]):
             n_array_flatten = np.full(self.X_cam_flatten.shape, sellmeier(lba))
 
-            X_dmd, Y_dmd = find_cam_position_curve_fit_new_model_no_A_oneinput(self.X_cam_flatten , self.Y_cam_flatten,n_array_flatten, np.radians(self.config["system architecture"]["dispersive element 1"]["A"]), self.config["system architecture"]["focal lens 1"], self.alpha_c, np.radians(self.config["system architecture"]["dispersive element 1"]["delta alpha c"]), np.radians(self.config["system architecture"]["dispersive element 1"]["delta beta c"]))
+            X_dmd, Y_dmd = propagate_through_arm_vector(self.X_cam_flatten , self.Y_cam_flatten,n_array_flatten, np.radians(self.config["system architecture"]["dispersive element 1"]["A"]), self.config["system architecture"]["focal lens 1"], self.alpha_c, np.radians(self.config["system architecture"]["dispersive element 1"]["delta alpha c"]), np.radians(self.config["system architecture"]["dispersive element 1"]["delta beta c"]))
             self.list_X_dmd.append(X_dmd.reshape(self.X_cam.shape))
             self.list_Y_dmd.append(Y_dmd.reshape(self.Y_cam.shape))
             self.list_wavelengths.append(np.full(self.X_cam.shape, lba).reshape(self.Y_cam.shape))
 
         return self.list_X_dmd, self.list_Y_dmd, self.list_wavelengths
 
+    def propagate_through_arm_scalar_no_params(self,X):
+
+        """
+        Mapping function between the DMD and the scene (ray tracing type function)
+
+
+        Parameters
+        ----------
+        x_dmd : float -- in um
+            X position, on the DMD, of the pixel for a given lambda
+        y_dmd : float -- in um
+            Y position, on the DMD, of the pixel for a given lambda
+        n : float
+            refractive index of the prism of a given lambda.
+        F : float -- in um
+            focal length of the lens L3.
+        A : float -- in rad
+            apex angle of the BK7 prism.
+        alpha_c : float -- in rad
+            minimum angle of deviation for the central wavelength.
+
+        Returns
+        -------
+        x_scene : float -- in um
+            X position, on the scene, of the pixel for a given lambda.
+        y_scene : float -- in um
+            Y position, on the scene, of the pixel for a given lambda.
+
+        """
+
+        X_cam, Y_cam, n = X[0], X[1], X[2]
+
+        A = np.radians(self.config["system architecture"]["dispersive element 1"]["A"])
+        F = self.config["system architecture"]["focal lens 1"]
+        alpha_c = self.alpha_c
+        delta_alpha_c = np.radians(self.config["system architecture"]["dispersive element 1"]["delta alpha c"])
+        delta_beta_c = np.radians(self.config["system architecture"]["dispersive element 1"]["delta beta c"])
+
+        angle_with_P1 = alpha_c - A / 2 + delta_alpha_c
+        angle_with_P2 = alpha_c - A / 2 - delta_alpha_c
+
+        k = l_p_a_V2_jax(X_cam, Y_cam, F)
+        # Rotation in relation to P1 around the Y axis
+
+        k_1 = rotation_y(angle_with_P1) @ k
+
+        print(k.shape, k_1.shape)
+        # Rotation in relation to P1 around the X axis
+        k_2 = rotation_x(delta_beta_c) @ k_1
+        # Rotation of P1 in relation to frame_in along the new Y axis
+        k_3 = rotation_y(A / 2) @ k_2
+
+        norm_k = np_jax.sqrt(k_3[0] ** 2 + k_3[1] ** 2 + k_3[2] ** 2)
+        k_3 /= norm_k
+
+        # Output vector of the prism in frame_out
+        k_out_p = prism_in_to_prism_out_parallel_dmd_scene_jax(k_3, n, A)
+
+        k_out_p = np_jax.array(k_out_p) * norm_k
+
+        # Rotation of P2 in relation to frame_in along the new Y axis
+        k_3_bis = np_jax.dot(rotation_y(A / 2), k_out_p)
+        # Rotation in relation to P2 around the X axis
+        k_2_bis = np_jax.dot(rotation_x(-delta_beta_c), k_3_bis)
+        # Rotation in relation to P2 around the Y axis
+        k_1_bis = np_jax.dot(rotation_y(angle_with_P2), k_2_bis)
+
+        theta_out = np_jax.arctan(k_1_bis[0] / k_1_bis[2])
+        phi_out = np_jax.arctan(k_1_bis[1] / k_1_bis[2])
+
+        [X_dmd, Y_dmd] = l_a_p_V2_jax(theta_out, phi_out, F)
+
+        return X_dmd, Y_dmd
+
+    def propagate_through_arm_vector_no_params(self,X):
+
+        """
+        Mapping function between the DMD and the scene (ray tracing type function)
+
+
+        Parameters
+        ----------
+        x_dmd : float -- in um
+            X position, on the DMD, of the pixel for a given lambda
+        y_dmd : float -- in um
+            Y position, on the DMD, of the pixel for a given lambda
+        n : float
+            refractive index of the prism of a given lambda.
+        F : float -- in um
+            focal length of the lens L3.
+        A : float -- in rad
+            apex angle of the BK7 prism.
+        alpha_c : float -- in rad
+            minimum angle of deviation for the central wavelength.
+
+        Returns
+        -------
+        x_scene : float -- in um
+            X position, on the scene, of the pixel for a given lambda.
+        y_scene : float -- in um
+            Y position, on the scene, of the pixel for a given lambda.
+
+        """
+        X_cam, Y_cam, n = X[0], X[1], X[2]
+
+        A = np.radians(self.config["system architecture"]["dispersive element 1"]["A"])
+        F = self.config["system architecture"]["focal lens 1"]
+        alpha_c = self.alpha_c
+        delta_alpha_c = np.radians(self.config["system architecture"]["dispersive element 1"]["delta alpha c"])
+        delta_beta_c = np.radians(self.config["system architecture"]["dispersive element 1"]["delta beta c"])
+
+        angle_with_P1 = alpha_c - A / 2 + delta_alpha_c
+        angle_with_P2 = alpha_c - A / 2 - delta_alpha_c
+
+        k = l_p_a_V2_jax(X_cam, Y_cam, F)
+        # Rotation in relation to P1 around the Y axis
+
+        k_1 = rotation_y(angle_with_P1) @ k[:,0,:]
+
+        print(k.shape, k_1.shape)
+        # Rotation in relation to P1 around the X axis
+        k_2 = rotation_x(delta_beta_c) @ k_1
+        # Rotation of P1 in relation to frame_in along the new Y axis
+        k_3 = rotation_y(A / 2) @ k_2
+
+        norm_k = np_jax.sqrt(k_3[0] ** 2 + k_3[1] ** 2 + k_3[2] ** 2)
+        k_3 /= norm_k
+
+        # Output vector of the prism in frame_out
+        k_out_p = prism_in_to_prism_out_parallel_dmd_scene_jax(k_3, n, A)
+
+        k_out_p = np_jax.array(k_out_p) * norm_k
+
+        # Rotation of P2 in relation to frame_in along the new Y axis
+        k_3_bis = np_jax.dot(rotation_y(A / 2), k_out_p)
+        # Rotation in relation to P2 around the X axis
+        k_2_bis = np_jax.dot(rotation_x(-delta_beta_c), k_3_bis)
+        # Rotation in relation to P2 around the Y axis
+        k_1_bis = np_jax.dot(rotation_y(angle_with_P2), k_2_bis)
+
+        theta_out = np_jax.arctan(k_1_bis[0] / k_1_bis[2])
+        phi_out = np_jax.arctan(k_1_bis[1] / k_1_bis[2])
+
+        [X_dmd, Y_dmd] = l_a_p_V2_jax(theta_out, phi_out, F)
+
+        return X_dmd, Y_dmd
+
 
     def define_camera_sampling(self):
+
+            if self.config['camera']['number of pixels along dispersion'] % 2 == 0:
+                self.config['camera']['number of pixels along dispersion'] += 1
+                logging.warning("Number of pixels across dispersion is even. It has been increased by 1 to be odd.")
+            if self.config['camera']['number of pixels across dispersion'] % 2 == 0:
+                self.config['camera']['number of pixels across dispersion'] += 1
+                logging.warning("Number of pixels along dispersion is even. It has been increased by 1 to be odd.")
+
+
             nb_pix_along_disp = self.config['camera']['number of pixels along dispersion']
             nb_pix_across_disp = self.config['camera']['number of pixels across dispersion']
 
-            if nb_pix_across_disp % 2 == 0:
-                nb_pix_across_disp += 1
-                logging.warning("Number of pixels across dispersion is even. It has been increased by 1 to be odd.")
-            if nb_pix_along_disp % 2 == 0:
-                nb_pix_along_disp += 1
-                logging.warning("Number of pixels along dispersion is even. It has been increased by 1 to be odd.")
 
             # Generate one-dimensional arrays for x and y coordinates
             x = np.linspace(-nb_pix_along_disp * self.config['camera']['pixel size']/2,nb_pix_along_disp * self.config['camera']['pixel size']/2, nb_pix_along_disp)
