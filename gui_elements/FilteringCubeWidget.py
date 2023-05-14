@@ -1,6 +1,3 @@
-
-
-import plotly.graph_objects as go
 import yaml
 from PyQt5.QtWidgets import (QTabWidget, QSpinBox,QHBoxLayout, QPushButton, QFileDialog, QLabel, QLineEdit, QWidget, QFormLayout, QScrollArea, QGroupBox,QRadioButton, QButtonGroup,QComboBox)
 from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot,QCoreApplication
@@ -8,11 +5,13 @@ from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot,QCoreApplication
 from CassiSystem import CassiSystem
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
-from PyQt5.QtWidgets import QFormLayout, QVBoxLayout, QGroupBox, QScrollArea, QSizePolicy
+from PyQt5.QtWidgets import QFormLayout, QGroupBox, QScrollArea
+from PyQt5.QtWidgets import QVBoxLayout, QSlider, QLabel, QWidget
 
-import matplotlib.pyplot as plt
+from PyQt5.QtCore import Qt
+import pyqtgraph as pg
 import numpy as np
-import seaborn as sns
+import matplotlib.pyplot as plt
 
 class MaskGridDisplay(QWidget):
     def __init__(self):
@@ -43,16 +42,6 @@ class MaskGridDisplay(QWidget):
 
 
 
-import pyqtgraph.opengl as gl
-from pyqtgraph.Qt import QtCore, QtGui
-import numpy as np
-import sys
-
-from PyQt5.QtWidgets import QVBoxLayout, QSlider, QLabel, QWidget
-from PyQt5.QtCore import Qt
-import pyqtgraph as pg
-import numpy as np
-import matplotlib.pyplot as plt
 
 
 
