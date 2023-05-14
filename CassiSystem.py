@@ -1,14 +1,18 @@
-import matplotlib.pyplot as plt
-
 from utils.functions_retropropagating import *
 import numpy as np
 from scipy.interpolate import griddata
 import multiprocessing as mp
 from multiprocessing import Pool
-import time
 from tqdm import tqdm
-
+from scipy import fftpack
+from scipy.ndimage import gaussian_filter
+import numpy as np
 def worker(args):
+    """
+    Process to parallellize
+    :param args:
+    :return:
+    """
     list_X_propagated_masks, list_Y_propagated_masks, mask, X_detector_grid, Y_detector_grid, wavelength_index = args
 
     list_X_propagated_masks = np.nan_to_num(list_X_propagated_masks)
@@ -58,21 +62,59 @@ class CassiSystem():
 
         return self.X_dmd_mask, self.Y_dmd_mask
 
-    def generate_2D_mask(self,mask_type):
+    def generate_2D_mask(self, mask_type):
+        if self.system_config["SLM"]["sampling across Y"] % 2 == 0:
+            self.system_config["SLM"]["sampling across Y"] += 1
+        if self.system_config["SLM"]["sampling across X"] % 2 == 0:
+            self.system_config["SLM"]["sampling across X"] += 1
+
         if mask_type == "random":
             self.mask = np.random.randint(0, 2, (self.system_config["SLM"]["sampling across Y"],
-                                           self.system_config["SLM"]["sampling across X"]))
+                                                 self.system_config["SLM"]["sampling across X"]))
         elif mask_type == "slit":
             self.mask = np.zeros((self.system_config["SLM"]["sampling across Y"],
-                                           self.system_config["SLM"]["sampling across X"]))
-            self.mask[:,int(self.system_config["SLM"]["sampling across X"]/2)] = 1
+                                  self.system_config["SLM"]["sampling across X"]))
+            self.mask[:, int(self.system_config["SLM"]["sampling across X"] / 2)] = 1
+        elif mask_type == "blue":
+            size = (self.system_config["SLM"]["sampling across Y"], self.system_config["SLM"]["sampling across X"])
+            self.mask = self.generate_blue_noise(size)
 
         return self.mask
+
+    @staticmethod
+    def generate_blue_noise(size):
+        shape = (size[0], size[1])
+        N = shape[0] * shape[1]
+        rng = np.random.default_rng()
+        noise = rng.standard_normal(N)
+        noise = np.reshape(noise, shape)
+
+        f_x = fftpack.fftfreq(shape[1])
+        f_y = fftpack.fftfreq(shape[0])
+        f_x_shift = fftpack.fftshift(f_x)
+        f_y_shift = fftpack.fftshift(f_y)
+        f_matrix = np.sqrt(f_x_shift[None, :] ** 2 + f_y_shift[:, None] ** 2)
+
+        spectrum = fftpack.fftshift(fftpack.fft2(noise))
+        filtered_spectrum = spectrum * f_matrix
+        filtered_noise = fftpack.ifft2(fftpack.ifftshift(filtered_spectrum)).real
+
+        # Make the mask binary
+        threshold = np.median(filtered_noise)
+        binary_mask = np.where(filtered_noise > threshold, 1, 0)
+
+        return binary_mask
 
 
 
     def generate_filtering_cube(self, X_detector_grid, Y_detector_grid, list_X_propagated_masks,
                                 list_Y_propagated_masks, mask):
+
+        if self.system_config["detector"]["sampling across Y"] %2 ==0:
+            self.system_config["detector"]["sampling across Y"] +=1
+        if self.system_config["detector"]["sampling across X"] %2 ==0:
+            self.system_config["detector"]["sampling across X"] +=1
+
         self.filtering_cube = np.zeros((self.system_config["detector"]["sampling across Y"],
                                         self.system_config["detector"]["sampling across X"],
                                         self.simulation_config["number of spectral samples"]))
@@ -91,12 +133,12 @@ class CassiSystem():
         return self.filtering_cube
     def create_grid(self,nb_of_samples_along_x, nb_of_samples_along_y, delta_x, delta_y):
 
-            # if nb_of_samples_along_x % 2 == 0:
-            #     nb_of_samples_along_x += 1
-            #     logging.warning("Number of grid samples along X is even. It has been increased by 1 to be odd.")
-            # if nb_of_samples_along_y % 2 == 0:
-            #     nb_of_samples_along_y += 1
-            #     logging.warning("Number of grid samples along Y is even. It has been increased by 1 to be odd.")
+            if nb_of_samples_along_x % 2 == 0:
+                nb_of_samples_along_x += 1
+                logging.warning("Number of grid samples along X is even. It has been increased by 1 to be odd.")
+            if nb_of_samples_along_y % 2 == 0:
+                nb_of_samples_along_y += 1
+                logging.warning("Number of grid samples along Y is even. It has been increased by 1 to be odd.")
 
             # Generate one-dimensional arrays for x and y coordinates
             x = np.linspace(-nb_of_samples_along_x * delta_x/2, nb_of_samples_along_x * delta_x/2, nb_of_samples_along_x)
@@ -104,6 +146,8 @@ class CassiSystem():
 
             # Create a two-dimensional grid of coordinates
             X_input_grid, Y_input_grid = np.meshgrid(x, y)
+
+            print(X_input_grid.shape,Y_input_grid.shape)
 
             return X_input_grid, Y_input_grid
 

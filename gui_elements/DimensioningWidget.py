@@ -184,8 +184,6 @@ class Worker(QThread):
         self.finished_propagate_mask_grid.emit((list_X_detector, list_Y_detector,list_wavelengths))
 
 
-        # self.finished_dispersion.emit((list_X_detector, list_Y_detector, list_wavelengths))
-        #
         self.finished_distorsion.emit((X_input_grid, Y_input_grid,list_X_detector, list_Y_detector, list_wavelengths))
 
 
@@ -357,8 +355,6 @@ class DimensioningWidget(QWidget):
         run_button_group_layout.addWidget(self.result_display_widget)
 
         self.run_button_group_box.setLayout(run_button_group_layout)
-
-
 
         # Add the dimensioning configuration editor, the result display widget, and the run button to the layout
         self.layout.addWidget(self.dimensioning_config_editor)

@@ -1,0 +1,13 @@
+#####  Configuration file for the chosen optical system
+
+infos:
+    results directory: ./data/masks/
+
+mask caracteristics:
+    type: slit
+
+spectral range:
+    wavelength min: 450     # minimum wavelength -- in nm
+    wavelength max: 750      # maximum wavelength -- in nm
+
+number of spectral samples: 30

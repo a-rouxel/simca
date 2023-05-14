@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QDockWidget
 
 from gui_elements import DimensioningWidget
 from gui_elements import EditorSystemConfigWidget
+from gui_elements import FilteringCubeWidget
 from gui_elements import AcquisitionWidget
 
 class MainWindow(QMainWindow):
@@ -12,26 +13,34 @@ class MainWindow(QMainWindow):
 
         self.setWindowTitle('SIMCA')
 
+        # Set the stylesheet for the QMainWindow
+        self.setStyleSheet("QDockWidget::title { font-weight: bold; }")
+
         self.editor_system_config = EditorSystemConfigWidget(initial_system_config_path="config/cassi_system.yml")
         self.system_config_dock = QDockWidget("Editor for system config")
         self.system_config_dock.setWidget(self.editor_system_config)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.system_config_dock)
 
         self.dimensioning_widget = DimensioningWidget(self.editor_system_config)
-        self.dimensioning_dock = QDockWidget("Dimensioning")
+        self.dimensioning_dock = QDockWidget("Optics")
         self.dimensioning_dock.setWidget(self.dimensioning_widget)
         self.addDockWidget(Qt.RightDockWidgetArea, self.dimensioning_dock)
 
-
         # Create the MaskConfigWidget
-        self.mask_config_widget = AcquisitionWidget(self.editor_system_config)
-        self.mask_config_dock = QDockWidget("Mask Config")
-        self.mask_config_dock.setWidget(self.mask_config_widget)
-        self.addDockWidget(Qt.RightDockWidgetArea, self.mask_config_dock)
+        self.filtering_config_widget = FilteringCubeWidget(self.editor_system_config)
+        self.filtering_config_dock = QDockWidget("Filtering Cube")
+        self.filtering_config_dock.setWidget(self.filtering_config_widget)
+        self.addDockWidget(Qt.RightDockWidgetArea, self.filtering_config_dock)
 
+        # Create the new widget
+        self.acquisition_widget = AcquisitionWidget(self.editor_system_config)
+        self.acquisition_dock = QDockWidget("Acquisition")
+        self.acquisition_dock.setWidget(self.acquisition_widget)
+        self.addDockWidget(Qt.RightDockWidgetArea, self.acquisition_dock)
 
         # Set tabified dock widgets
-        self.tabifyDockWidget(self.mask_config_dock,self.dimensioning_dock)
+        self.tabifyDockWidget(self.filtering_config_dock, self.dimensioning_dock)
+        self.tabifyDockWidget(self.dimensioning_dock, self.acquisition_dock)
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
