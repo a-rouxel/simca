@@ -7,10 +7,12 @@ spectral range:
     wavelength min: 450     # minimum wavelength -- in nm
     wavelength max: 750      # maximum wavelength -- in nm
 
+number of spectral samples: 30
+
 input grid sampling:
     sampling across X: 48                  # sampling across X axis -- no units
     sampling across Y: 51                  # sampling across Y axis -- no units
     delta X : 100                              # delta X       -- in um
     delta Y : 100                              # delta Y       -- in um
 
-number of spectral samples: 30
+

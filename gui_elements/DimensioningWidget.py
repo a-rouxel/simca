@@ -1,6 +1,6 @@
 import yaml
 from PyQt5.QtWidgets import (QTabWidget, QSpinBox,QHBoxLayout, QPushButton, QFileDialog, QLabel, QLineEdit, QWidget, QFormLayout, QScrollArea, QGroupBox,QRadioButton, QButtonGroup,QComboBox)
-from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot
+from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot,QCoreApplication
 
 from CassiSystem import CassiSystem
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -118,14 +118,9 @@ class DistorsionResultDisplay(QWidget):
         self.layout.addWidget(self.toolbar_distorsion)
         self.layout.addWidget(self.canvas_distorsion)
 
-    def update_display(self, new_data):
-        # Code to update the display with new_data
-
-        # Force a redraw of the widget
-        self.update()
-
     def display_results_distorsion(self, X_input_grid, Y_input_grid, list_X_detector, list_Y_detector,
                                    list_wavelengths):
+        self.figure_distorsion = plt.figure()
         self.figure_distorsion.clear()
 
         fig, axs = plt.subplots(3, 1)  # Create a new figure with 3 subplots
@@ -177,11 +172,13 @@ class Worker(QThread):
         # Put your analysis here
         cassi_system = CassiSystem(system_config=self.system_config ,simulation_config=self.simulation_config)
 
-        X_mask, Y_mask = cassi_system.X_mask_grid, cassi_system.Y_mask_grid
+        X_input_grid, Y_input_grid = cassi_system.create_input_grid()
 
-        self.finished_define_mask_grid.emit((X_mask, Y_mask))  # Emit a tuple of arrays
+        self.finished_define_mask_grid.emit((X_input_grid, Y_input_grid))  # Emit a tuple of arrays
 
-        list_X_detector, list_Y_detector, list_wavelengths = cassi_system.propagate_mask_grid([self.simulation_config["spectral range"]["wavelength min"],
+        list_X_detector, list_Y_detector, list_wavelengths = cassi_system.propagate_mask_grid(X_input_grid,
+                                                                                              Y_input_grid,
+                                                                                              [self.simulation_config["spectral range"]["wavelength min"],
                                                                                                self.simulation_config["spectral range"]["wavelength max"]],
                                                                                               self.simulation_config["number of spectral samples"])
         self.finished_propagate_mask_grid.emit((list_X_detector, list_Y_detector,list_wavelengths))
@@ -189,7 +186,7 @@ class Worker(QThread):
 
         # self.finished_dispersion.emit((list_X_detector, list_Y_detector, list_wavelengths))
         #
-        self.finished_distorsion.emit((X_mask, Y_mask,list_X_detector, list_Y_detector, list_wavelengths))
+        self.finished_distorsion.emit((X_input_grid, Y_input_grid,list_X_detector, list_Y_detector, list_wavelengths))
 
 
 
@@ -238,6 +235,10 @@ class DimensioningConfigEditor(QWidget):
         sampling_layout.addRow("Delta X", self.delta_X)
         sampling_layout.addRow("Delta Y", self.delta_Y)
 
+        general_layout = QFormLayout()
+        general_layout.addRow("results directory", self.results_directory)
+        general_layout.addRow("spectral samples", self.spectral_samples)
+
         # Create group boxes and set layouts
         wavelength_group = QGroupBox("Spectral Range")
         wavelength_group.setLayout(wavelength_layout)
@@ -245,18 +246,20 @@ class DimensioningConfigEditor(QWidget):
         sampling_group = QGroupBox("Input Grid Sampling")
         sampling_group.setLayout(sampling_layout)
 
+
+
+        general_group = QGroupBox("General settings")
+        general_group.setLayout(general_layout)
+
         # Load config button
         self.load_config_button = QPushButton("Load Config")
         self.load_config_button.clicked.connect(self.on_load_config_clicked)
 
         # Create main layout and add widgets
         main_layout = QVBoxLayout()
-        main_layout.addWidget(QLabel("Results directory"))
-        main_layout.addWidget(self.results_directory)
-        main_layout.addWidget(QLabel("Number of spectral samples"))
-        main_layout.addWidget(self.spectral_samples)
         main_layout.addWidget(wavelength_group)
         main_layout.addWidget(sampling_group)
+        main_layout.addWidget(general_group)
         main_layout.addWidget(self.load_config_button)
 
         # Set the layout of the widget within the scroll area
@@ -370,6 +373,8 @@ class DimensioningWidget(QWidget):
 
     def run_dimensioning(self):
         # Get the configs from the editors
+
+
         system_config = self.editor_system_config.get_config()
         dimensioning_config = self.dimensioning_config_editor.get_config()
 
@@ -383,7 +388,7 @@ class DimensioningWidget(QWidget):
         self.worker.finished_distorsion.connect(self.display_results_distorsion)
         self.worker.start()
 
-        self.distorsion_result_display.update()
+        QCoreApplication.processEvents()
 
 
     @pyqtSlot(tuple)

@@ -1,2 +1,3 @@
 from .EditorSystemConfigWidget import EditorSystemConfigWidget
 from .DimensioningWidget import DimensioningWidget
+from .AcquisitionWidget import AcquisitionWidget

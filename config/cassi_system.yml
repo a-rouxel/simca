@@ -14,3 +14,14 @@ system architecture:
         A: 60              # apex angle of the prism in degrees      (only used if type == 'prism')   -- in degrees
         m: 1               # grating order to consider         (only used if type == 'grating')       -- no units
         G: 160             # grating density                   (only used if type == 'grating')       -- in lines/mm
+
+detector:
+    sampling across X: 400                  # sampling across X axis -- no units
+    sampling across Y: 250                  # sampling across Y axis -- no units
+    delta X: 20                             # delta X       -- in um
+    delta Y: 20                              # delta Y       -- in um
+SLM:
+    sampling across X: 400                  # sampling across X axis -- no units
+    sampling across Y: 200                  # sampling across Y axis -- no units
+    delta X: 30                              # delta X       -- in um
+    delta Y: 30                              # delta Y       -- in um

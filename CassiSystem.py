@@ -1,4 +1,24 @@
+import matplotlib.pyplot as plt
+
 from utils.functions_retropropagating import *
+import numpy as np
+from scipy.interpolate import griddata
+import multiprocessing as mp
+from multiprocessing import Pool
+import time
+from tqdm import tqdm
+
+def worker(args):
+    list_X_propagated_masks, list_Y_propagated_masks, mask, X_detector_grid, Y_detector_grid, wavelength_index = args
+
+    list_X_propagated_masks = np.nan_to_num(list_X_propagated_masks)
+    interpolated_mask = griddata((list_X_propagated_masks[wavelength_index][:, :].flatten(),
+                                  list_Y_propagated_masks[wavelength_index][:, :].flatten()),
+                                 mask.flatten(),
+                                 (X_detector_grid, Y_detector_grid),
+                                 method='linear')
+    return interpolated_mask
+
 class CassiSystem():
 
     def __init__(self,system_config,simulation_config):
@@ -7,28 +27,87 @@ class CassiSystem():
         self.simulation_config = simulation_config
         self.result_directory = initialize_directory(self.simulation_config)
         self.alpha_c = self.calculate_alpha_c()
-        self.X_mask_grid, self.Y_mask_grid = self.create_mask_grid(self.simulation_config["input grid sampling"]["sampling across X"],
+
+        self.X_dmd_grid, self.Y_dmd_grid = self.create_grid(self.system_config["SLM"]["sampling across X"],
+                                                                        self.system_config["SLM"]["sampling across Y"],
+                                                                        self.system_config["SLM"]["delta X"],
+                                                                        self.system_config["SLM"]["delta Y"])
+
+
+        self.X_detector_grid, self.Y_detector_grid = self.create_grid(self.system_config["detector"]["sampling across X"],
+                                                                        self.system_config["detector"]["sampling across Y"],
+                                                                        self.system_config["detector"]["delta X"],
+                                                                        self.system_config["detector"]["delta Y"])
+
+    def create_input_grid(self):
+
+        self.X_input_grid, self.Y_input_grid = self.create_grid(self.simulation_config["input grid sampling"]["sampling across X"],
                                                                       self.simulation_config["input grid sampling"]["sampling across Y"],
                                                                       self.simulation_config["input grid sampling"]["delta X"],
                                                                       self.simulation_config["input grid sampling"]["delta Y"])
 
-    def create_mask_grid(self,nb_of_samples_along_x, nb_of_samples_along_y, delta_x, delta_y):
+        return self.X_input_grid, self.Y_input_grid
 
-            if nb_of_samples_along_x % 2 == 0:
-                nb_of_samples_along_x += 1
-                logging.warning("Number of grid samples along X is even. It has been increased by 1 to be odd.")
-            if nb_of_samples_along_y % 2 == 0:
-                nb_of_samples_along_y += 1
-                logging.warning("Number of grid samples along Y is even. It has been increased by 1 to be odd.")
+    def create_dmd_mask(self):
+
+        self.X_dmd_mask, self.Y_dmd_mask = self.create_grid(
+            self.system_config["SLM"]["sampling across X"],
+            self.system_config["SLM"]["sampling across Y"],
+            self.system_config["SLM"]["delta X"],
+            self.system_config["SLM"]["delta Y"])
+
+        return self.X_dmd_mask, self.Y_dmd_mask
+
+    def generate_2D_mask(self,mask_type):
+        if mask_type == "random":
+            self.mask = np.random.randint(0, 2, (self.system_config["SLM"]["sampling across Y"],
+                                           self.system_config["SLM"]["sampling across X"]))
+        elif mask_type == "slit":
+            self.mask = np.zeros((self.system_config["SLM"]["sampling across Y"],
+                                           self.system_config["SLM"]["sampling across X"]))
+            self.mask[:,int(self.system_config["SLM"]["sampling across X"]/2)] = 1
+
+        return self.mask
+
+
+
+    def generate_filtering_cube(self, X_detector_grid, Y_detector_grid, list_X_propagated_masks,
+                                list_Y_propagated_masks, mask):
+        self.filtering_cube = np.zeros((self.system_config["detector"]["sampling across Y"],
+                                        self.system_config["detector"]["sampling across X"],
+                                        self.simulation_config["number of spectral samples"]))
+
+        wavelengths = np.linspace(self.simulation_config["spectral range"]["wavelength min"],
+                                  self.simulation_config["spectral range"]["wavelength max"],
+                                  self.simulation_config["number of spectral samples"])
+        with Pool(mp.cpu_count()) as p:
+            tasks = [(list_X_propagated_masks, list_Y_propagated_masks, mask, X_detector_grid, Y_detector_grid, i)
+                     for i in range(len(wavelengths))]
+            for index, zi in tqdm(enumerate(p.imap(worker, tasks)), total=len(wavelengths), desc='Processing tasks'):
+                self.filtering_cube[:, :, index] = zi
+
+
+
+        return self.filtering_cube
+    def create_grid(self,nb_of_samples_along_x, nb_of_samples_along_y, delta_x, delta_y):
+
+            # if nb_of_samples_along_x % 2 == 0:
+            #     nb_of_samples_along_x += 1
+            #     logging.warning("Number of grid samples along X is even. It has been increased by 1 to be odd.")
+            # if nb_of_samples_along_y % 2 == 0:
+            #     nb_of_samples_along_y += 1
+            #     logging.warning("Number of grid samples along Y is even. It has been increased by 1 to be odd.")
 
             # Generate one-dimensional arrays for x and y coordinates
             x = np.linspace(-nb_of_samples_along_x * delta_x/2, nb_of_samples_along_x * delta_x/2, nb_of_samples_along_x)
             y = np.linspace(-nb_of_samples_along_y * delta_y/2, nb_of_samples_along_y * delta_y/2, nb_of_samples_along_y)
 
             # Create a two-dimensional grid of coordinates
-            X_mask_grid, Y_mask_grid = np.meshgrid(x, y)
+            X_input_grid, Y_input_grid = np.meshgrid(x, y)
 
-            return X_mask_grid, Y_mask_grid
+            return X_input_grid, Y_input_grid
+
+
 
     def calculate_alpha_c(self):
 
@@ -40,28 +119,28 @@ class CassiSystem():
                                self.Dm)
 
         return self.alpha_c
-    def propagate_mask_grid(self,spectral_range,spectral_samples):
+    def propagate_mask_grid(self,X_input_grid,Y_input_grid,spectral_range,spectral_samples):
 
         wavelength_min = spectral_range[0]
         wavelength_max = spectral_range[1]
 
-        self.n_array_center = np.full(self.X_mask_grid.shape,
+        self.n_array_center = np.full(X_input_grid.shape,
                                       sellmeier(self.system_config["system architecture"]["dispersive element 1"]["wavelength center"]))
 
-        self.X_mask_grid_flatten = self.X_mask_grid.flatten()
-        self.Y_mask_grid_flatten = self.Y_mask_grid.flatten()
+        X_input_grid_flatten = X_input_grid.flatten()
+        Y_input_grid_flatten = Y_input_grid.flatten()
 
 
         self.list_wavelengths= list()
-        self.list_X_detector = list()
-        self.list_Y_detector = list()
+        self.list_X_propagated_mask = list()
+        self.list_Y_propagated_mask = list()
 
         for lba in np.linspace(wavelength_min,wavelength_max,spectral_samples):
 
-            n_array_flatten = np.full(self.X_mask_grid_flatten.shape, sellmeier(lba))
+            n_array_flatten = np.full(X_input_grid_flatten.shape, sellmeier(lba))
 
-            X_detector, Y_detector = propagate_through_arm_vector(X_mask= self.X_mask_grid_flatten ,
-                                                        Y_mask= self.Y_mask_grid_flatten,
+            X_propagated_mask, Y_propagated_mask = propagate_through_arm_vector(X_mask= X_input_grid_flatten ,
+                                                        Y_mask= Y_input_grid_flatten,
                                                         n = n_array_flatten,
                                                         A =np.radians(self.system_config["system architecture"]["dispersive element 1"]["A"]),
                                                         F = self.system_config["system architecture"]["focal lens 1"],
@@ -69,9 +148,9 @@ class CassiSystem():
                                                         delta_alpha_c = np.radians(self.system_config["system architecture"]["dispersive element 1"]["delta alpha c"]),
                                                         delta_beta_c= np.radians(self.system_config["system architecture"]["dispersive element 1"]["delta beta c"])
                                                         )
-            self.list_X_detector.append(X_detector.reshape(self.X_mask_grid.shape))
-            self.list_Y_detector.append(Y_detector.reshape(self.Y_mask_grid.shape))
-            self.list_wavelengths.append(np.full(self.X_mask_grid.shape, lba).reshape(self.Y_mask_grid.shape))
+            self.list_X_propagated_mask.append(X_propagated_mask.reshape(X_input_grid.shape))
+            self.list_Y_propagated_mask.append(Y_propagated_mask.reshape(Y_input_grid.shape))
+            self.list_wavelengths.append(np.full(X_input_grid.shape, lba).reshape(Y_input_grid.shape))
 
-        return self.list_X_detector, self.list_Y_detector, self.list_wavelengths
+        return self.list_X_propagated_mask, self.list_Y_propagated_mask, self.list_wavelengths
 
