@@ -1,6 +1,9 @@
 from utils.helpers import *
 
-def propagate_through_arm_vector(X_cam,Y_cam,n, A,F, alpha_c,delta_alpha_c, delta_beta_c):
+
+
+
+def propagate_through_arm_vector(X_mask,Y_mask,n, A,F, alpha_c,delta_alpha_c, delta_beta_c):
     """
     Mapping function between the DMD and the scene (ray tracing type function)
 
@@ -32,7 +35,7 @@ def propagate_through_arm_vector(X_cam,Y_cam,n, A,F, alpha_c,delta_alpha_c, delt
     angle_with_P1 = alpha_c - A / 2 + delta_alpha_c
     angle_with_P2 = alpha_c - A / 2 - delta_alpha_c
 
-    k = l_p_a_V2(X_cam, Y_cam, F)
+    k = l_p_a_V2(X_mask, Y_mask, F)
     # Rotation in relation to P1 around the Y axis
 
     k_1 = rotation_y(angle_with_P1) @ k[:,0,:]
@@ -64,7 +67,7 @@ def propagate_through_arm_vector(X_cam,Y_cam,n, A,F, alpha_c,delta_alpha_c, delt
 
     return X_dmd, Y_dmd
 
-def propagate_through_arm_scalar(X_cam,Y_cam,n, A,F, alpha_c,delta_alpha_c, delta_beta_c):
+def propagate_through_arm_scalar(X_mask,Y_mask,n, A,F, alpha_c,delta_alpha_c, delta_beta_c):
     """
     Mapping function between the DMD and the scene (ray tracing type function)
 
@@ -96,7 +99,7 @@ def propagate_through_arm_scalar(X_cam,Y_cam,n, A,F, alpha_c,delta_alpha_c, delt
     angle_with_P1 = alpha_c - A / 2 + delta_alpha_c
     angle_with_P2 = alpha_c - A / 2 - delta_alpha_c
 
-    k = l_p_a_V2(X_cam, Y_cam, F)
+    k = l_p_a_V2(X_mask, Y_mask, F)
     # Rotation in relation to P1 around the Y axis
 
     k_1 = rotation_y(angle_with_P1) @ k
@@ -178,50 +181,109 @@ def l_p_a_V2(x_obj, y_obj, F):
     return k0
 
 
-import jax.numpy as np_jax
+def D_m(n, A):
+    # A should be given in radians
+    print(2 * np.arcsin(n * np.sin(A / 2)) - A)
+    return 2 * np.arcsin(n * np.sin(A / 2)) - A
 
-def l_a_p_V2_jax(alpha, beta, F):
+def alpha_c(A, D_m):
+    return (A + D_m) / 2
 
-    x = F*np_jax.tan(alpha)
-    y  = F*np_jax.tan(beta)
-
-    return [x,y]
-
-def prism_in_to_prism_out_parallel_dmd_scene_jax(k0, n, A):
+def rotation_z(theta):
     """
-    Ray tracing through the prism
+    Rotate 3D matrix around the z axis
 
     Parameters
     ----------
-    k0 : numpy array -- no units
-        input vector
-    n : float -- no units
-        refractive index of the considered wavelength
-    A : float -- rad
-        Apex angle of the prism
+    theta : float -- in rad
+        Input angle.
+
     Returns
     -------
-    kout : numpy array -- no units
-        output vector
+    r : 2D numpy array
+        The rotation matrix.
 
     """
 
-    kp = np_jax.array([k0[0], k0[1], np_jax.sqrt(n ** 2 - k0[0] ** 2 - k0[1] ** 2)])
+    r = np.array(((np.cos(theta), -np.sin(theta), 0),
+                  (np.sin(theta), np.cos(theta), 0),
+                  (0, 0, 1)));
 
-    kp_r = np_jax.matmul(rotation_y(-A), kp)
-
-    kout = [kp_r[0], kp_r[1], np_jax.sqrt(1 - kp_r[0] ** 2 - kp_r[1] ** 2)]
-
-
-    return kout
+    return r
 
 
-def l_p_a_V2_jax(x_obj, y_obj, F):
+def rotation_y(theta):
+    """
+    Rotate 3D matrix around the y axis
 
-    alpha = -1*np_jax.arctan(x_obj / F)
-    beta  = -1*np_jax.arctan(y_obj / F)
+    Parameters
+    ----------
+    theta : float -- in rad
+        Input angle.
 
-    k0 = np_jax.array([[np_jax.sin(alpha) * np_jax.cos(beta)], [np_jax.sin(beta)*np_jax.cos(alpha)],
-                   [np_jax.cos(alpha) * np_jax.cos(beta)]])
+    Returns
+    -------
+    r : 2D numpy array
+        The rotation matrix.
+    """
 
-    return k0
+    r = np.array(((np.cos(theta), 0, np.sin(theta)),
+                  (0, 1, 0),
+                  (-np.sin(theta), 0, np.cos(theta))));
+
+    return r
+
+
+def rotation_x(theta):
+    """
+    Rotate 3D matrix around the x axis
+
+    Parameters
+    ----------
+    theta : float -- in rad
+        Input angle.
+
+    Returns
+    -------
+    r : 2D numpy array
+        The rotation matrix.
+    """
+
+    r = np.array(((1, 0, 0),
+                  (0, math.cos(theta), -math.sin(theta)),
+                  (0, math.sin(theta), math.cos(theta))));
+
+    return r
+
+def sellmeier(lambda_):
+    """
+    Evaluating the refractive index value of a BK7 prism for a given lambda
+
+    Parameters
+    ----------
+    lambda_ : float -- in nm
+        input wavelength on the prism.
+
+    Returns
+    -------
+    n : float
+        index value corresponding to the input wavelength
+
+    """
+
+    B1 = 1.03961212;
+    B2 = 0.231792344;
+    B3 = 1.01046945;
+    C1 = 6.00069867 * (10 ** -3);
+    C2 = 2.00179144 * (10 ** -2);
+    C3 = 1.03560653 * (10 ** 2);
+
+    lambda_in_mm = lambda_ / 1000
+
+    n = math.sqrt(1 + B1 * lambda_in_mm ** 2 / (lambda_in_mm ** 2 - C1) + B2 * lambda_in_mm ** 2 / (
+                lambda_in_mm ** 2 - C2) + B3 * lambda_in_mm ** 2 / (lambda_in_mm ** 2 - C3));
+
+    return n
+
+
+

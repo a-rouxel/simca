@@ -1,0 +1,17 @@
+#####  Configuration file for the chosen optical system
+
+infos:
+    system name: HYACAMEO
+
+system architecture:
+    focal lens 1: 165000
+    dispersive element 1:
+    # dispersive element caracteristics
+        type: prism        # name of the dispersive element
+        delta alpha c: 0
+        delta beta c: 0
+        wavelength center: 550  # central wavelength -- in nm
+        A: 60              # apex angle of the prism in degrees      (only used if type == 'prism')   -- in degrees
+        m: 1               # grating order to consider         (only used if type == 'grating')       -- no units
+        G: 160             # grating density                   (only used if type == 'grating')       -- in lines/mm
+    focal lens 2: 165000
