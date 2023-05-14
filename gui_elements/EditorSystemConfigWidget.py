@@ -1,6 +1,5 @@
 from PyQt5.QtWidgets import (QVBoxLayout, QPushButton, QFileDialog, QLabel, QLineEdit, QWidget, QFormLayout, QScrollArea, QGroupBox,QComboBox)
 import yaml
-import pprint
 
 
 class EditorSystemConfigWidget(QWidget):
@@ -203,7 +202,6 @@ class EditorSystemConfigWidget(QWidget):
 
     def get_config(self):
         config = {}  # Create an empty dictionary
-        print(self.input_fields)
         # Loop over all input fields and add their values to the config
         for key, input_field in self.input_fields.items():
             # Split the key into parts
@@ -211,7 +209,6 @@ class EditorSystemConfigWidget(QWidget):
 
             if len(key_parts) == 3:
                 section, sub_section, sub_key = key_parts
-                print(section, sub_section, sub_key)
                 # Ensure the section exists in the config
                 if section not in config:
                     config[section] = {}
@@ -248,7 +245,6 @@ class EditorSystemConfigWidget(QWidget):
             # Add the value to the config
             target_dict[sub_key] = value
 
-        pprint.pprint(config)
 
         return config
 

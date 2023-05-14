@@ -35,10 +35,3 @@ t_end = time.time()
 
 print('Interpolation took {:.2f} seconds'.format(t_end - t_start))
 
-# Plot the results
-# for i, zi in enumerate(zi_values):
-#     plt.figure(figsize=(6,6))
-#     plt.imshow(zi, extent=(-2, 2, -2, 2), origin='lower')
-#     plt.colorbar()
-#     plt.title('Interpolated to Structured Grid for wavelength {}'.format(wavelengths[i]))
-#     plt.show()

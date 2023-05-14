@@ -14,4 +14,3 @@ system architecture:
         A: 60              # apex angle of the prism in degrees      (only used if type == 'prism')   -- in degrees
         m: 1               # grating order to consider         (only used if type == 'grating')       -- no units
         G: 160             # grating density                   (only used if type == 'grating')       -- in lines/mm
-    focal lens 2: 165000

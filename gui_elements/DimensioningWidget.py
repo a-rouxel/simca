@@ -1,15 +1,13 @@
-import sys
 import yaml
-import pprint
-from PyQt5.QtWidgets import (QTabWidget, QSpinBox, QDockWidget,QHBoxLayout, QPushButton, QFileDialog, QLabel, QLineEdit, QWidget, QFormLayout, QScrollArea, QGroupBox,QRadioButton, QButtonGroup,QComboBox)
-from PyQt5.QtCore import Qt, QThread, pyqtSignal, pyqtSlot, QSize
+from PyQt5.QtWidgets import (QTabWidget, QSpinBox,QHBoxLayout, QPushButton, QFileDialog, QLabel, QLineEdit, QWidget, QFormLayout, QScrollArea, QGroupBox,QRadioButton, QButtonGroup,QComboBox)
+from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot
 
 from CassiSystem import CassiSystem
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
-import matplotlib.pyplot as plt
-import matplotlib
+from PyQt5.QtWidgets import QFormLayout, QVBoxLayout, QGroupBox, QScrollArea, QSizePolicy
 
+import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 
@@ -120,6 +118,12 @@ class DistorsionResultDisplay(QWidget):
         self.layout.addWidget(self.toolbar_distorsion)
         self.layout.addWidget(self.canvas_distorsion)
 
+    def update_display(self, new_data):
+        # Code to update the display with new_data
+
+        # Force a redraw of the widget
+        self.update()
+
     def display_results_distorsion(self, X_input_grid, Y_input_grid, list_X_detector, list_Y_detector,
                                    list_wavelengths):
         self.figure_distorsion.clear()
@@ -188,9 +192,6 @@ class Worker(QThread):
         self.finished_distorsion.emit((X_mask, Y_mask,list_X_detector, list_Y_detector, list_wavelengths))
 
 
-from PyQt5.QtWidgets import QFormLayout, QVBoxLayout, QGroupBox
-
-from PyQt5.QtWidgets import QFormLayout, QVBoxLayout, QGroupBox, QScrollArea, QSizePolicy
 
 class DimensioningConfigEditor(QWidget):
     def __init__(self,initial_config_file=None):
@@ -342,16 +343,30 @@ class DimensioningWidget(QWidget):
 
         # Create the run button
         self.run_button = QPushButton('Run Dimensioning')
-        # Connect the button to the run_dimensioning method
+        self.run_button.setStyleSheet('QPushButton {background-color: blue; color: white;}')        # Connect the button to the run_dimensioning method
         self.run_button.clicked.connect(self.run_dimensioning)
+
+        # Create a group box for the run button
+        self.run_button_group_box = QGroupBox()
+        run_button_group_layout = QVBoxLayout()
+
+        run_button_group_layout.addWidget(self.run_button)
+        run_button_group_layout.addWidget(self.result_display_widget)
+
+        self.run_button_group_box.setLayout(run_button_group_layout)
+
+
 
         # Add the dimensioning configuration editor, the result display widget, and the run button to the layout
         self.layout.addWidget(self.dimensioning_config_editor)
-        self.layout.addWidget(self.run_button)
-        self.layout.addWidget(self.result_display_widget)
+        self.layout.addWidget(self.run_button_group_box)
+
+        self.layout.setStretchFactor(self.run_button_group_box, 1)
+        self.layout.setStretchFactor(self.result_display_widget, 2)
 
         # Set the layout on the widget
         self.setLayout(self.layout)
+
 
     def run_dimensioning(self):
         # Get the configs from the editors
@@ -360,13 +375,16 @@ class DimensioningWidget(QWidget):
 
         config = {**system_config, **dimensioning_config}  # Merge the configs
 
-        # pprint.pprint(config)
+
 
         self.worker = Worker(system_config, dimensioning_config)
         self.worker.finished_define_mask_grid.connect(self.display_mask_grid)
         self.worker.finished_propagate_mask_grid.connect(self.display_mask_propagation)
         self.worker.finished_distorsion.connect(self.display_results_distorsion)
         self.worker.start()
+
+        self.distorsion_result_display.update()
+
 
     @pyqtSlot(tuple)
     def display_mask_grid(self, arrays_input_grid):
