@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QDockWidget
 from gui_elements import DimensioningWidget
 from gui_elements import EditorSystemConfigWidget
 from gui_elements import FilteringCubeWidget
-from gui_elements import AcquisitionWidget
+from gui_elements import SceneWidget
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -32,7 +32,7 @@ class MainWindow(QMainWindow):
         self.addDockWidget(Qt.RightDockWidgetArea, self.filtering_config_dock)
 
         # Create the new widget
-        self.acquisition_widget = AcquisitionWidget(self.editor_system_config)
+        self.acquisition_widget = SceneWidget(scene_config_path="config/scene.yml")
         self.acquisition_dock = QDockWidget("Acquisition")
         self.acquisition_dock.setWidget(self.acquisition_widget)
         self.addDockWidget(Qt.RightDockWidgetArea, self.acquisition_dock)

@@ -318,8 +318,6 @@ class FilteringCubeWidget(QWidget):
         self.worker.finished_propagate_mask_grid.connect(self.display_propagated_masks)
         self.worker.start()
 
-        QCoreApplication.processEvents()
-
 
     @pyqtSlot(np.ndarray)
     def display_mask_grid(self, mask):
