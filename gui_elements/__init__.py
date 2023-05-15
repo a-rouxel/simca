@@ -1,4 +1,4 @@
 from .EditorSystemConfigWidget import EditorSystemConfigWidget
-from .DimensioningWidget import DimensioningWidget
+from .OpticsWidget import OpticsWidget
 from .FilteringCubeWidget import FilteringCubeWidget
 from .SceneWidget import SceneWidget

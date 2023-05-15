@@ -6,6 +6,7 @@ import pickle as pkl
 import numpy as np
 import matplotlib.image as mpimg
 import re
+import seaborn as sns
 
 DATASETS_CONFIG = {
     "PaviaU": {
@@ -19,6 +20,10 @@ DATASETS_CONFIG = {
     "WashMall":{
         "img": "DC.tif",
         "gt": "GT.tif"
+    },
+    "Salinas": {
+        "img":"Salinas_corrected.mat",
+        "gt":"Salinas_gt.mat"
     },
 }
 
@@ -106,6 +111,13 @@ def get_dataset(dataset_name, target_folder="./", datasets=DATASETS_CONFIG):
         delta_lambda = 850 - 430
 
         list_wavelengths = np.linspace(430, 850, img.shape[-1]).tolist()
+
+    # elif dataset_name == "Salinas":
+    #     img = open_file(folder + "Salinas_corrected.mat")["salinas_corrected"]
+    #
+    #     rgb_bands = (55, 41, 12) # ????
+    #
+    #     get = open_file(folder + "Salinas_gt.mat")["salinas_gt"]
 
     elif dataset_name == "IndianPines":
         # Load the image
@@ -222,3 +234,11 @@ def text_reader_wvelengths_indian_pines(text_path):
                         'FWHM Uncertainty': float(items[5])
                     }
     return aviris_data
+
+
+def palette_init(label_values, palette):
+    if palette is None:
+        palette = {0: (0, 0, 0)}
+        for k, color in enumerate(sns.color_palette("hls", len(label_values) - 1)):
+            palette[k + 1] = tuple(np.asarray(255 * np.array(color), dtype="uint8"))
+    return palette

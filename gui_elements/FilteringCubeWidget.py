@@ -274,11 +274,11 @@ class FilteringCubeWidget(QWidget):
 
         # Add the result displays to the tab widget
         self.result_display_widget.addTab(self.camera_result_display, "Mask Grid")
-        self.result_display_widget.addTab(self.propagated_mask_display, "Filtering cube")
+        self.result_display_widget.addTab(self.propagated_mask_display, "Filtering cube, slide by slide")
 
 
         # Create the run button
-        self.run_button = QPushButton('generate filtering cube')
+        self.run_button = QPushButton('Generate Filtering Cube')
         self.run_button.setStyleSheet('QPushButton {background-color: red; color: white;}')        # Connect the button to the run_dimensioning method
         self.run_button.clicked.connect(self.run_dimensioning)
 

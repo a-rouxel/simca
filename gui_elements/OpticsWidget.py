@@ -188,7 +188,7 @@ class Worker(QThread):
 
 
 
-class DimensioningConfigEditor(QWidget):
+class OpticsConfigEditor(QWidget):
     def __init__(self,initial_config_file=None):
         super().__init__()
 
@@ -200,7 +200,7 @@ class DimensioningConfigEditor(QWidget):
         # Create a widget for the scroll area
         scroll_widget = QWidget()
 
-        # Add your dimensioning parameters here
+        # Add your optics parameters here
         self.results_directory = QLineEdit()
 
         self.spectral_samples = QSpinBox()
@@ -318,17 +318,17 @@ class DimensioningConfigEditor(QWidget):
             "number of spectral samples": self.spectral_samples.value()
         }
 
-class DimensioningWidget(QWidget):
-    def __init__(self, editor_system_config,dimensioning_config_path=None):
+class OpticsWidget(QWidget):
+    def __init__(self, editor_system_config,optics_config_path=None):
         super().__init__()
 
         self.editor_system_config = editor_system_config
 
         self.layout = QHBoxLayout()
 
-        # Create the dimensioning configuration editor
-        if dimensioning_config_path is not None:
-            self.dimensioning_config_editor = DimensioningConfigEditor(initial_config_file=dimensioning_config_path)
+        # Create the optics configuration editor
+        if optics_config_path is not None:
+            self.optics_config_editor = OpticsConfigEditor(initial_config_file=optics_config_path)
 
         # Create the result display widget (tab widget in this case)
         self.result_display_widget = QTabWidget()
@@ -344,9 +344,9 @@ class DimensioningWidget(QWidget):
         self.result_display_widget.addTab(self.distorsion_result_display, "Distortion Maps")
 
         # Create the run button
-        self.run_button = QPushButton('Run Dimensioning')
-        self.run_button.setStyleSheet('QPushButton {background-color: blue; color: white;}')        # Connect the button to the run_dimensioning method
-        self.run_button.clicked.connect(self.run_dimensioning)
+        self.run_button = QPushButton('Run Optics Dimensioning')
+        self.run_button.setStyleSheet('QPushButton {background-color: blue; color: white;}')        # Connect the button to the run_optics method
+        self.run_button.clicked.connect(self.run_optics)
 
         # Create a group box for the run button
         self.run_button_group_box = QGroupBox()
@@ -357,8 +357,8 @@ class DimensioningWidget(QWidget):
 
         self.run_button_group_box.setLayout(run_button_group_layout)
 
-        # Add the dimensioning configuration editor, the result display widget, and the run button to the layout
-        self.layout.addWidget(self.dimensioning_config_editor)
+        # Add the optics configuration editor, the result display widget, and the run button to the layout
+        self.layout.addWidget(self.optics_config_editor)
         self.layout.addWidget(self.run_button_group_box)
 
         self.layout.setStretchFactor(self.run_button_group_box, 1)
@@ -368,18 +368,18 @@ class DimensioningWidget(QWidget):
         self.setLayout(self.layout)
 
 
-    def run_dimensioning(self):
+    def run_optics(self):
         # Get the configs from the editors
 
 
         system_config = self.editor_system_config.get_config()
-        dimensioning_config = self.dimensioning_config_editor.get_config()
+        optics_config = self.optics_config_editor.get_config()
 
-        config = {**system_config, **dimensioning_config}  # Merge the configs
+        config = {**system_config, **optics_config}  # Merge the configs
 
 
 
-        self.worker = Worker(system_config, dimensioning_config)
+        self.worker = Worker(system_config, optics_config)
         self.worker.finished_define_mask_grid.connect(self.display_mask_grid)
         self.worker.finished_propagate_mask_grid.connect(self.display_mask_propagation)
         self.worker.finished_distorsion.connect(self.display_results_distorsion)
