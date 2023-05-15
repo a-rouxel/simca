@@ -2,3 +2,4 @@ from .EditorSystemConfigWidget import EditorSystemConfigWidget
 from .OpticsWidget import OpticsWidget
 from .FilteringCubeWidget import FilteringCubeWidget
 from .SceneWidget import SceneWidget
+from .AcquisitionWidget import AcquisitionWidget

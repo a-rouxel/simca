@@ -113,27 +113,27 @@ class Worker(QThread):
 
     def run(self):
         # Put your analysis here
-        cassi_system = CassiSystem(system_config=self.system_config ,simulation_config=self.simulation_config)
+        self.cassi_system = CassiSystem(system_config=self.system_config ,simulation_config=self.simulation_config)
 
-        X_dmd_grid, Y_dmd_grid = cassi_system.create_dmd_mask()
-        mask = cassi_system.generate_2D_mask(self.simulation_config["mask caracteristics"]["type"])
+        X_dmd_grid, Y_dmd_grid = self.cassi_system.create_dmd_mask()
+        mask = self.cassi_system.generate_2D_mask(self.simulation_config["mask caracteristics"]["type"])
 
 
         self.finished_define_mask_grid.emit(mask)  # Emit a tuple of arrays
 
-        list_X_propagated_masks, list_Y_propagated_masks, list_wavelengths = cassi_system.propagate_mask_grid(X_dmd_grid,
+        list_X_propagated_masks, list_Y_propagated_masks, self.list_wavelengths = self.cassi_system.propagate_mask_grid(X_dmd_grid,
                                                                                                             Y_dmd_grid,
                                                                                                               [self.simulation_config["spectral range"]["wavelength min"],
                                                                                                                self.simulation_config["spectral range"]["wavelength max"]],
                                                                                                                self.simulation_config["number of spectral samples"])
-        filtering_cube = cassi_system.generate_filtering_cube(cassi_system.X_detector_grid,
-                                               cassi_system.Y_detector_grid,
+        self.filtering_cube = self.cassi_system.generate_filtering_cube(self.cassi_system.X_detector_grid,
+                                               self.cassi_system.Y_detector_grid,
                                                list_X_propagated_masks,
                                                list_Y_propagated_masks,
                                                mask)
 
 
-        self.finished_propagate_mask_grid.emit(filtering_cube,list_wavelengths)  # Emit a tuple of arrays
+        self.finished_propagate_mask_grid.emit(self.filtering_cube,self.list_wavelengths)  # Emit a tuple of arrays
 
 
 class FilteringCubeWidgetEditor(QWidget):
@@ -262,7 +262,7 @@ class FilteringCubeWidget(QWidget):
         self.layout = QHBoxLayout()
 
         # Create the dimensioning configuration editor
-        self.acquisition_config_editor = FilteringCubeWidgetEditor(initial_config_file=filtering_config_path)
+        self.filtering_config_editor = FilteringCubeWidgetEditor(initial_config_file=filtering_config_path)
 
         # Create the result display widget (tab widget in this case)
         self.result_display_widget = QTabWidget()
@@ -294,7 +294,7 @@ class FilteringCubeWidget(QWidget):
 
 
         # Add the dimensioning configuration editor, the result display widget, and the run button to the layout
-        self.layout.addWidget(self.acquisition_config_editor)
+        self.layout.addWidget(self.filtering_config_editor)
         self.layout.addWidget(self.run_button_group_box)
 
         self.layout.setStretchFactor(self.run_button_group_box, 1)
@@ -311,9 +311,9 @@ class FilteringCubeWidget(QWidget):
 
 
         system_config = self.editor_system_config.get_config()
-        acquisition_config_editor = self.acquisition_config_editor.get_config()
+        filtering_config_editor = self.filtering_config_editor.get_config()
 
-        self.worker = Worker(system_config, acquisition_config_editor)
+        self.worker = Worker(system_config, filtering_config_editor)
         self.worker.finished_define_mask_grid.connect(self.display_mask_grid)
         self.worker.finished_propagate_mask_grid.connect(self.display_propagated_masks)
         self.worker.start()
@@ -325,4 +325,5 @@ class FilteringCubeWidget(QWidget):
 
     @pyqtSlot(np.ndarray,list)
     def display_propagated_masks(self, filtering_cube,list_of_wavelengths):
+        self.filtering_cube = filtering_cube
         self.propagated_mask_display.display_propagated_mask_grid(filtering_cube,list_of_wavelengths)

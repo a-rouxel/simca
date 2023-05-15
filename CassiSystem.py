@@ -147,8 +147,6 @@ class CassiSystem():
             # Create a two-dimensional grid of coordinates
             X_input_grid, Y_input_grid = np.meshgrid(x, y)
 
-            print(X_input_grid.shape,Y_input_grid.shape)
-
             return X_input_grid, Y_input_grid
 
 

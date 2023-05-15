@@ -6,6 +6,7 @@ from gui_elements import OpticsWidget
 from gui_elements import EditorSystemConfigWidget
 from gui_elements import FilteringCubeWidget
 from gui_elements import SceneWidget
+from gui_elements import AcquisitionWidget
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -24,19 +25,24 @@ class MainWindow(QMainWindow):
         self.optics_dock.setWidget(self.optics_widget)
         self.addDockWidget(Qt.RightDockWidgetArea, self.optics_dock)
 
-        self.filtering_config_widget = FilteringCubeWidget(self.editor_system_config,filtering_config_path="config/filtering.yml")
-        self.filtering_config_dock = QDockWidget("Filtering Cube")
-        self.filtering_config_dock.setWidget(self.filtering_config_widget)
-        self.addDockWidget(Qt.RightDockWidgetArea, self.filtering_config_dock)
+        self.filtering_widget = FilteringCubeWidget(self.editor_system_config,filtering_config_path="config/filtering.yml")
+        self.filtering_dock = QDockWidget("Filtering Cube")
+        self.filtering_dock.setWidget(self.filtering_widget)
+        self.addDockWidget(Qt.RightDockWidgetArea, self.filtering_dock)
 
         self.scene_widget = SceneWidget(scene_config_path="config/scene.yml")
         self.scene_dock = QDockWidget("Scene")
         self.scene_dock.setWidget(self.scene_widget)
         self.addDockWidget(Qt.RightDockWidgetArea, self.scene_dock)
 
+        self.acquisition_widget = AcquisitionWidget(self.scene_widget, self.filtering_widget,acquisition_config_path="config/acquisition.yml")
+        self.acquisition_dock = QDockWidget("Acquisition")
+        self.acquisition_dock.setWidget(self.acquisition_widget)
+        self.addDockWidget(Qt.RightDockWidgetArea, self.acquisition_dock)
 
-        self.tabifyDockWidget(self.optics_dock, self.filtering_config_dock)
-        self.tabifyDockWidget(self.filtering_config_dock, self.scene_dock)
+        self.tabifyDockWidget(self.optics_dock, self.filtering_dock)
+        self.tabifyDockWidget(self.filtering_dock, self.scene_dock)
+        self.tabifyDockWidget(self.scene_dock, self.acquisition_dock)
         # Connect the signal to the slot
         self.tabifiedDockWidgetActivated.connect(self.check_dock_visibility)
 
@@ -44,7 +50,7 @@ class MainWindow(QMainWindow):
 
     def check_dock_visibility(self, dock_widget):
         # If the currently selected dock widget is the Scene dock, hide the system_config_dock
-        if dock_widget is self.scene_dock or dock_widget is self.filtering_config_dock:
+        if dock_widget is self.scene_dock :
             self.system_config_dock.setVisible(False)
         else:
             self.system_config_dock.setVisible(True)

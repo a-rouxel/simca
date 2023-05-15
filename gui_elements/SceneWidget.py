@@ -419,6 +419,7 @@ class SceneWidget(QWidget):
 
     @pyqtSlot(np.ndarray,list)
     def display_scene_content(self, scene,list_wavelengths):
+        self.scene = scene
         self.scene_content_display.diplay_scene_content(scene,list_wavelengths)
 
 
