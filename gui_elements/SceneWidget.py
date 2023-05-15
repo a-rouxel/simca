@@ -1,42 +1,54 @@
 import yaml
 from PyQt5.QtWidgets import (QTabWidget, QSpinBox,QHBoxLayout, QPushButton, QFileDialog, QLabel, QLineEdit, QWidget, QFormLayout, QScrollArea, QGroupBox,QRadioButton, QButtonGroup,QComboBox)
 from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot,QCoreApplication
-from PyQt5.QtWidgets import  QVBoxLayout
-import os
-import matplotlib.pyplot as plt
-
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
-
+from PyQt5.QtWidgets import  QVBoxLayout, QSlider
+from PyQt5.QtCore import Qt
+import pyqtgraph as pg
 from utils.scenes_helper import *
 
 class SceneContentDisplay(QWidget):
 
     def __init__(self):
         super().__init__()
+
         self.layout = QVBoxLayout()
         self.setLayout(self.layout)
 
-        self.figure_scene = plt.figure()
-        self.canvas_scene = FigureCanvas(self.figure_scene)
-        self.toolbar_scene = NavigationToolbar(self.canvas_scene, self)
+        # Create a label
+        self.label = QLabel("Slice Number: ")
+        self.layout.addWidget(self.label)
 
-        self.layout.addWidget(self.toolbar_scene)
-        self.layout.addWidget(self.canvas_scene)
+        # Create a slider
+        self.slider = QSlider(Qt.Horizontal)
+        self.slider.setMinimum(0)
+        self.slider.valueChanged.connect(self.update_image)
+        self.layout.addWidget(self.slider)
 
-    def diplay_scene_content(self, scene):
+        # Create ImageView item with a PlotItem as its view box
+        self.imageView = pg.ImageView(view=pg.PlotItem())
+        self.layout.addWidget(self.imageView)
 
-        self.figure_scene.clear()
+    def diplay_scene_content(self, scene, list_wavelengths):
 
-        ax = self.figure_scene.add_subplot(111)
-        # scatter = ax.scatter(X_cam, Y_cam)
+        self.list_wavelengths = list_wavelengths
 
-        # Set labels with LaTeX font.
-        ax.set_xlabel(f'X input grid [um]', fontsize=12)
-        ax.set_ylabel(f'Y input grid [um]', fontsize=12)
-        ax.set_title(f'Input Grid', fontsize=12)
+        # Normalize filtering_cube values to range [0, 255] for ImageView
+        self.data = (scene - np.min(scene)) / (np.max(scene) - np.min(scene)) * 255
+        self.data = self.data.astype(np.uint8)
 
-        self.canvas_scene.draw()
+        # Set slider maximum value
+        self.slider.setMaximum(self.data.shape[2] - 1)
+
+        # Display the first slice
+        self.update_image(0)
+
+    def update_image(self, slice_index):
+        # Update the label
+        self.label.setText("wavelength: " + str(int(self.list_wavelengths[slice_index])) + " nm")
+
+        # Display the slice
+        self.imageView.setImage(np.rot90(self.data[:, :, slice_index]), levels=(0, 255))
+
 
 
 
@@ -89,17 +101,18 @@ class SceneConfigEditor(QWidget):
 
     def load_scene(self):
 
-        try:
-            img, gt, label_values, ignored_labels, rgb_bands, palette, delta_lambda = get_dataset(self.scene_config_editor.directories_combo.currentText(), self.scene_config_editor.scenes_directory.text())
+
+            img, gt, list_wavelengths, label_values, ignored_labels, rgb_bands, palette, delta_lambda = get_dataset(self.directories_combo.currentText(), self.scenes_directory.text())
             self.scene = img
             self.scene_gt = gt
+            self.list_wavelengths = list_wavelengths
             self.scene_label_values = label_values
             self.scene_ignored_labels = ignored_labels
             self.scene_rgb_bands = rgb_bands
             self.scene_palette = palette
             self.scene_delta_lambda = delta_lambda
-        except:
-            print("Error: scene not found")
+            #
+            # print("Error: scene not found")
 
 
     def load_scenes(self):
@@ -124,19 +137,19 @@ class SceneConfigEditor(QWidget):
             "scenes directory": self.scene_directory.value()
         }
 
-# class Worker(QThread):
-#     finished_load_scene = pyqtSignal(np.ndarray)
-#
-#     def __init__(self,scene_config):
-#         super().__init__()
-#
-#         self.scene_config = scene_config
-#
-#     def run(self):
-#
-#         scene = load_scene(self.scene_config)
-#
-#         self.finished_load_scene.emit(scene)  # Emit a tuple of arrays
+class Worker(QThread):
+    finished_load_scene = pyqtSignal(np.ndarray,list)
+
+    def __init__(self,scene_config_editor):
+        super().__init__()
+
+        self.scene_config_editor = scene_config_editor
+
+    def run(self):
+
+        self.scene_config_editor.load_scene()
+
+        self.finished_load_scene.emit(self.scene_config_editor.scene,self.scene_config_editor.list_wavelengths)  # Emit a tuple of arrays
 
 class SceneWidget(QWidget):
     def __init__(self,scene_config_path="config/scene.yml"):
@@ -154,17 +167,31 @@ class SceneWidget(QWidget):
         self.scene_content_display = SceneContentDisplay()
 
         self.result_display_widget.addTab(self.scene_content_display, "Scene Content")
-        self.layout.addWidget(self.result_display_widget)
 
+
+        self.run_button = QPushButton('Load Scene')
+        self.run_button.setStyleSheet('QPushButton {background-color: red; color: white;}')        # Connect the button to the run_dimensioning method
+        self.run_button.clicked.connect(self.run_load_scene)
+
+        # Create a group box for the run button
+        self.run_button_group_box = QGroupBox()
+        run_button_group_layout = QVBoxLayout()
+
+        run_button_group_layout.addWidget(self.run_button)
+        run_button_group_layout.addWidget(self.result_display_widget)
+
+        self.run_button_group_box.setLayout(run_button_group_layout)
+
+        self.layout.addWidget(self.run_button_group_box)
         self.setLayout(self.layout)
     #
-    # def run_load_scene(self):
-    #     # Get the configs from the editors
-    #
-    #     self.worker = Worker()
-    #     self.worker.finished_load_scene.connect(self.diplay_scene_content)
-    #     self.worker.start()
+    def run_load_scene(self):
+        # Get the configs from the editors
 
-    @pyqtSlot(np.ndarray)
-    def display_scene_content(self, scene):
-        self.scene_content_display.diplay_scene_content(scene)
+        self.worker = Worker(self.scene_config_editor)
+        self.worker.finished_load_scene.connect(self.display_scene_content)
+        self.worker.start()
+
+    @pyqtSlot(np.ndarray,list)
+    def display_scene_content(self, scene,list_wavelengths):
+        self.scene_content_display.diplay_scene_content(scene,list_wavelengths)

@@ -5,6 +5,7 @@ import spectral
 import pickle as pkl
 import numpy as np
 import matplotlib.image as mpimg
+import re
 
 DATASETS_CONFIG = {
     "PaviaU": {
@@ -41,6 +42,7 @@ def get_dataset(dataset_name, target_folder="./", datasets=DATASETS_CONFIG):
     label_values = {}
     rgb_bands = []
     delta_lambda = None
+    list_wavelengths = []
 
     if dataset_name not in datasets.keys():
         raise ValueError("{} dataset is unknown.".format(dataset_name))
@@ -103,6 +105,8 @@ def get_dataset(dataset_name, target_folder="./", datasets=DATASETS_CONFIG):
 
         delta_lambda = 850 - 430
 
+        list_wavelengths = np.linspace(430, 850, img.shape[-1]).tolist()
+
     elif dataset_name == "IndianPines":
         # Load the image
         img = open_file(folder + "Indian_pines_corrected.mat")
@@ -136,6 +140,14 @@ def get_dataset(dataset_name, target_folder="./", datasets=DATASETS_CONFIG):
         delta_lambda = 2500-400
 
 
+        aviris_data = text_reader_wvelengths_indian_pines(folder + "wavelengths.txt")
+
+        for idx in range(len(aviris_data)):
+            if aviris_data[idx+1]["Center Wavelength"] is not None:
+                list_wavelengths.append(aviris_data[idx+1]["Center Wavelength"])
+
+
+
     # No NaN accepted
     nan_mask = np.isnan(img.sum(axis=-1))
     assert np.count_nonzero(nan_mask) == 0
@@ -145,7 +157,7 @@ def get_dataset(dataset_name, target_folder="./", datasets=DATASETS_CONFIG):
 
     ignored_labels = list(set(ignored_labels))
     img = np.asarray(img, dtype="float32")
-    return img, gt, label_values, ignored_labels, rgb_bands, palette, delta_lambda
+    return img, gt, list_wavelengths,label_values, ignored_labels, rgb_bands, palette, delta_lambda
 
 
 def open_file(dataset):
@@ -170,3 +182,43 @@ def open_file(dataset):
         return img
     else:
         raise ValueError("Unknown file format: {}".format(ext))
+
+def text_reader_wvelengths_indian_pines(text_path):
+
+    with open(text_path, 'r') as file:
+        data = file.read()
+
+    # Split data by lines
+    lines = data.split('\n')
+
+    # Initialize the dictionary
+    aviris_data = {}
+
+    # Loop over each line in the data
+    for line in lines:
+        # Check if line is empty or not
+        if line.strip() != "":
+            # Check if line starts with a number (which indicates a data row)
+            if line.strip()[0].isdigit():
+                # Split line by multiple spaces
+                items = re.split(r'\s{2,}', line.strip())
+
+                if len(items) == 2:  # If the band is not used
+                    aviris_data[int(items[0])] = {
+                        'Aviris Band': None,
+                        'Data Channel': None,
+                        'Center Wavelength': None,
+                        'FWHM': None,
+                        'Center Uncertainty': None,
+                        'FWHM Uncertainty': None
+                    }
+                else:  # If the band is used
+                    aviris_data[int(items[0])] = {
+                        'Aviris Band': int(items[0]),
+                        'Data Channel': int(items[1]),
+                        'Center Wavelength': float(items[2]),
+                        'FWHM': float(items[3]),
+                        'Center Uncertainty': float(items[4]),
+                        'FWHM Uncertainty': float(items[5])
+                    }
+    return aviris_data
