@@ -14,20 +14,19 @@ class MainWindow(QMainWindow):
         self.setWindowTitle('SIMCA')
 
         # Set the stylesheet for the QMainWindow
-        self.setStyleSheet("QDockWidget::title { font-weight: bold; }")
 
         self.editor_system_config = EditorSystemConfigWidget(initial_system_config_path="config/cassi_system.yml")
         self.system_config_dock = QDockWidget("Editor for system config")
         self.system_config_dock.setWidget(self.editor_system_config)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.system_config_dock)
 
-        self.dimensioning_widget = DimensioningWidget(self.editor_system_config)
+        self.dimensioning_widget = DimensioningWidget(self.editor_system_config,dimensioning_config_path="config/dimensioning.yml")
         self.dimensioning_dock = QDockWidget("Optics")
         self.dimensioning_dock.setWidget(self.dimensioning_widget)
         self.addDockWidget(Qt.RightDockWidgetArea, self.dimensioning_dock)
 
         # Create the MaskConfigWidget
-        self.filtering_config_widget = FilteringCubeWidget(self.editor_system_config)
+        self.filtering_config_widget = FilteringCubeWidget(self.editor_system_config,filtering_config_path="config/filtering.yml")
         self.filtering_config_dock = QDockWidget("Filtering Cube")
         self.filtering_config_dock.setWidget(self.filtering_config_widget)
         self.addDockWidget(Qt.RightDockWidgetArea, self.filtering_config_dock)

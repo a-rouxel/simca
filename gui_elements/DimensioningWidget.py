@@ -319,7 +319,7 @@ class DimensioningConfigEditor(QWidget):
         }
 
 class DimensioningWidget(QWidget):
-    def __init__(self, editor_system_config):
+    def __init__(self, editor_system_config,dimensioning_config_path=None):
         super().__init__()
 
         self.editor_system_config = editor_system_config
@@ -327,7 +327,8 @@ class DimensioningWidget(QWidget):
         self.layout = QHBoxLayout()
 
         # Create the dimensioning configuration editor
-        self.dimensioning_config_editor = DimensioningConfigEditor(initial_config_file="config/dimensioning.yml")
+        if dimensioning_config_path is not None:
+            self.dimensioning_config_editor = DimensioningConfigEditor(initial_config_file=dimensioning_config_path)
 
         # Create the result display widget (tab widget in this case)
         self.result_display_widget = QTabWidget()

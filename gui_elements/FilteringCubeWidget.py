@@ -136,7 +136,7 @@ class Worker(QThread):
         self.finished_propagate_mask_grid.emit(filtering_cube,list_wavelengths)  # Emit a tuple of arrays
 
 
-class AcquisitionWidgetEditor(QWidget):
+class FilteringCubeWidgetEditor(QWidget):
     def __init__(self,initial_config_file=None):
         super().__init__()
 
@@ -253,7 +253,7 @@ class AcquisitionWidgetEditor(QWidget):
         }
 
 class FilteringCubeWidget(QWidget):
-    def __init__(self, editor_system_config):
+    def __init__(self, editor_system_config,filtering_config_path=None):
         super().__init__()
 
         self.editor_system_config = editor_system_config
@@ -262,7 +262,7 @@ class FilteringCubeWidget(QWidget):
         self.layout = QHBoxLayout()
 
         # Create the dimensioning configuration editor
-        self.acquisition_config_editor = AcquisitionWidgetEditor(initial_config_file="config/acquisition.yml")
+        self.acquisition_config_editor = FilteringCubeWidgetEditor(initial_config_file=filtering_config_path)
 
         # Create the result display widget (tab widget in this case)
         self.result_display_widget = QTabWidget()
