@@ -25,11 +25,10 @@ def worker(args):
 
 class CassiSystem():
 
-    def __init__(self,system_config,simulation_config):
+    def __init__(self,system_config):
 
         self.system_config = system_config
-        self.simulation_config = simulation_config
-        self.result_directory = initialize_directory(self.simulation_config)
+        self.result_directory = initialize_directory(self.system_config)
         self.alpha_c = self.calculate_alpha_c()
 
         self.X_dmd_grid, self.Y_dmd_grid = self.create_grid(self.system_config["SLM"]["sampling across X"],
@@ -43,14 +42,7 @@ class CassiSystem():
                                                                         self.system_config["detector"]["delta X"],
                                                                         self.system_config["detector"]["delta Y"])
 
-    def create_input_grid(self):
 
-        self.X_input_grid, self.Y_input_grid = self.create_grid(self.simulation_config["input grid sampling"]["sampling across X"],
-                                                                      self.simulation_config["input grid sampling"]["sampling across Y"],
-                                                                      self.simulation_config["input grid sampling"]["delta X"],
-                                                                      self.simulation_config["input grid sampling"]["delta Y"])
-
-        return self.X_input_grid, self.Y_input_grid
 
     def create_dmd_mask(self):
 
@@ -117,11 +109,11 @@ class CassiSystem():
 
         self.filtering_cube = np.zeros((self.system_config["detector"]["sampling across Y"],
                                         self.system_config["detector"]["sampling across X"],
-                                        self.simulation_config["number of spectral samples"]))
+                                        self.system_config["spectral range"]["number of spectral samples"]))
 
-        wavelengths = np.linspace(self.simulation_config["spectral range"]["wavelength min"],
-                                  self.simulation_config["spectral range"]["wavelength max"],
-                                  self.simulation_config["number of spectral samples"])
+        wavelengths = np.linspace(self.system_config["spectral range"]["wavelength min"],
+                                  self.system_config["spectral range"]["wavelength max"],
+                                  self.system_config["number of spectral samples"])
         with Pool(mp.cpu_count()) as p:
             tasks = [(list_X_propagated_masks, list_Y_propagated_masks, mask, X_detector_grid, Y_detector_grid, i)
                      for i in range(len(wavelengths))]

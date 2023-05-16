@@ -270,7 +270,6 @@ def SAM(s1, s2):
         return 0.0
     return angle
 
-import plotly.graph_objects as go
 def plot_all_spectrums(mean_spectrums, std_spectrums):
     """
     Display mean and intracovariance for each class, one graph per class

@@ -6,8 +6,3 @@ infos:
 mask caracteristics:
     type: slit
 
-spectral range:
-    wavelength min: 450     # minimum wavelength -- in nm
-    wavelength max: 750      # maximum wavelength -- in nm
-
-number of spectral samples: 100

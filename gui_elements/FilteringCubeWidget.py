@@ -106,14 +106,14 @@ class Worker(QThread):
     finished_define_mask_grid = pyqtSignal(np.ndarray)
     finished_propagate_mask_grid = pyqtSignal(np.ndarray,list)
 
-    def __init__(self, system_config,simulation_config):
+    def __init__(self, cassi_system,system_config,simulation_config):
         super().__init__()
+        self.cassi_system = cassi_system
         self.system_config = system_config
         self.simulation_config = simulation_config
 
     def run(self):
         # Put your analysis here
-        self.cassi_system = CassiSystem(system_config=self.system_config ,simulation_config=self.simulation_config)
 
         X_dmd_grid, Y_dmd_grid = self.cassi_system.create_dmd_mask()
         mask = self.cassi_system.generate_2D_mask(self.simulation_config["mask caracteristics"]["type"])
@@ -123,9 +123,9 @@ class Worker(QThread):
 
         list_X_propagated_masks, list_Y_propagated_masks, self.list_wavelengths = self.cassi_system.propagate_mask_grid(X_dmd_grid,
                                                                                                             Y_dmd_grid,
-                                                                                                              [self.simulation_config["spectral range"]["wavelength min"],
-                                                                                                               self.simulation_config["spectral range"]["wavelength max"]],
-                                                                                                               self.simulation_config["number of spectral samples"])
+                                                                                                              [self.system_config["spectral range"]["wavelength min"],
+                                                                                                               self.system_config["spectral range"]["wavelength max"]],
+                                                                                                               self.system_config["spectral range"]["number of spectral samples"])
         self.filtering_cube = self.cassi_system.generate_filtering_cube(self.cassi_system.X_detector_grid,
                                                self.cassi_system.Y_detector_grid,
                                                list_X_propagated_masks,
@@ -154,32 +154,11 @@ class FilteringCubeWidgetEditor(QWidget):
         self.results_directory = QLineEdit()
         self.mask_caracteristics_type = QLineEdit()
 
-        self.spectral_samples = QSpinBox()
-        self.spectral_samples.setMinimum(1)
-        self.spectral_samples.setMaximum(500)
-
-        self.wavelength_min = QSpinBox()
-        self.wavelength_min.setMinimum(200)
-        self.wavelength_min.setMaximum(5000)
-
-        self.wavelength_max = QSpinBox()
-        self.wavelength_max.setMinimum(200)
-        self.wavelength_max.setMaximum(5000)
-
-        wavelength_layout = QFormLayout()
-        wavelength_layout.addRow("Wavelength min", self.wavelength_min)
-        wavelength_layout.addRow("Wavelength max", self.wavelength_max)
 
 
         general_layout = QFormLayout()
-        general_layout.addRow("results directory", self.results_directory)
         general_layout.addRow("mask caracteristics", self.mask_caracteristics_type)
-        general_layout.addRow("spectral samples", self.spectral_samples)
 
-
-
-        wavelength_group = QGroupBox("Spectral Range")
-        wavelength_group.setLayout(wavelength_layout)
 
         general_group = QGroupBox("General settings")
         general_group.setLayout(general_layout)
@@ -191,7 +170,6 @@ class FilteringCubeWidgetEditor(QWidget):
         # Create main layout and add widgets
         main_layout = QVBoxLayout()
         main_layout.addWidget(general_group)
-        main_layout.addWidget(wavelength_group)
         main_layout.addWidget(self.load_config_button)
 
         # Set the layout of the widget within the scroll area
@@ -226,37 +204,30 @@ class FilteringCubeWidgetEditor(QWidget):
         self.results_directory.setText(self.config['infos']['results directory'])
         self.mask_caracteristics_type.setText(self.config['mask caracteristics']['type'])
 
-        self.wavelength_min.setValue(self.config['spectral range']['wavelength min'])
-
-        self.wavelength_max.setValue(self.config['spectral range']['wavelength max'])
+        # self.wavelength_min.setValue(self.config['spectral range']['wavelength min'])
+        #
+        # self.wavelength_max.setValue(self.config['spectral range']['wavelength max'])
         #
         # self.sampling_across_X.setValue(self.config['input grid sampling']['sampling across X'])
         # self.sampling_across_Y.setValue(self.config['input grid sampling']['sampling across Y'])
         # self.delta_X.setText(str(self.config['input grid sampling']['delta X']))
         # self.delta_Y.setText(str(self.config['input grid sampling']['delta Y']))
         #
-        self.spectral_samples.setValue(self.config['number of spectral samples'])
+        # self.spectral_samples.setValue(self.config['number of spectral samples'])
 
     def get_config(self):
         return {
-            "infos": {
-                "results directory": self.results_directory.text()
-            },
             "mask caracteristics": {
                 "type": self.mask_caracteristics_type.text()
-            },
-            "number of spectral samples": self.spectral_samples.value(),
-            "spectral range": {
-                "wavelength min": self.wavelength_min.value(),
-                "wavelength max": self.wavelength_max.value()
             },
         }
 
 class FilteringCubeWidget(QWidget):
-    def __init__(self, editor_system_config,filtering_config_path=None):
+    def __init__(self, system_editor,cassi_system,filtering_config_path=None):
         super().__init__()
 
-        self.editor_system_config = editor_system_config
+        self.system_editor = system_editor
+        self.cassi_system = cassi_system
 
 
         self.layout = QHBoxLayout()
@@ -309,11 +280,11 @@ class FilteringCubeWidget(QWidget):
     def run_dimensioning(self):
         # Get the configs from the editors
 
-
-        system_config = self.editor_system_config.get_config()
+        cassi_system = self.cassi_system
+        system_config = self.system_editor.get_config()
         filtering_config_editor = self.filtering_config_editor.get_config()
 
-        self.worker = Worker(system_config, filtering_config_editor)
+        self.worker = Worker(cassi_system,system_config, filtering_config_editor)
         self.worker.finished_define_mask_grid.connect(self.display_mask_grid)
         self.worker.finished_propagate_mask_grid.connect(self.display_propagated_masks)
         self.worker.start()

@@ -161,7 +161,6 @@ class EditorSystemConfigWidget(QWidget):
                     self.input_labels[full_key] = label
 
             self.group_layout.addWidget(group_box)
-
     def toggle_fields(self, keys, enable_fields, input_fields_dict, labels_dict):
         for key in keys:
             if key in input_fields_dict:
@@ -173,7 +172,6 @@ class EditorSystemConfigWidget(QWidget):
 
             if key in labels_dict:  # Add this check to prevent KeyError
                 labels_dict[key].setVisible(enable_fields)
-
     def toggle_dispersive_element_fields(self, dispersive_element_type, dispersive_element_key):
         prism_keys = [f"{dispersive_element_key}_A"]
         grating_keys = [f"{dispersive_element_key}_m", f"{dispersive_element_key}_G"]
@@ -184,22 +182,6 @@ class EditorSystemConfigWidget(QWidget):
         else:
             self.toggle_fields(prism_keys, False, self.input_fields, self.input_labels)
             self.toggle_fields(grating_keys, True, self.input_fields, self.input_labels)
-
-
-    # def save_config(self):
-    #     if hasattr(self, 'config'):
-    #         options = QFileDialog.Options()
-    #         file_name, _ = QFileDialog.getSaveFileName(self, "Save Config", "", "YAML Files (*.yml *.yaml);;All Files (*)", options=options)
-    #
-    #         system_config = self.get_config()
-    #         self.config = system_config
-    #         if file_name:
-    #             # self.update_config()
-    #             with open(file_name, 'w') as file:
-    #                 yaml.dump(self.config, file)
-    #     else:
-    #         pass
-
     def get_config(self):
         config = {}  # Create an empty dictionary
         # Loop over all input fields and add their values to the config
@@ -244,53 +226,4 @@ class EditorSystemConfigWidget(QWidget):
 
             # Add the value to the config
             target_dict[sub_key] = value
-
-
         return config
-
-    # def update_config(self):
-    #     for key, section in self.config.items():
-    #         for sub_key, value in section.items():
-    #             if isinstance(value, dict):
-    #                 for nested_sub_key, _ in value.items():
-    #                     full_key = f"{key}_{sub_key}_{nested_sub_key}"
-    #                     if full_key in self.input_fields:
-    #                         input_field = self.input_fields[full_key]
-    #                         if input_field.isHidden():
-    #                             new_value = None
-    #                         else:
-    #                             if isinstance(input_field, QComboBox):
-    #                                 new_value = input_field.currentText()  # Changed line
-    #                             else:
-    #                                 new_value = input_field.text()
-    #                             try:
-    #                                 new_value = int(new_value)
-    #                             except ValueError:
-    #                                 try:
-    #                                     new_value = float(new_value)
-    #                                 except ValueError:
-    #                                     pass
-    #                         self.config[key][sub_key][nested_sub_key] = new_value
-    #             else:
-    #                 full_key = f"{key}_{sub_key}"
-    #                 if full_key in self.input_fields:
-    #                     if full_key == "system_architecture_name" or full_key == "FOV_field_of_view_mode":
-    #                         input_field = self.input_fields[full_key]
-    #                         new_value = input_field.currentText()
-    #                     else:
-    #                         input_field = self.input_fields[full_key]
-    #                         if input_field.isHidden():
-    #                             new_value = None
-    #                         else:
-    #                             if isinstance(input_field, QComboBox):
-    #                                 new_value = input_field.currentText()  # Changed line
-    #                             else:
-    #                                 new_value = input_field.text()
-    #                             try:
-    #                                 new_value = int(new_value)
-    #                             except ValueError:
-    #                                 try:
-    #                                     new_value = float(new_value)
-    #                                 except ValueError:
-    #                                     pass
-    #                     self.config[key][sub_key] = new_value

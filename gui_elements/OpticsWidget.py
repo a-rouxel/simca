@@ -163,28 +163,26 @@ class Worker(QThread):
     finished_propagate_mask_grid = pyqtSignal(tuple)
     finished_distorsion = pyqtSignal(tuple)
 
-    def __init__(self, system_config,simulation_config):
+    def __init__(self, system_config):
         super().__init__()
         self.system_config = system_config
-        self.simulation_config = simulation_config
+
 
     def run(self):
         # Put your analysis here
-        cassi_system = CassiSystem(system_config=self.system_config ,simulation_config=self.simulation_config)
+        cassi_system = CassiSystem(system_config=self.system_config)
 
-        X_input_grid, Y_input_grid = cassi_system.create_input_grid()
+        self.finished_define_mask_grid.emit((cassi_system.X_dmd_grid, cassi_system.Y_dmd_grid))  # Emit a tuple of arrays
 
-        self.finished_define_mask_grid.emit((X_input_grid, Y_input_grid))  # Emit a tuple of arrays
-
-        list_X_detector, list_Y_detector, list_wavelengths = cassi_system.propagate_mask_grid(X_input_grid,
-                                                                                              Y_input_grid,
-                                                                                              [self.simulation_config["spectral range"]["wavelength min"],
-                                                                                               self.simulation_config["spectral range"]["wavelength max"]],
-                                                                                              self.simulation_config["number of spectral samples"])
+        list_X_detector, list_Y_detector, list_wavelengths = cassi_system.propagate_mask_grid(cassi_system.X_dmd_grid,
+                                                                                              cassi_system.Y_dmd_grid,
+                                                                                              [self.system_config["spectral range"]["wavelength min"],
+                                                                                               self.system_config["spectral range"]["wavelength max"]],
+                                                                                              self.system_config["spectral range"]["number of spectral samples"])
         self.finished_propagate_mask_grid.emit((list_X_detector, list_Y_detector,list_wavelengths))
 
 
-        self.finished_distorsion.emit((X_input_grid, Y_input_grid,list_X_detector, list_Y_detector, list_wavelengths))
+        self.finished_distorsion.emit((cassi_system.X_dmd_grid, cassi_system.Y_dmd_grid,list_X_detector, list_Y_detector, list_wavelengths))
 
 
 
@@ -327,8 +325,8 @@ class OpticsWidget(QWidget):
         self.layout = QHBoxLayout()
 
         # Create the optics configuration editor
-        if optics_config_path is not None:
-            self.optics_config_editor = OpticsConfigEditor(initial_config_file=optics_config_path)
+        # if optics_config_path is not None:
+        #     self.optics_config_editor = OpticsConfigEditor(initial_config_file=optics_config_path)
 
         # Create the result display widget (tab widget in this case)
         self.result_display_widget = QTabWidget()
@@ -358,7 +356,7 @@ class OpticsWidget(QWidget):
         self.run_button_group_box.setLayout(run_button_group_layout)
 
         # Add the optics configuration editor, the result display widget, and the run button to the layout
-        self.layout.addWidget(self.optics_config_editor)
+        # self.layout.addWidget(self.optics_config_editor)
         self.layout.addWidget(self.run_button_group_box)
 
         self.layout.setStretchFactor(self.run_button_group_box, 1)
@@ -373,19 +371,14 @@ class OpticsWidget(QWidget):
 
 
         system_config = self.editor_system_config.get_config()
-        optics_config = self.optics_config_editor.get_config()
+        # optics_config = self.optics_config_editor.get_config()
 
-        config = {**system_config, **optics_config}  # Merge the configs
-
-
-
-        self.worker = Worker(system_config, optics_config)
+        self.worker = Worker(system_config)
         self.worker.finished_define_mask_grid.connect(self.display_mask_grid)
         self.worker.finished_propagate_mask_grid.connect(self.display_mask_propagation)
         self.worker.finished_distorsion.connect(self.display_results_distorsion)
         self.worker.start()
 
-        QCoreApplication.processEvents()
 
 
     @pyqtSlot(tuple)

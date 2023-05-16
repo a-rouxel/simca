@@ -2,6 +2,7 @@
 
 infos:
     system name: HYACAMEO
+    results directory: ./data/results/
 
 system architecture:
     focal lens 1: 165000
@@ -16,12 +17,17 @@ system architecture:
         G: 160             # grating density                   (only used if type == 'grating')       -- in lines/mm
 
 detector:
-    sampling across X: 100                  # sampling across X axis -- no units
-    sampling across Y: 100                  # sampling across Y axis -- no units
+    sampling across X: 20                  # sampling across X axis -- no units
+    sampling across Y: 21                  # sampling across Y axis -- no units
     delta X: 20                             # delta X       -- in um
     delta Y: 20                              # delta Y       -- in um
 SLM:
-    sampling across X: 200                  # sampling across X axis -- no units
-    sampling across Y: 100                  # sampling across Y axis -- no units
+    sampling across X: 30                  # sampling across X axis -- no units
+    sampling across Y: 20                  # sampling across Y axis -- no units
     delta X: 30                              # delta X       -- in um
     delta Y: 30                              # delta Y       -- in um
+
+spectral range:
+    wavelength min: 450     # minimum wavelength -- in nm
+    wavelength max: 750      # maximum wavelength -- in nm
+    number of spectral samples: 30
