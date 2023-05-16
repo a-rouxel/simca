@@ -1,18 +1,22 @@
 import sys
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QApplication, QMainWindow, QDockWidget
-
+from PyQt5.QtGui import QIcon
 from gui_elements import OpticsWidget
 from gui_elements import EditorSystemConfigWidget
 from gui_elements import FilteringCubeWidget
 from gui_elements import SceneWidget
 from gui_elements import AcquisitionWidget
-
+import os
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-
+        try:
+            self.setWindowIcon(QIcon('Figure_1.ico'))
+        except:
+            print('damn')
         self.setWindowTitle('SIMCA')
+
 
         self.editor_system_config = EditorSystemConfigWidget(initial_system_config_path="config/cassi_system.yml")
         self.system_config_dock = QDockWidget("Editor for system config")
@@ -58,6 +62,7 @@ class MainWindow(QMainWindow):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
+    app.setWindowIcon(QIcon('Figure_1.ico'))
     main_window = MainWindow()
     main_window.show()
     sys.exit(app.exec_())
