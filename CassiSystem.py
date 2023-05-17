@@ -176,9 +176,9 @@ class CassiSystem():
 
 
 
-        self.Dm = D_m(sellmeier(self.system_config["system architecture"]["dispersive element 1"]["wavelength center"]),
-                      np.radians(self.system_config["system architecture"]["dispersive element 1"]["A"]))
-        self.alpha_c = alpha_c(np.radians(self.system_config["system architecture"]["dispersive element 1"]["A"]),
+        self.Dm = D_m(sellmeier(self.system_config["system architecture"]["dispersive element"]["wavelength center"]),
+                      np.radians(self.system_config["system architecture"]["dispersive element"]["A"]))
+        self.alpha_c = alpha_c(np.radians(self.system_config["system architecture"]["dispersive element"]["A"]),
                                self.Dm)
 
         return self.alpha_c
@@ -188,7 +188,7 @@ class CassiSystem():
         wavelength_max = spectral_range[1]
 
         self.n_array_center = np.full(X_input_grid.shape,
-                                      sellmeier(self.system_config["system architecture"]["dispersive element 1"]["wavelength center"]))
+                                      sellmeier(self.system_config["system architecture"]["dispersive element"]["wavelength center"]))
 
         X_input_grid_flatten = X_input_grid.flatten()
         Y_input_grid_flatten = Y_input_grid.flatten()
@@ -205,11 +205,11 @@ class CassiSystem():
             X_propagated_mask, Y_propagated_mask = propagate_through_arm_vector(X_mask= X_input_grid_flatten ,
                                                         Y_mask= Y_input_grid_flatten,
                                                         n = n_array_flatten,
-                                                        A =np.radians(self.system_config["system architecture"]["dispersive element 1"]["A"]),
-                                                        F = self.system_config["system architecture"]["focal lens 1"],
+                                                        A =np.radians(self.system_config["system architecture"]["dispersive element"]["A"]),
+                                                        F = self.system_config["system architecture"]["focal lens"],
                                                         alpha_c = self.alpha_c,
-                                                        delta_alpha_c = np.radians(self.system_config["system architecture"]["dispersive element 1"]["delta alpha c"]),
-                                                        delta_beta_c= np.radians(self.system_config["system architecture"]["dispersive element 1"]["delta beta c"])
+                                                        delta_alpha_c = np.radians(self.system_config["system architecture"]["dispersive element"]["delta alpha c"]),
+                                                        delta_beta_c= np.radians(self.system_config["system architecture"]["dispersive element"]["delta beta c"])
                                                         )
             self.list_X_propagated_mask.append(X_propagated_mask.reshape(X_input_grid.shape))
             self.list_Y_propagated_mask.append(Y_propagated_mask.reshape(Y_input_grid.shape))

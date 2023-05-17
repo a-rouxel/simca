@@ -64,7 +64,7 @@ class SceneHistogram(QWidget):
         self.layout = QVBoxLayout(self)
 
         # Create a figure and a canvas
-        self.figure = plt.figure(figsize=(6, 4))
+        self.figure = plt.figure()
         self.canvas = FigureCanvas(self.figure)
         self.toolbar = NavigationToolbar(self.canvas, self)
 
@@ -109,7 +109,7 @@ class SceneHistogram(QWidget):
         ax.set_ylabel("Occurrence")
 
         # Rotate the x-axis labels
-        plt.xticks(rotation=45)
+        ax.set_xticklabels(labels, rotation=45)
 
         # Redraw the canvas
         self.canvas.draw()
@@ -232,7 +232,7 @@ class SpectralDataDisplay(QWidget):
 
 class SceneConfigEditor(QWidget):
 
-    scene_loaded = pyqtSignal(np.ndarray)
+    scene_loaded = pyqtSignal(int,int,int,float,float)
     def __init__(self,initial_config_file=None):
         super().__init__()
         self.initial_config_file = initial_config_file
@@ -248,12 +248,21 @@ class SceneConfigEditor(QWidget):
 
 
         self.directories_combo = QComboBox()
+
+
+
+
         self.scene_dimension_x = QLineEdit()
         self.scene_dimension_x.setReadOnly(True)  # The dimensions should be read-only
         self.scene_dimension_y = QLineEdit()
         self.scene_dimension_y.setReadOnly(True)  # The dimensions should be read-only
-        self.scene_nb_of_wavelengths = QLineEdit()
-        self.scene_nb_of_wavelengths.setReadOnly(True)  # The dimensions should be read-only
+        self.scene_nb_of_spectral_bands = QLineEdit()
+        self.scene_nb_of_spectral_bands.setReadOnly(True)  # The dimensions should be read-only
+        self.minimum_wavelengths = QLineEdit()
+        self.minimum_wavelengths.setReadOnly(True)  # The dimensions should be read-only
+        self.maximum_wavelengths = QLineEdit()
+        self.maximum_wavelengths.setReadOnly(True)  # The dimensions should be read-only
+
         self.scene_loaded.connect(self.update_scene_dimensions)
 
         # Add the dimensioning configuration editor, the result display widget, and the run button to the layout
@@ -261,17 +270,38 @@ class SceneConfigEditor(QWidget):
 
         scene_layout = QFormLayout()
         scene_layout.addRow("scenes directory", self.scenes_directory)
-        scene_layout.addRow("available scenes", self.directories_combo)
-        scene_layout.addRow("dimension along X", self.scene_dimension_x)
-        scene_layout.addRow("dimension along Y", self.scene_dimension_y)
-        scene_layout.addRow("number of wavelengths", self.scene_nb_of_wavelengths)
 
-        scene_group = QGroupBox("Scene settings")
+        self.reload_scenes_button = QPushButton('reload scenes')
+        self.reload_scenes_button.clicked.connect(self.load_scenes)
+
+        scene_layout.addWidget(self.reload_scenes_button)
+
+        chosen_scene = QFormLayout()
+
+
+
+        chosen_scene.addRow("scene name",self.directories_combo)
+        chosen_scene.addRow("dimension along X", self.scene_dimension_x)
+        chosen_scene.addRow("dimension along Y", self.scene_dimension_y)
+        chosen_scene.addRow("number of spectral bands", self.scene_nb_of_spectral_bands)
+        chosen_scene.addRow("minimum wavelength", self.minimum_wavelengths)
+        chosen_scene.addRow("maximum wavelength", self.maximum_wavelengths)
+
+        chosen_scene_group = QGroupBox("Chosen Scene")
+        chosen_scene_group.setLayout(chosen_scene)
+
+        # scene_layout.addRow("chosen scene", chosen_scene)
+
+
+        scene_group = QGroupBox("Settings")
         scene_group.setLayout(scene_layout)
+
+
 
 
         main_layout = QVBoxLayout()
         main_layout.addWidget(scene_group)
+        main_layout.addWidget(chosen_scene_group)
 
 
 
@@ -308,12 +338,14 @@ class SceneConfigEditor(QWidget):
             self.scene_palette = palette_init(label_values, palette)
             #
             # print("Error: scene not found")
-            self.scene_loaded.emit(self.scene)
+            self.scene_loaded.emit(self.scene.shape[1],self.scene.shape[0],self.scene.shape[2],list_wavelengths[0],list_wavelengths[-1])
 
 
 
     def load_scenes(self):
+
         scene_dir = self.scenes_directory.text()
+        self.directories_combo.clear()
         if os.path.isdir(scene_dir):
             sub_dirs = [name for name in os.listdir(scene_dir)
                         if os.path.isdir(os.path.join(scene_dir, name))]
@@ -335,12 +367,15 @@ class SceneConfigEditor(QWidget):
             "scene dimension along X": self.scene.shape[1],
         }
 
-    @pyqtSlot(np.ndarray)
-    def update_scene_dimensions(self, scene):
+    @pyqtSlot(int,int,int,float,float)
+    def update_scene_dimensions(self, x_dim,y_dim,wav_dim,min_wav,max_wav):
         # Update the GUI in this slot function, which is called from the main thread
-        self.scene_dimension_x.setText(str(scene.shape[1]))
-        self.scene_dimension_y.setText(str(scene.shape[0]))
-        self.scene_nb_of_wavelengths.setText(str(scene.shape[2]))
+        self.scene_dimension_x.setText(str(x_dim))
+        self.scene_dimension_y.setText(str(y_dim))
+        self.scene_nb_of_spectral_bands.setText(str(wav_dim))
+        self.minimum_wavelengths.setText(str(min_wav))
+        self.maximum_wavelengths.setText(str(max_wav))
+
 
 class Worker(QThread):
     finished_load_scene = pyqtSignal(np.ndarray,list)

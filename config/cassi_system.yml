@@ -5,16 +5,16 @@ infos:
     results directory: ./data/results/
 
 system architecture:
-    focal lens 1: 165000
-    dispersive element 1:
+    focal lens: 165000
+    dispersive element:
     # dispersive element caracteristics
         type: prism        # name of the dispersive element
-        delta alpha c: 0
-        delta beta c: 0
-        wavelength center: 550  # central wavelength -- in nm
         A: 60              # apex angle of the prism in degrees      (only used if type == 'prism')   -- in degrees
         m: 1               # grating order to consider         (only used if type == 'grating')       -- no units
         G: 160             # grating density                   (only used if type == 'grating')       -- in lines/mm
+        delta alpha c: 0
+        delta beta c: 0
+        wavelength center: 550  # central wavelength -- in nm
 
 detector:
     sampling across X: 20                  # sampling across X axis -- no units

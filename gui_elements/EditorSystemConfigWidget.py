@@ -125,7 +125,7 @@ class EditorSystemConfigWidget(QWidget):
             for sub_key, value in section.items():
                 full_key = f"{key}_{sub_key}"
 
-                if sub_key in ['dispersive element 1', 'dispersive element 2']:
+                if sub_key in ['dispersive element', 'dispersive element 2']:
                     sub_group_box = QGroupBox(sub_key)
                     sub_form_layout = QFormLayout()
                     sub_group_box.setLayout(sub_form_layout)
