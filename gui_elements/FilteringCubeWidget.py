@@ -1,7 +1,7 @@
 import yaml
 from PyQt5.QtWidgets import (QTabWidget, QSpinBox,QHBoxLayout, QPushButton, QFileDialog, QLabel, QLineEdit, QWidget, QFormLayout, QScrollArea, QGroupBox,QRadioButton, QButtonGroup,QComboBox)
 from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot,QCoreApplication
-
+import pprint
 from CassiSystem import CassiSystem
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
@@ -97,23 +97,24 @@ class PropagatedMaskGridDisplay(QWidget):
 
     def update_image(self, slice_index):
         # Update the label
-        self.label.setText("wavelength: " + str(int(self.list_wavelengths[slice_index][0,0])) +" nm")
+        self.label.setText("wavelength: " + str(int(self.list_wavelengths[slice_index])) +" nm")
 
         # Display the slice
         self.imageView.setImage(np.rot90(self.data[:,:,slice_index]), levels=(0, 255))
 
 class Worker(QThread):
     finished_define_mask_grid = pyqtSignal(np.ndarray)
-    finished_propagate_mask_grid = pyqtSignal(np.ndarray,list)
+    finished_propagate_mask_grid = pyqtSignal(np.ndarray,np.ndarray)
 
-    def __init__(self, cassi_system,system_config,simulation_config):
+    def __init__(self, system_config,simulation_config):
         super().__init__()
-        self.cassi_system = cassi_system
         self.system_config = system_config
         self.simulation_config = simulation_config
 
     def run(self):
         # Put your analysis here
+
+        self.cassi_system = CassiSystem(self.system_config)
 
         X_dmd_grid, Y_dmd_grid = self.cassi_system.create_dmd_mask()
         mask = self.cassi_system.generate_2D_mask(self.simulation_config["mask caracteristics"]["type"])
@@ -126,14 +127,16 @@ class Worker(QThread):
                                                                                                               [self.system_config["spectral range"]["wavelength min"],
                                                                                                                self.system_config["spectral range"]["wavelength max"]],
                                                                                                                self.system_config["spectral range"]["number of spectral samples"])
-        self.filtering_cube = self.cassi_system.generate_filtering_cube(self.cassi_system.X_detector_grid,
+        self.cassi_system.generate_filtering_cube(self.cassi_system.X_detector_grid,
                                                self.cassi_system.Y_detector_grid,
                                                list_X_propagated_masks,
                                                list_Y_propagated_masks,
                                                mask)
 
+        # self.cassi_system.interpolate_filtering_cube_along_wavelength(1000)
 
-        self.finished_propagate_mask_grid.emit(self.filtering_cube,self.list_wavelengths)  # Emit a tuple of arrays
+
+        self.finished_propagate_mask_grid.emit(self.cassi_system.filtering_cube,self.cassi_system.list_wavelengths)  # Emit a tuple of arrays
 
 
 class FilteringCubeWidgetEditor(QWidget):
@@ -223,11 +226,10 @@ class FilteringCubeWidgetEditor(QWidget):
         }
 
 class FilteringCubeWidget(QWidget):
-    def __init__(self, system_editor,cassi_system,filtering_config_path=None):
+    def __init__(self, system_editor,filtering_config_path=None):
         super().__init__()
 
         self.system_editor = system_editor
-        self.cassi_system = cassi_system
 
 
         self.layout = QHBoxLayout()
@@ -280,11 +282,10 @@ class FilteringCubeWidget(QWidget):
     def run_dimensioning(self):
         # Get the configs from the editors
 
-        cassi_system = self.cassi_system
         system_config = self.system_editor.get_config()
         filtering_config_editor = self.filtering_config_editor.get_config()
 
-        self.worker = Worker(cassi_system,system_config, filtering_config_editor)
+        self.worker = Worker(system_config, filtering_config_editor)
         self.worker.finished_define_mask_grid.connect(self.display_mask_grid)
         self.worker.finished_propagate_mask_grid.connect(self.display_propagated_masks)
         self.worker.start()
@@ -294,7 +295,7 @@ class FilteringCubeWidget(QWidget):
     def display_mask_grid(self, mask):
         self.camera_result_display.display_mask_grid(mask)
 
-    @pyqtSlot(np.ndarray,list)
-    def display_propagated_masks(self, filtering_cube,list_of_wavelengths):
+    @pyqtSlot(np.ndarray,np.ndarray)
+    def display_propagated_masks(self, filtering_cube,np_of_wavelengths):
         self.filtering_cube = filtering_cube
-        self.propagated_mask_display.display_propagated_mask_grid(filtering_cube,list_of_wavelengths)
+        self.propagated_mask_display.display_propagated_mask_grid(filtering_cube,np_of_wavelengths)

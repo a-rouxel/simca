@@ -7,6 +7,7 @@ from tqdm import tqdm
 from scipy import fftpack
 from scipy.ndimage import gaussian_filter
 import numpy as np
+from scipy.interpolate import interpn
 def worker(args):
     """
     Process to parallellize
@@ -55,6 +56,8 @@ class CassiSystem():
         return self.X_dmd_mask, self.Y_dmd_mask
 
     def generate_2D_mask(self, mask_type):
+
+        print(self.system_config["SLM"]["sampling across Y"])
         if self.system_config["SLM"]["sampling across Y"] % 2 == 0:
             self.system_config["SLM"]["sampling across Y"] += 1
         if self.system_config["SLM"]["sampling across X"] % 2 == 0:
@@ -113,16 +116,42 @@ class CassiSystem():
 
         wavelengths = np.linspace(self.system_config["spectral range"]["wavelength min"],
                                   self.system_config["spectral range"]["wavelength max"],
-                                  self.system_config["number of spectral samples"])
+                                  self.system_config['spectral range']["number of spectral samples"])
         with Pool(mp.cpu_count()) as p:
             tasks = [(list_X_propagated_masks, list_Y_propagated_masks, mask, X_detector_grid, Y_detector_grid, i)
                      for i in range(len(wavelengths))]
             for index, zi in tqdm(enumerate(p.imap(worker, tasks)), total=len(wavelengths), desc='Processing tasks'):
                 self.filtering_cube[:, :, index] = zi
 
-
+        self.list_wavelengths = wavelengths
 
         return self.filtering_cube
+
+    def interpolate_filtering_cube_along_wavelength(self,nb_of_wav_samples):
+
+        list_wavelength = np.array(self.list_wavelengths)
+
+        print(list_wavelength.shape)
+
+        # Generate the coordinates for the original grid
+
+        # Create new coordinates for interpolation
+        new_z = np.linspace(list_wavelength[0,0,0], list_wavelength[-1,0,0], nb_of_wav_samples)
+
+        print(new_z.shape)
+        new_coordinates = np.meshgrid(self.Y_detector_grid[:,0], self.X_detector_grid[0,:], new_z, indexing='ij')
+
+        print(new_coordinates[0].shape)
+
+        print(self.filtering_cube.shape)
+
+        # Perform the interpolation
+        new_grid = interpn((self.Y_detector_grid[:,0],self.X_detector_grid[0,:], list_wavelength[:,0,0]), self.filtering_cube, tuple(new_coordinates))
+
+        self.filtering_cube = new_grid
+        self.list_wavelengths = new_z
+
+        print(new_grid.shape)
     def create_grid(self,nb_of_samples_along_x, nb_of_samples_along_y, delta_x, delta_y):
 
             if nb_of_samples_along_x % 2 == 0:

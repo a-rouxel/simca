@@ -26,23 +26,23 @@ class MainWindow(QMainWindow):
 
 
         self.system_editor = EditorSystemConfigWidget(initial_system_config_path="config/cassi_system.yml")
-        self.system_config_dock = QDockWidget("Editor for system config")
+        self.system_config_dock = QDockWidget("Editor Optical System")
         self.system_config_dock.setWidget(self.system_editor)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.system_config_dock)
         self.system_config_dock.setVisible(False)
         self.system_config_dock.setFixedWidth(int(self.width() / 2))
 
         # --- Initiliaze CASSI SYSTEM -- #
-        self.cassi_system = CassiSystem(self.system_editor.get_config())
+
 
 
         self.optics_widget = OpticsWidget(self.system_editor,optics_config_path="config/optics.yml")
-        self.optics_dock = QDockWidget("Optics")
+        self.optics_dock = QDockWidget("Optical Design")
         self.optics_dock.setWidget(self.optics_widget)
         self.addDockWidget(Qt.RightDockWidgetArea, self.optics_dock)
 
-        self.filtering_widget = FilteringCubeWidget(self.system_editor,self.cassi_system,filtering_config_path="config/filtering.yml")
-        self.filtering_dock = QDockWidget("Filtering Cube")
+        self.filtering_widget = FilteringCubeWidget(self.system_editor,filtering_config_path="config/filtering.yml")
+        self.filtering_dock = QDockWidget("Masks")
         self.filtering_dock.setWidget(self.filtering_widget)
         self.addDockWidget(Qt.RightDockWidgetArea, self.filtering_dock)
 
