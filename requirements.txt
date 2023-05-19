@@ -6,3 +6,4 @@ scipy
 seaborn
 tqdm
 imageio
+spectral
