@@ -55,8 +55,6 @@ SIMCA includes four main features:
 
 - **Acquisition Coded Images**: This module is used to encode and acquire images.
 
-![SIMCA Layout](/img/layout_general.svg)
-
 For more detailed information about each feature and further instructions, please visit our [documentation website](https://arouxel.gitlab.io/simca-documentation/).
 
 ## License
