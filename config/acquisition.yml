@@ -1,1 +1,4 @@
+acquisition name : test_acquisition
 acquisition type: single acq.
+results directory: ./data/results/
+

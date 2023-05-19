@@ -2,7 +2,6 @@
 
 infos:
     system name: HYACAMEO
-    results directory: ./data/results/
 
 system architecture:
     system type: DD-CASSI

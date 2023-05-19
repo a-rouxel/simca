@@ -29,7 +29,6 @@ class CassiSystem():
     def __init__(self,system_config):
 
         self.system_config = system_config
-        self.result_directory = initialize_directory(self.system_config)
         self.alpha_c = self.calculate_alpha_c()
 
         self.X_dmd_grid, self.Y_dmd_grid = self.create_grid(self.system_config["SLM"]["sampling across X"],

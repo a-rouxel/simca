@@ -1,12 +1,14 @@
 import yaml
-from PyQt5.QtWidgets import (QTabWidget,QHBoxLayout, QPushButton,QComboBox)
+from PyQt5.QtWidgets import (QTabWidget,QHBoxLayout, QPushButton,QComboBox,QLineEdit)
 from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot
 from PyQt5.QtWidgets import QFormLayout, QGroupBox, QScrollArea
 from PyQt5.QtWidgets import QVBoxLayout, QSlider, QLabel, QWidget
-
+from utils.helpers import *
+import h5py
 from PyQt5.QtCore import Qt
 import pyqtgraph as pg
 import numpy as np
+import time
 from utils.functions_acquisition import get_measurement_in_3D, crop_scene
 class AcquisitionPanchromaticWidget(QWidget):
 
@@ -110,6 +112,7 @@ class AcquisitionEditorWidget(QWidget):
 
         self.initial_config_file = initial_config
 
+
         # Create a QScrollArea
         scroll = QScrollArea(self)
         scroll.setWidgetResizable(True)
@@ -122,9 +125,14 @@ class AcquisitionEditorWidget(QWidget):
         self.directories_combo.addItems(self.acquisition_types)
 
         # Add the dimensioning configuration editor, the result display widget, and the run button to the layout
+        self.results_directory = QLineEdit()
+        self.acquisition_name = QLineEdit()
+
 
         acquisition_layout = QFormLayout()
+        acquisition_layout.addRow("acquisition name", self.acquisition_name)
         acquisition_layout.addRow("acquisition type", self.directories_combo)
+        acquisition_layout.addRow("results directory", self.results_directory)
 
         acquisition_group = QGroupBox("Settings")
         acquisition_group.setLayout(acquisition_layout)
@@ -132,6 +140,7 @@ class AcquisitionEditorWidget(QWidget):
 
         main_layout = QVBoxLayout()
         main_layout.addWidget(acquisition_group)
+
 
 
 
@@ -158,15 +167,21 @@ class AcquisitionEditorWidget(QWidget):
         # This method should update your QLineEdit and QSpinBox widgets with the loaded config.
         # self.acquisitions_directory.setText(self.config['acquisition directory'])
         self.directories_combo.setCurrentText(self.config['acquisition type'])
+        self.results_directory.setText(self.config['results directory'])
+        self.acquisition_name.setText(self.config['acquisition name'])
 
     def get_config(self):
         return {
-            "acquisition type": self.directories_combo.text(),
+            "acquisition name": self.acquisition_name.text(),
+            "acquisition type": self.directories_combo.currentText(),
+            "results directory": self.results_directory.text(),
+
         }
 
 class Worker(QThread):
     finished_acquire_measure = pyqtSignal(np.ndarray)
     finished_interpolated_scene = pyqtSignal(np.ndarray)
+
 
     def __init__(self,filtering_widget, scene_widget,acquisition_config_editor):
         super().__init__()
@@ -182,6 +197,7 @@ class Worker(QThread):
         filtering_cube_wavelengths = self.filtering_widget.list_wavelengths
 
 
+
         scene = self.scene_widget.scene_config_editor.interpolate_scene(filtering_cube_wavelengths,chunk_size=50)
         scene = crop_scene(scene, filtering_cube)
 
@@ -190,9 +206,15 @@ class Worker(QThread):
         # Define chunk size
         chunk_size = 50  # Adjust this value based on your system's memory
 
+        t_0 = time.time()
         measurement_in_3D = get_measurement_in_3D(scene, filtering_cube, chunk_size)
+        print("Acquisition time: ", time.time() - t_0)
 
         self.finished_acquire_measure.emit(measurement_in_3D)  # Emit a tuple of arrays
+
+        self.last_measurement_3D = measurement_in_3D
+        self.interpolated_scene = scene
+
 
         print("Acquisition finished")
 
@@ -202,7 +224,8 @@ class AcquisitionWidget(QWidget):
 
         self.scene_widget = scene_widget
         self.filtering_widget = filtering_widget
-
+        self.last_measurement_3D = None
+        self.interpolated_scene = None
 
         self.layout = QHBoxLayout()
 
@@ -225,11 +248,16 @@ class AcquisitionWidget(QWidget):
         self.run_button.setStyleSheet('QPushButton {background-color: black; color: white;}')        # Connect the button to the run_dimensioning method
         self.run_button.clicked.connect(self.run_acquisition)
 
+        self.save_acquisition_button = QPushButton("Save Acquisition")
+        self.save_acquisition_button.clicked.connect(self.on_acquisition_saved)
+
+
         # Create a group box for the run button
         self.run_button_group_box = QGroupBox()
         run_button_group_layout = QVBoxLayout()
 
         run_button_group_layout.addWidget(self.run_button)
+        run_button_group_layout.addWidget(self.save_acquisition_button)
         run_button_group_layout.addWidget(self.result_display_widget)
 
         self.run_button_group_box.setLayout(run_button_group_layout)
@@ -248,14 +276,42 @@ class AcquisitionWidget(QWidget):
         self.worker.finished_interpolated_scene.connect(self.display_panchrom_display)
         self.worker.start()
 
+    def on_acquisition_saved(self):
+        self.result_directory = initialize_directory(self.acquisition_config_editor.get_config())
+
+        if self.last_measurement_3D is not None:
+            last_measurement = self.last_measurement_3D
+
+            # Calculate the other two arrays
+            sum_last_measurement = np.sum(last_measurement, axis=2)
+            sum_scene_interpolated = np.sum(self.interpolated_scene, axis=2)
+
+            # Save the arrays in an H5 file
+            with h5py.File(self.result_directory + '/filtered_image.h5', 'w') as f:
+                f.create_dataset('filtered_image', data=last_measurement)
+            with h5py.File(self.result_directory + '/image.h5', 'w') as f:
+                f.create_dataset('image', data=sum_last_measurement)
+            with h5py.File(self.result_directory + '/panchro.h5', 'w') as f:
+                f.create_dataset('panchro', data=sum_scene_interpolated)
+            with h5py.File(self.result_directory + '/filtering_cube.h5', 'w') as f:
+                f.create_dataset('filtering_cube', data=self.filtering_widget.filtering_cube)
+            with h5py.File(self.result_directory + '/wavelengths.h5', 'w') as f:
+                f.create_dataset('wavelengths', data=self.filtering_widget.list_wavelengths)
+
+            print("Measurement saved")
+        else:
+            print("No measurement to save")
 
     @pyqtSlot(np.ndarray)
     def display_acquisition(self, measurement_3D):
+
         self.acquisition_display.display_acquisition(measurement_3D)
 
     def display_measurement_by_slide(self, measurement_3D):
+        self.last_measurement_3D = measurement_3D
         self.acquisition_by_slice_display.display_measurement_slice_by_slice(measurement_3D)
     def display_panchrom_display(self, scene):
+        self.interpolated_scene = scene
         self.acquisition_panchro_display.display_panchrom_acquisition(scene)
 
 
