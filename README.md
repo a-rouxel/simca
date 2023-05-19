@@ -47,7 +47,7 @@ python main.py
 
 SIMCA includes four main features:
 
-- **Scene Analysis**: This module is used to analyze input multi- or hyper-spectral input scenes. It includes data slices, spectrum analysis, and ground truth labeling. This module is independent from the first two steps.
+- **Scene Analysis**: This module is used to analyze input multi- or hyper-spectral input scenes. It includes data slices, spectrum analysis, and ground truth labeling.
 
 - **Optical Design**: This module is used to compare the performances of various optical systems.
 
