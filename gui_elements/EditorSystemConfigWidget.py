@@ -1,4 +1,6 @@
-from PyQt5.QtWidgets import (QVBoxLayout, QPushButton, QFileDialog, QLabel, QLineEdit, QWidget, QFormLayout, QScrollArea, QGroupBox,QComboBox)
+from PyQt5.QtWidgets import (QVBoxLayout, QPushButton, QFileDialog,
+                             QLabel, QLineEdit, QWidget, QFormLayout,
+                             QScrollArea, QGroupBox,QComboBox)
 import yaml
 
 
@@ -118,6 +120,7 @@ class EditorSystemConfigWidget(QWidget):
         self.input_labels = {}
         self.input_groups = {}
         for key, section in self.config.items():
+
             group_box = QGroupBox(key)
             form_layout = QFormLayout()
             group_box.setLayout(form_layout)
@@ -125,7 +128,22 @@ class EditorSystemConfigWidget(QWidget):
             for sub_key, value in section.items():
                 full_key = f"{key}_{sub_key}"
 
-                if sub_key in ['dispersive element', 'dispersive element 2']:
+                if sub_key == 'system type':
+                    sub_group_box = QGroupBox(sub_key)
+                    sub_form_layout = QFormLayout()
+                    sub_group_box.setLayout(sub_form_layout)
+
+                    input_field = QComboBox(self)
+                    input_field.addItems(['DD-CASSI', 'SD-CASSI'])
+                    input_field.setCurrentText(value)
+                    label = QLabel(sub_key)
+                    self.input_groups[full_key] = sub_group_box
+                    self.input_fields[full_key] = input_field
+                    self.input_labels[full_key] = label
+                    form_layout.addRow(label, input_field)
+
+
+                elif sub_key in ['dispersive element', 'dispersive element 2']:
                     sub_group_box = QGroupBox(sub_key)
                     sub_form_layout = QFormLayout()
                     sub_group_box.setLayout(sub_form_layout)

@@ -1,12 +1,12 @@
 import yaml
-from PyQt5.QtWidgets import (QTabWidget, QSpinBox,QHBoxLayout, QPushButton, QFileDialog, QLabel, QLineEdit, QWidget, QFormLayout, QScrollArea, QGroupBox,QRadioButton, QButtonGroup,QComboBox)
-from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot,QCoreApplication
+from PyQt5.QtWidgets import (QTabWidget, QSpinBox,QHBoxLayout, QPushButton,
+                             QFileDialog, QLineEdit, QWidget,
+                             QFormLayout, QVBoxLayout, QGroupBox, QScrollArea)
+from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot
 
 from CassiSystem import CassiSystem
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
-from PyQt5.QtWidgets import QFormLayout, QVBoxLayout, QGroupBox, QScrollArea, QSizePolicy
-
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
@@ -34,7 +34,7 @@ class InputGridDisplay(QWidget):
         # Set labels with LaTeX font.
         ax.set_xlabel(f'X input grid [um]', fontsize=12)
         ax.set_ylabel(f'Y input grid [um]', fontsize=12)
-        ax.set_title(f'Input Grid', fontsize=12)
+        ax.set_title(f'Mask Grid', fontsize=12)
 
         self.canvas_cam.draw()
 
@@ -84,7 +84,7 @@ class InputGridPropagationDisplay(QWidget):
 
         ax.set_xlabel(f'X image plane [um]', fontsize=12)
         ax.set_ylabel(f'Y image plane [um]', fontsize=12)
-        ax.set_title(f'Propagated grids', fontsize=12)
+        ax.set_title(f'Propagated Grids', fontsize=12)
         ax.legend()
 
         self.canvas_dmd.draw()
@@ -337,12 +337,12 @@ class OpticsWidget(QWidget):
         self.distorsion_result_display = DistorsionResultDisplay()
 
         # Add the result displays to the tab widget
-        self.result_display_widget.addTab(self.camera_result_display, "Input Grid")
+        self.result_display_widget.addTab(self.camera_result_display, "Mask Grid")
         self.result_display_widget.addTab(self.dmd_result_display, "Propagated Grids")
         self.result_display_widget.addTab(self.distorsion_result_display, "Distortion Maps")
 
         # Create the run button
-        self.run_button = QPushButton('Run Optics Dimensioning')
+        self.run_button = QPushButton('Run Simulation')
         self.run_button.setStyleSheet('QPushButton {background-color: blue; color: white;}')        # Connect the button to the run_optics method
         self.run_button.clicked.connect(self.run_optics)
 

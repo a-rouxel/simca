@@ -1,18 +1,39 @@
-
 import yaml
-from PyQt5.QtWidgets import (QTabWidget, QSpinBox,QHBoxLayout, QPushButton, QFileDialog, QLabel, QLineEdit, QWidget, QFormLayout, QScrollArea, QGroupBox,QRadioButton, QButtonGroup,QComboBox)
-from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot,QCoreApplication
-
-from CassiSystem import CassiSystem
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+from PyQt5.QtWidgets import (QTabWidget,QHBoxLayout, QPushButton,QComboBox)
+from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot
 from PyQt5.QtWidgets import QFormLayout, QGroupBox, QScrollArea
 from PyQt5.QtWidgets import QVBoxLayout, QSlider, QLabel, QWidget
 
 from PyQt5.QtCore import Qt
 import pyqtgraph as pg
 import numpy as np
-import matplotlib.pyplot as plt
+
+class AcquisitionPanchromaticWidget(QWidget):
+
+    def __init__(self):
+        super().__init__()
+
+        self.layout = QVBoxLayout()
+        self.setLayout(self.layout)
+
+        # Create ImageView item with a PlotItem as its view box
+        self.imageView = pg.ImageView(view=pg.PlotItem())
+        self.layout.addWidget(self.imageView)
+
+    def display_panchrom_acquisition(self, measurement_3D):
+        """
+        Display the ground truth with each color corresponding to a label_value.
+
+        :param ground_truth: np.array, ground truth labels
+        :param label_values: list, label_values[i] = name of the class i
+        :param palette: color palette to use, must be a list of colors where the index corresponds to the label
+        :param ignored_labels: list of ignored labels (pixel with no label)
+        """
+        # Compute the sum along the third axis
+        image = np.sum(measurement_3D, axis=2)
+
+        # Display the image
+        self.imageView.setImage(np.rot90(image))
 
 
 class AcquisitionSlideBySlideWidget(QWidget):
@@ -51,7 +72,6 @@ class AcquisitionSlideBySlideWidget(QWidget):
     def update_image(self, slice_index):
         # Update the label
         self.label.setText("slice_index: " + str(int(slice_index)) )
-        print(self.data)
         # Display the slice
         self.imageView.setImage(np.rot90(self.data[:, :, slice_index]))
 
@@ -59,18 +79,12 @@ class AcquisitionDisplay(QWidget):
     def __init__(self):
         super().__init__()
 
-        # Create a QVBoxLayout for the widget
-        self.layout = QVBoxLayout(self)
+        self.layout = QVBoxLayout()
+        self.setLayout(self.layout)
 
-        # Create a figure and a canvas
-        self.figure = plt.figure(figsize=(8, 6))
-        self.canvas = FigureCanvas(self.figure)
-        self.toolbar = NavigationToolbar(self.canvas, self)
-
-        self.layout.addWidget(self.toolbar)
-        self.layout.addWidget(self.canvas)
-
-
+        # Create ImageView item with a PlotItem as its view box
+        self.imageView = pg.ImageView(view=pg.PlotItem())
+        self.layout.addWidget(self.imageView)
 
     def display_acquisition(self, measurement_3D):
         """
@@ -81,19 +95,11 @@ class AcquisitionDisplay(QWidget):
         :param palette: color palette to use, must be a list of colors where the index corresponds to the label
         :param ignored_labels: list of ignored labels (pixel with no label)
         """
-        # Clear the figure
-        self.figure.clear()
+        # Compute the sum along the third axis
+        image = np.sum(measurement_3D, axis=2)
 
-        # Create an axes
-        ax = self.figure.add_subplot(111)
-        print(measurement_3D)
-
-        imshow = ax.imshow(np.sum(measurement_3D,axis=2), cmap='gray')
-
-        cbar = self.figure.colorbar(imshow, ax=ax)  # Use the new figure for the colorbar
-
-        # Redraw the canvas
-        self.canvas.draw()
+        # Display the image
+        self.imageView.setImage(np.rot90(image))
 
 
 
@@ -111,16 +117,13 @@ class AcquisitionEditorWidget(QWidget):
         # Create a widget for the scroll area
         scroll_widget = QWidget()
 
-        self.acquisitions_directory = QLineEdit()
-
         self.directories_combo = QComboBox()
-        self.acquisition_types = ['DD-CASSI', 'SD-CASSI']
+        self.acquisition_types = ['single acq.']
         self.directories_combo.addItems(self.acquisition_types)
 
         # Add the dimensioning configuration editor, the result display widget, and the run button to the layout
 
         acquisition_layout = QFormLayout()
-        acquisition_layout.addRow("acquisition directory", self.acquisitions_directory)
         acquisition_layout.addRow("acquisition type", self.directories_combo)
 
         acquisition_group = QGroupBox("Settings")
@@ -153,18 +156,17 @@ class AcquisitionEditorWidget(QWidget):
         self.update_config()
     def update_config(self):
         # This method should update your QLineEdit and QSpinBox widgets with the loaded config.
-        self.acquisitions_directory.setText(self.config['acquisition directory'])
-        # self.directories_combo.addItem(self.config['acquisition type'])
+        # self.acquisitions_directory.setText(self.config['acquisition directory'])
+        self.directories_combo.setCurrentText(self.config['acquisition type'])
 
     def get_config(self):
         return {
-            "acquisition directory": self.acquisitions_directory.text(),
             "acquisition type": self.directories_combo.text(),
         }
 
 class Worker(QThread):
     finished_acquire_measure = pyqtSignal(np.ndarray)
-
+    finished_interpolated_scene = pyqtSignal(np.ndarray)
 
     def __init__(self,filtering_widget, scene_widget,acquisition_config_editor):
         super().__init__()
@@ -175,8 +177,10 @@ class Worker(QThread):
     def run(self):
 
         filtering_cube = self.filtering_widget.filtering_cube
-        scene = self.scene_widget.scene
+        filtering_cube_wavelengths = self.filtering_widget.list_wavelengths
 
+
+        scene = self.scene_widget.scene_config_editor.interpolate_scene(filtering_cube_wavelengths)
 
 
 
@@ -187,6 +191,8 @@ class Worker(QThread):
                 if  filtering_cube.shape[2] != scene.shape[2]:
                     scene = scene[:, :, 0:filtering_cube.shape[2]]
                     print("Filtering cube and scene must have the same number of wavelengths")
+
+        self.finished_interpolated_scene.emit(scene)
 
         measurement_in_3D = filtering_cube * scene
         measurement_in_3D = np.nan_to_num(measurement_in_3D)
@@ -212,9 +218,11 @@ class AcquisitionWidget(QWidget):
 
         self.acquisition_display = AcquisitionDisplay()
         self.acquisition_by_slice_display = AcquisitionSlideBySlideWidget()
+        self.acquisition_panchro_display = AcquisitionPanchromaticWidget()
 
         self.result_display_widget.addTab(self.acquisition_display, "Measured Image")
         self.result_display_widget.addTab(self.acquisition_by_slice_display, "Measured Image for each spectral sample")
+        self.result_display_widget.addTab(self.acquisition_panchro_display, "Panchromatic Image")
 
         self.run_button = QPushButton('Run Acquisition')
         self.run_button.setStyleSheet('QPushButton {background-color: black; color: white;}')        # Connect the button to the run_dimensioning method
@@ -240,6 +248,7 @@ class AcquisitionWidget(QWidget):
         self.worker = Worker(self.filtering_widget,self.scene_widget,self.acquisition_config_editor)
         self.worker.finished_acquire_measure.connect(self.display_acquisition)
         self.worker.finished_acquire_measure.connect(self.display_measurement_by_slide)
+        self.worker.finished_interpolated_scene.connect(self.display_panchrom_display)
         self.worker.start()
 
 
@@ -249,5 +258,7 @@ class AcquisitionWidget(QWidget):
 
     def display_measurement_by_slide(self, measurement_3D):
         self.acquisition_by_slice_display.display_measurement_slice_by_slice(measurement_3D)
+    def display_panchrom_display(self, scene):
+        self.acquisition_panchro_display.display_panchrom_acquisition(scene)
 
 

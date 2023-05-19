@@ -3,6 +3,8 @@
 infos:
     results directory: ./data/masks/
 
-mask caracteristics:
+mask:
     type: slit
+    slit position: 0
+    slit width: 3
 

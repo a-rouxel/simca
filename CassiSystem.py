@@ -1,13 +1,11 @@
 from utils.functions_retropropagating import *
-import numpy as np
 from scipy.interpolate import griddata
 import multiprocessing as mp
 from multiprocessing import Pool
 from tqdm import tqdm
 from scipy import fftpack
-from scipy.ndimage import gaussian_filter
 import numpy as np
-from scipy.interpolate import interpn
+
 def worker(args):
     """
     Process to parallellize
@@ -23,6 +21,8 @@ def worker(args):
                                  (X_detector_grid, Y_detector_grid),
                                  method='linear')
     return interpolated_mask
+
+
 
 class CassiSystem():
 
@@ -55,9 +55,9 @@ class CassiSystem():
 
         return self.X_dmd_mask, self.Y_dmd_mask
 
-    def generate_2D_mask(self, mask_type):
+    def generate_2D_mask(self, mask_type,slit_position=None,slit_width=None):
 
-        print(self.system_config["SLM"]["sampling across Y"])
+
         if self.system_config["SLM"]["sampling across Y"] % 2 == 0:
             self.system_config["SLM"]["sampling across Y"] += 1
         if self.system_config["SLM"]["sampling across X"] % 2 == 0:
@@ -69,7 +69,16 @@ class CassiSystem():
         elif mask_type == "slit":
             self.mask = np.zeros((self.system_config["SLM"]["sampling across Y"],
                                   self.system_config["SLM"]["sampling across X"]))
-            self.mask[:, int(self.system_config["SLM"]["sampling across X"] / 2)] = 1
+
+            if slit_position is not None:
+                slit_position = int(self.system_config["SLM"]["sampling across X"] / 2) + slit_position
+            else :
+                slit_position = int(self.system_config["SLM"]["sampling across X"] / 2)
+            if slit_width is None:
+                slit_width = 1
+
+            self.mask[:,slit_position-slit_width//2:slit_position+slit_width] = 1
+
         elif mask_type == "blue":
             size = (self.system_config["SLM"]["sampling across Y"], self.system_config["SLM"]["sampling across X"])
             self.mask = self.generate_blue_noise(size)
@@ -105,6 +114,8 @@ class CassiSystem():
     def generate_filtering_cube(self, X_detector_grid, Y_detector_grid, list_X_propagated_masks,
                                 list_Y_propagated_masks, mask):
 
+        print("--- Generating filtering cube ---- ")
+
         if self.system_config["detector"]["sampling across Y"] %2 ==0:
             self.system_config["detector"]["sampling across Y"] +=1
         if self.system_config["detector"]["sampling across X"] %2 ==0:
@@ -127,31 +138,8 @@ class CassiSystem():
 
         return self.filtering_cube
 
-    def interpolate_filtering_cube_along_wavelength(self,nb_of_wav_samples):
 
-        list_wavelength = np.array(self.list_wavelengths)
 
-        print(list_wavelength.shape)
-
-        # Generate the coordinates for the original grid
-
-        # Create new coordinates for interpolation
-        new_z = np.linspace(list_wavelength[0,0,0], list_wavelength[-1,0,0], nb_of_wav_samples)
-
-        print(new_z.shape)
-        new_coordinates = np.meshgrid(self.Y_detector_grid[:,0], self.X_detector_grid[0,:], new_z, indexing='ij')
-
-        print(new_coordinates[0].shape)
-
-        print(self.filtering_cube.shape)
-
-        # Perform the interpolation
-        new_grid = interpn((self.Y_detector_grid[:,0],self.X_detector_grid[0,:], list_wavelength[:,0,0]), self.filtering_cube, tuple(new_coordinates))
-
-        self.filtering_cube = new_grid
-        self.list_wavelengths = new_z
-
-        print(new_grid.shape)
     def create_grid(self,nb_of_samples_along_x, nb_of_samples_along_y, delta_x, delta_y):
 
             if nb_of_samples_along_x % 2 == 0:

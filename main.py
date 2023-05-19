@@ -13,10 +13,8 @@ import os
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        try:
-            self.setWindowIcon(QIcon('Figure_1.ico'))
-        except:
-            print('damn')
+
+        # self.setWindowIcon(QIcon('Figure_1.ico'))
         self.setWindowTitle('SIMCA')
 
         self.scene_widget = SceneWidget(scene_config_path="config/scene.yml")
@@ -26,7 +24,7 @@ class MainWindow(QMainWindow):
 
 
         self.system_editor = EditorSystemConfigWidget(initial_system_config_path="config/cassi_system.yml")
-        self.system_config_dock = QDockWidget("Editor Optical System")
+        self.system_config_dock = QDockWidget("Editor Optical Design")
         self.system_config_dock.setWidget(self.system_editor)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.system_config_dock)
         self.system_config_dock.setVisible(False)
@@ -60,9 +58,8 @@ class MainWindow(QMainWindow):
         self.tabifiedDockWidgetActivated.connect(self.check_dock_visibility)
 
     def check_dock_visibility(self, dock_widget):
-        print(dock_widget)
         # If the currently selected dock widget is the Scene dock, hide the system_config_dock
-        if dock_widget is self.scene_dock :
+        if dock_widget is self.scene_dock or dock_widget is self.acquisition_dock:
             self.system_config_dock.setVisible(False)
         else:
             self.system_config_dock.setVisible(True)

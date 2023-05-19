@@ -1,6 +1,7 @@
 import yaml
-from PyQt5.QtWidgets import (QTabWidget, QSpinBox,QHBoxLayout, QPushButton, QFileDialog, QLabel, QLineEdit, QWidget, QFormLayout, QScrollArea, QGroupBox,QRadioButton, QButtonGroup,QComboBox)
-from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot,QCoreApplication
+from PyQt5.QtWidgets import (QTabWidget,QHBoxLayout, QPushButton, QLabel, QLineEdit,
+                             QWidget, QFormLayout, QScrollArea, QGroupBox,QComboBox)
+from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot
 from PyQt5.QtWidgets import  QVBoxLayout, QSlider
 from PyQt5.QtCore import Qt
 import pyqtgraph as pg
@@ -109,6 +110,7 @@ class SceneHistogram(QWidget):
         ax.set_ylabel("Occurrence")
 
         # Rotate the x-axis labels
+        ax.set_xticks(range(len(labels)))  # Add this line
         ax.set_xticklabels(labels, rotation=45)
 
         # Redraw the canvas
@@ -340,7 +342,9 @@ class SceneConfigEditor(QWidget):
             # print("Error: scene not found")
             self.scene_loaded.emit(self.scene.shape[1],self.scene.shape[0],self.scene.shape[2],list_wavelengths[0],list_wavelengths[-1])
 
-
+    def interpolate_scene(self,new_sampling):
+        self.scene_interpolated = interpolate_scene_cube_along_wavelength(self.scene, self.list_wavelengths, new_sampling)
+        return self.scene_interpolated
 
     def load_scenes(self):
 
@@ -361,11 +365,6 @@ class SceneConfigEditor(QWidget):
         # This method should update your QLineEdit and QSpinBox widgets with the loaded config.
         self.scenes_directory.setText(self.config['scenes directory'])
 
-    def get_config(self):
-        return {
-            "scenes directory": self.scene_directory.value(),
-            "scene dimension along X": self.scene.shape[1],
-        }
 
     @pyqtSlot(int,int,int,float,float)
     def update_scene_dimensions(self, x_dim,y_dim,wav_dim,min_wav,max_wav):

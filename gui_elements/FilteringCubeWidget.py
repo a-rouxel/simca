@@ -1,17 +1,18 @@
-import yaml
-from PyQt5.QtWidgets import (QTabWidget, QSpinBox,QHBoxLayout, QPushButton, QFileDialog, QLabel, QLineEdit, QWidget, QFormLayout, QScrollArea, QGroupBox,QRadioButton, QButtonGroup,QComboBox)
-from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot,QCoreApplication
-import pprint
-from CassiSystem import CassiSystem
+from PyQt5.QtWidgets import (QTabWidget,QHBoxLayout, QPushButton, QFileDialog,
+                             QLineEdit, QComboBox,QFormLayout, QGroupBox, QScrollArea,
+                             QVBoxLayout, QSlider, QLabel, QWidget)
+from PyQt5.QtCore import Qt,QThread, pyqtSignal, pyqtSlot
+
+import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
-from PyQt5.QtWidgets import QFormLayout, QGroupBox, QScrollArea
-from PyQt5.QtWidgets import QVBoxLayout, QSlider, QLabel, QWidget
 
-from PyQt5.QtCore import Qt
 import pyqtgraph as pg
 import numpy as np
-import matplotlib.pyplot as plt
+import yaml
+from CassiSystem import CassiSystem
+
+
 
 class MaskGridDisplay(QWidget):
     def __init__(self):
@@ -117,7 +118,7 @@ class Worker(QThread):
         self.cassi_system = CassiSystem(self.system_config)
 
         X_dmd_grid, Y_dmd_grid = self.cassi_system.create_dmd_mask()
-        mask = self.cassi_system.generate_2D_mask(self.simulation_config["mask caracteristics"]["type"])
+        mask = self.cassi_system.generate_2D_mask(self.simulation_config["mask"]["type"],self.simulation_config["mask"]["slit position"],self.simulation_config["mask"]["slit width"])
 
 
         self.finished_define_mask_grid.emit(mask)  # Emit a tuple of arrays
@@ -155,25 +156,45 @@ class FilteringCubeWidgetEditor(QWidget):
 
         # Add your dimensioning parameters here
         self.results_directory = QLineEdit()
-        self.mask_caracteristics_type = QLineEdit()
+
+        self.mask_type = QComboBox()
+        self.mask_type.addItems(["slit","random","blue"])
+        self.mask_type.currentTextChanged.connect(self.on_mask_type_changed)
+
+        self.slit_position_slider = QSlider(Qt.Horizontal)
+        self.slit_position_slider.setMinimum(-200)
+        self.slit_position_slider.setMaximum(200)  # Adjust as needed
+        self.slit_position_slider.valueChanged.connect(self.on_slit_position_changed)
+
+        self.slit_width_slider = QSlider(Qt.Horizontal)
+        self.slit_width_slider.setMinimum(1)
+        self.slit_width_slider.setMaximum(30)  # Adjust as needed
+        self.slit_width_slider.valueChanged.connect(self.on_slit_width_changed)
 
 
 
         general_layout = QFormLayout()
-        general_layout.addRow("mask caracteristics", self.mask_caracteristics_type)
+        general_layout.addRow("mask type", self.mask_type)
+        general_layout.addRow("slit position", self.slit_position_slider)
+        general_layout.addRow("slit width", self.slit_width_slider)
 
 
-        general_group = QGroupBox("General settings")
+
+        general_group = QGroupBox("Settings")
         general_group.setLayout(general_layout)
+
 
         # Load config button
         self.load_config_button = QPushButton("Load Config")
         self.load_config_button.clicked.connect(self.on_load_config_clicked)
+        self.save_config_button = QPushButton("Save Config")
+        self.save_config_button.clicked.connect(self.save_config)
 
         # Create main layout and add widgets
         main_layout = QVBoxLayout()
         main_layout.addWidget(general_group)
         main_layout.addWidget(self.load_config_button)
+        main_layout.addWidget(self.save_config_button)
 
         # Set the layout of the widget within the scroll area
         scroll_widget.setLayout(main_layout)
@@ -188,6 +209,17 @@ class FilteringCubeWidgetEditor(QWidget):
         # Load the initial configuration file if one was provided
         if self.initial_config_file is not None:
             self.load_config(initial_config_file)
+
+    def save_config(self):
+        if hasattr(self, 'config'):
+            options = QFileDialog.Options()
+            file_name, _ = QFileDialog.getSaveFileName(self, "Save Config", "",
+                                                       "YAML Files (*.yml *.yaml);;All Files (*)", options=options)
+            if file_name:
+                # Update the config from the current input fields
+                self.config = self.get_config()
+                with open(file_name, 'w') as file:
+                    yaml.safe_dump(self.config, file, default_flow_style=False)
 
 
     def on_load_config_clicked(self):
@@ -205,25 +237,46 @@ class FilteringCubeWidgetEditor(QWidget):
         # This method should update your QLineEdit and QSpinBox widgets with the loaded config.
 
         self.results_directory.setText(self.config['infos']['results directory'])
-        self.mask_caracteristics_type.setText(self.config['mask caracteristics']['type'])
+        self.mask_type.setCurrentText(self.config['mask']['type'])
 
-        # self.wavelength_min.setValue(self.config['spectral range']['wavelength min'])
-        #
-        # self.wavelength_max.setValue(self.config['spectral range']['wavelength max'])
-        #
-        # self.sampling_across_X.setValue(self.config['input grid sampling']['sampling across X'])
-        # self.sampling_across_Y.setValue(self.config['input grid sampling']['sampling across Y'])
-        # self.delta_X.setText(str(self.config['input grid sampling']['delta X']))
-        # self.delta_Y.setText(str(self.config['input grid sampling']['delta Y']))
-        #
-        # self.spectral_samples.setValue(self.config['number of spectral samples'])
+        if 'slit position' in self.config['mask']:
+            self.slit_position_slider.setValue(self.config['mask']['slit position'])
+
+        if 'slit width' in self.config['mask']:
+            self.slit_width_slider.setValue(self.config['mask']['slit width'])
+
+
+    def on_mask_type_changed(self, mask_type):
+        if mask_type == "slit":
+            self.slit_position_slider.setEnabled(True)
+            self.slit_width_slider.setEnabled(True)
+        else:
+            self.slit_position_slider.setEnabled(False)
+            self.slit_width_slider.setEnabled(False)
+
+    def on_slit_position_changed(self, position):
+        # Update the slit position in your config
+        self.config['mask']['slit position'] = position
+
+    def on_slit_width_changed(self, width):
+        # Update the slit width in your config
+        self.config['mask']['slit width'] = width
 
     def get_config(self):
-        return {
-            "mask caracteristics": {
-                "type": self.mask_caracteristics_type.text()
+        config = {
+            "mask": {
+                "type": self.mask_type.currentText()
             },
         }
+
+        if config['mask']['type'] == "slit":
+            config['mask']['slit position'] = self.slit_position_slider.value()
+            config['mask']['slit width'] = self.slit_width_slider.value()
+        else :
+            config['mask']['slit position'] = None
+            config['mask']['slit width'] = None
+
+        return config
 
 class FilteringCubeWidget(QWidget):
     def __init__(self, system_editor,filtering_config_path=None):
@@ -298,4 +351,5 @@ class FilteringCubeWidget(QWidget):
     @pyqtSlot(np.ndarray,np.ndarray)
     def display_propagated_masks(self, filtering_cube,np_of_wavelengths):
         self.filtering_cube = filtering_cube
+        self.list_wavelengths = np_of_wavelengths
         self.propagated_mask_display.display_propagated_mask_grid(filtering_cube,np_of_wavelengths)

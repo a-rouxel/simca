@@ -104,7 +104,6 @@ def propagate_through_arm_scalar(X_mask,Y_mask,n, A,F, alpha_c,delta_alpha_c, de
 
     k_1 = rotation_y(angle_with_P1) @ k
 
-    print(k.shape, k_1.shape)
     # Rotation in relation to P1 around the X axis
     k_2 = rotation_x(delta_beta_c) @ k_1
     # Rotation of P1 in relation to frame_in along the new Y axis

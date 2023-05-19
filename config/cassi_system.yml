@@ -5,6 +5,7 @@ infos:
     results directory: ./data/results/
 
 system architecture:
+    system type: DD-CASSI
     focal lens: 165000
     dispersive element:
     # dispersive element caracteristics

@@ -242,3 +242,23 @@ def palette_init(label_values, palette):
         for k, color in enumerate(sns.color_palette("hls", len(label_values) - 1)):
             palette[k + 1] = tuple(np.asarray(255 * np.array(color), dtype="uint8"))
     return palette
+
+from scipy.interpolate import interpn
+
+def interpolate_scene_cube_along_wavelength(scene, scene_wavelengths, new_wavelengths_sampling):
+    # Generate the coordinates for the original grid
+    x = np.arange(scene.shape[0])
+    y = np.arange(scene.shape[1])
+    z = scene_wavelengths
+
+    # Generate the coordinates for the new grid
+    new_z = new_wavelengths_sampling
+    new_coordinates = np.meshgrid(x, y, new_z, indexing='ij')
+
+    # Perform the interpolation
+    interpolated_scene = interpn((x, y, z), scene, tuple(new_coordinates))
+
+    print("interpolated_scene.shape", interpolated_scene.shape)
+    print(interpolated_scene[0,0,:])
+
+    return interpolated_scene
