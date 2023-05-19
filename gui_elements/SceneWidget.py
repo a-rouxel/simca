@@ -342,8 +342,8 @@ class SceneConfigEditor(QWidget):
             # print("Error: scene not found")
             self.scene_loaded.emit(self.scene.shape[1],self.scene.shape[0],self.scene.shape[2],list_wavelengths[0],list_wavelengths[-1])
 
-    def interpolate_scene(self,new_sampling):
-        self.scene_interpolated = interpolate_scene_cube_along_wavelength(self.scene, self.list_wavelengths, new_sampling)
+    def interpolate_scene(self,new_sampling,chunk_size):
+        self.scene_interpolated = interpolate_scene_cube_along_wavelength(self.scene, self.list_wavelengths, new_sampling,chunk_size)
         return self.scene_interpolated
 
     def load_scenes(self):

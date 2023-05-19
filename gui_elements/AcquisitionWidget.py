@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import QVBoxLayout, QSlider, QLabel, QWidget
 from PyQt5.QtCore import Qt
 import pyqtgraph as pg
 import numpy as np
-
+from utils.functions_acquisition import get_measurement_in_3D, crop_scene
 class AcquisitionPanchromaticWidget(QWidget):
 
     def __init__(self):
@@ -176,28 +176,25 @@ class Worker(QThread):
 
     def run(self):
 
+        print("Acquisition started")
+
         filtering_cube = self.filtering_widget.filtering_cube
         filtering_cube_wavelengths = self.filtering_widget.list_wavelengths
 
 
-        scene = self.scene_widget.scene_config_editor.interpolate_scene(filtering_cube_wavelengths)
-
-
-
-        if filtering_cube.shape[0] != scene.shape[0] or filtering_cube.shape[1] != scene.shape[1] :
-                scene = scene[0:filtering_cube.shape[0], 0:filtering_cube.shape[1], :]
-                print("Filtering cube and scene must have the same lines and columns")
-
-                if  filtering_cube.shape[2] != scene.shape[2]:
-                    scene = scene[:, :, 0:filtering_cube.shape[2]]
-                    print("Filtering cube and scene must have the same number of wavelengths")
+        scene = self.scene_widget.scene_config_editor.interpolate_scene(filtering_cube_wavelengths,chunk_size=50)
+        scene = crop_scene(scene, filtering_cube)
 
         self.finished_interpolated_scene.emit(scene)
 
-        measurement_in_3D = filtering_cube * scene
-        measurement_in_3D = np.nan_to_num(measurement_in_3D)
+        # Define chunk size
+        chunk_size = 50  # Adjust this value based on your system's memory
+
+        measurement_in_3D = get_measurement_in_3D(scene, filtering_cube, chunk_size)
 
         self.finished_acquire_measure.emit(measurement_in_3D)  # Emit a tuple of arrays
+
+        print("Acquisition finished")
 
 class AcquisitionWidget(QWidget):
     def __init__(self,scene_widget, filtering_widget,acquisition_config_path="config/acquisition.yml"):
