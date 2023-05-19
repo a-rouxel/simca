@@ -7,3 +7,4 @@ seaborn
 tqdm
 imageio
 spectral
+scikit-learn

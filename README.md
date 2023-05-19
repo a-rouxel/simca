@@ -1,47 +1,66 @@
-# SIMCA -- Dimensioning and Acquisition
+# SIMCA: Coded Aperture Snapshot Spectral Imaging (CASSI) Simulator
 
-This Python/Qt application allows users to run dimensioning analysis and acquisition procedures on CASSI systems.
+SIMCA is a Python/Qt application designed to perform optical simulations for Coded Aperture Snapshot Spectral Imaging (CASSI). 
 
-## Features
+Go check the documentation page [here](https://arouxel.gitlab.io/simca-documentation/)
 
-The application provides the following features:
+## Installation
 
-1. Allows users to specify various system parameters.
-2. Displays results of the dimensioning analysis in different forms, such as camera pixelization, mapping in the DMD plane, spectral dispersion, and distortion map.
-3. Facilitates the creation and configuration of a filtering cube.
-4. Allows for the execution of an acquisition procedure.
+To install SIMCA, follow the steps below:
 
-## Install
+1. Clone the repository from GitLab:
 
 ```bash
-# Clone the repository 
-git clone git@gitlab.laas.fr:arouxel/simca-revival.git
-cd simca-revival
+git clone git@gitlab.laas.fr:arouxel/simca.git
+cd simca
 ```
 
-Once the repository has been cloned, create a dedicated python environment with python=3.9. In these instructions, the python environment is created using Miniconda. It can be installed by following the instructions [here](https://docs.conda.io/projects/conda/en/latest/user-guide/install/linux.html).
+2. Create a dedicated Python environment using Miniconda. If you don't have Miniconda installed, you can find the instructions [here](https://docs.conda.io/projects/conda/en/latest/user-guide/install/linux.html).
 
 ```bash
-# create a new python environment
-conda create -n simca-revival-env python=3.9
-# activate the environment
-conda activate simca-revival-env
+# Create a new Python environment
+conda create -n simca-env python=3.9
+
+# Activate the environment
+conda activate simca-env
 ```
 
-Now we have to install the packages we use:
+3. Install the necessary Python packages that SIMCA relies on. These are listed in the `requirements.txt` file in the repository.
 
 ```bash
-# install packages contained in the "requirements.txt" with pip:
+# Install necessary Python packages with pip
 pip install -r requirements.txt
 ```
 
-## Usage
+## Quick Start
 
-The application provides a graphical interface for running dimensioning analysis and acquisition procedures.
+4. Download the standard scenes from this [link](https://cloud.laas.fr/index.php/s/zfh5RFmsjYfk108) and paste the `datasets` folder in the root directory of SIMCA.
 
-- The application window is divided into multiple sections. On the left is a dock for inputting parameters. On the right are dockable tabs for dimensioning, filtering cube configuration, and acquisition.
+5. Start the application:
 
-- You can input the system configuration parameters in the left dock of the window.
+```bash
+# run the app
+python main.py
+```
 
-- The dimensioning, filtering cube, and acquisition procedures can be initiated and configured in their respective tabs.
+## Main Features
 
+SIMCA includes four main features:
+
+- **Scene Analysis**: This module is used to analyze input multi- or hyper-spectral input scenes. It includes data slices, spectrum analysis, and ground truth labeling.
+
+- **Optical Design**: This module is used to compare the performances of various optical systems.
+
+- **Masks Generation**: This module is used to generate spectral and/or spatial filtering, based on the optical design.
+
+- **Acquisition Coded Images**: This module is used to encode and acquire images.
+
+For more detailed information about each feature and further instructions, please visit our [documentation website](https://arouxel.gitlab.io/simca-documentation/).
+
+## License
+
+SIMCA is licensed under the [MIT License](https://www.mit.edu/~amini/LICENSE.md).
+
+## Contact
+
+For any questions or feedback, please contact us at arouxel@laas.fr
