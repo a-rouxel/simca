@@ -11,6 +11,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 
+from utils.helpers import *
+
 class InputGridDisplay(QWidget):
     def __init__(self):
         super().__init__()
@@ -26,6 +28,10 @@ class InputGridDisplay(QWidget):
         self.layout.addWidget(self.canvas_cam)
 
     def display_mask_grid(self, X_cam, Y_cam):
+
+        X_cam = undersample_grid(X_cam)
+        Y_cam = undersample_grid(Y_cam)
+
         self.figure_cam.clear()
 
         ax = self.figure_cam.add_subplot(111)
@@ -73,12 +79,14 @@ class InputGridPropagationDisplay(QWidget):
                 color = colors[0]  # light red
 
             if idx == 0 or idx == len(list_X_detector) // 2 or idx == len(list_X_detector) - 1:
-                X_detector = list_X_detector[idx]
-                Y_detector = list_Y_detector[idx]
+
                 wavelength = list_wavelengths[idx]
+                X_detector = undersample_grid(list_X_detector[idx])
+                Y_detector = undersample_grid(list_Y_detector[idx])
 
                 X_detector = X_detector.reshape(-1, 1)
                 Y_detector = Y_detector.reshape(-1, 1)
+
 
                 scatter = ax.scatter(X_detector, Y_detector, alpha= 0.5,color=color, label=f'{int(wavelength[0, 0])} nm')
 
@@ -130,12 +138,15 @@ class DistorsionResultDisplay(QWidget):
 
         for i, idx in enumerate(selected_indices):
             # ax = axs[i,0]
-            X_detector = list_X_detector[idx]
-            Y_detector = list_Y_detector[idx]
+            X_input_grid_subsampled = undersample_grid(X_input_grid)
+            Y_input_grid_subsampled = undersample_grid(Y_input_grid)
+
+            X_detector = undersample_grid(list_X_detector[idx])
+            Y_detector = undersample_grid(list_Y_detector[idx])
             wavelength = list_wavelengths[idx]
 
-            X_ref = -1 * X_input_grid + X_detector[X_detector.shape[0] // 2, X_detector.shape[1] // 2]
-            Y_ref = -1 * Y_input_grid + Y_detector[Y_detector.shape[0] // 2, Y_detector.shape[1] // 2]
+            X_ref = -1 * X_input_grid_subsampled + X_detector[X_detector.shape[0] // 2, X_detector.shape[1] // 2]
+            Y_ref = -1 * Y_input_grid_subsampled + Y_detector[Y_detector.shape[0] // 2, Y_detector.shape[1] // 2]
 
             dist = np.sqrt((X_detector - X_ref) ** 2 + (Y_detector - Y_ref) ** 2)
 
@@ -148,10 +159,6 @@ class DistorsionResultDisplay(QWidget):
             scatter_trad = ax.scatter(X_ref, Y_ref,alpha=0.1,label='classical model')
 
             ax.legend()
-
-
-
-
 
         # Update the canvas with the new figure
         self.canvas_distorsion.figure = self.figure_distorsion

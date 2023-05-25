@@ -78,3 +78,9 @@ def save_frames_to_h5(frames_data, result_directory, file_name="frames.h5"):
         for i, (frame, frame_time) in enumerate(zip(frames_list, frame_times)):
             frames_dataset[i] = frame
             frame_times_dataset[i] = frame_time
+
+def undersample_grid(grid, target_size=40):
+    factor = grid.shape[0] // target_size
+    if factor == 0:
+        return grid[::1,::1]
+    return grid[::factor,::factor]
