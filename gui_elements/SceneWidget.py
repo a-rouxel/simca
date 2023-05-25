@@ -54,7 +54,8 @@ class SceneContentDisplay(QWidget):
         self.label.setText("wavelength: " + str(int(self.list_wavelengths[slice_index])) + " nm")
 
         # Display the slice
-        self.imageView.setImage(np.rot90(self.data[:, :, slice_index]), levels=(0, 255))
+        image = np.rot90(self.data[:, :, slice_index],1)
+        self.imageView.setImage(np.flip(image, axis=0))
 
 class SceneHistogram(QWidget):
 
@@ -116,21 +117,34 @@ class SceneHistogram(QWidget):
         # Redraw the canvas
         self.canvas.draw()
 
+from PyQt5.QtWidgets import QVBoxLayout, QWidget, QLabel, QScrollArea
+from PyQt5.QtGui import QColor, QPixmap, QPainter, QImage
+import pyqtgraph as pg
+import numpy as np
+
+
 class SceneLabelisation(QWidget):
     def __init__(self):
         super().__init__()
 
-        # Create a QVBoxLayout for the widget
-        self.layout = QVBoxLayout(self)
+        # Create a QHBoxLayout for the widget
+        self.layout = QHBoxLayout(self)
 
-        # Create a figure and a canvas
-        self.figure = plt.figure(figsize=(8, 6))
-        self.canvas = FigureCanvas(self.figure)
-        self.toolbar = NavigationToolbar(self.canvas, self)
+        # Create a PlotWidget (QGraphicsView)
+        self.plot_widget = pg.PlotWidget()
 
-        self.layout.addWidget(self.toolbar)
-        self.layout.addWidget(self.canvas)
+        # Lock the aspect ratio
+        self.plot_widget.getViewBox().setAspectLocked(True)
 
+        # Create ImageItem and add it to PlotWidget
+        self.image_item = pg.ImageItem(border='w')
+        self.plot_widget.addItem(self.image_item)
+
+        self.layout.addWidget(self.plot_widget)
+
+        # Create a QScrollArea for the legend
+        self.legend_scroll_area = QScrollArea(self)
+        self.layout.addWidget(self.legend_scroll_area)
 
 
     def display_ground_truth(self, ground_truth, label_values, palette):
@@ -140,29 +154,47 @@ class SceneLabelisation(QWidget):
         :param ground_truth: np.array, ground truth labels
         :param label_values: list, label_values[i] = name of the class i
         :param palette: color palette to use, must be a list of colors where the index corresponds to the label
-        :param ignored_labels: list of ignored labels (pixel with no label)
         """
-        # Clear the figure
-        self.figure.clear()
+        # Convert the ground truth labels to colors using the palette
+        image = np.zeros((ground_truth.shape[0], ground_truth.shape[1], 3), dtype=np.uint8)
+        for i in range(len(label_values)):
+            image[ground_truth == i] = palette[i]
 
-        # Create an axes
-        ax = self.figure.add_subplot(111)
+        image = np.rot90(image, 3)
+        # Display the image using ImageItem
+        self.image_item.setImage(image)
 
-        # Convert palette to matplotlib color map
-        cmap = ListedColormap([tuple([x / 255 for x in palette[i]]) for i in range(len(label_values))])
 
-        # Plot the ground truth
-        ax.imshow(ground_truth, cmap=cmap,interpolation='nearest')
+        # Create a legend
+        legend_widget = LegendWidget(label_values, palette, ground_truth)
+        self.legend_scroll_area.setWidget(legend_widget)
 
-        # Create a patch (colored square) for each label
-        patches = [mpatches.Patch(color=cmap(i), label=f"{label_values[i]}: {np.sum(ground_truth == i)}")
-                   for i in range(len(label_values))]
 
-        # Create a legend using the patches
-        ax.legend(handles=patches, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+class LegendWidget(QWidget):
+    def __init__(self, label_values, palette, ground_truth):
+        super().__init__()
 
-        # Redraw the canvas
-        self.canvas.draw()
+        self.layout = QVBoxLayout(self)
+
+        # Create a colored square and a label for each label_value
+        for i in range(len(label_values)):
+            # Create a QHBoxLayout for the colored square and the label
+            hbox = QHBoxLayout()
+
+            # Create a QPixmap (colored square) for the label
+            pixmap = QPixmap(20, 20)
+            pixmap.fill(QColor(*palette[i]))
+            pixmap_label = QLabel()
+            pixmap_label.setPixmap(pixmap)
+            hbox.addWidget(pixmap_label)
+
+            # Create a QLabel for the label text
+            label_text = f"{label_values[i]}: {np.sum(ground_truth == i)}"
+            text_label = QLabel(label_text)
+            hbox.addWidget(text_label)
+
+            self.layout.addLayout(hbox)
+
 
 
 
