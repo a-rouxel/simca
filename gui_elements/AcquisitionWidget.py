@@ -9,7 +9,7 @@ from PyQt5.QtCore import Qt
 import pyqtgraph as pg
 import numpy as np
 import time
-from utils.functions_acquisition import get_measurement_in_3D, crop_scene
+from utils.functions_acquisition import get_measurement_in_3D, match_scene_to_instrument
 class AcquisitionPanchromaticWidget(QWidget):
 
     def __init__(self):
@@ -197,9 +197,8 @@ class Worker(QThread):
         filtering_cube_wavelengths = self.filtering_widget.list_wavelengths
 
 
-
         scene = self.scene_widget.scene_config_editor.interpolate_scene(filtering_cube_wavelengths,chunk_size=50)
-        scene = crop_scene(scene, filtering_cube)
+        scene = match_scene_to_instrument(scene, filtering_cube)
 
         self.finished_interpolated_scene.emit(scene)
 
