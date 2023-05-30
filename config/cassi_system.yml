@@ -17,15 +17,15 @@ system architecture:
         wavelength center: 550  # central wavelength -- in nm
 
 detector:
-    sampling across X: 20                  # sampling across X axis -- no units
-    sampling across Y: 21                  # sampling across Y axis -- no units
-    delta X: 20                             # delta X       -- in um
-    delta Y: 20                              # delta Y       -- in um
-SLM:
-    sampling across X: 30                  # sampling across X axis -- no units
-    sampling across Y: 20                  # sampling across Y axis -- no units
-    delta X: 30                              # delta X       -- in um
+    sampling across X: 201                  # sampling across X axis -- no units
+    sampling across Y: 183                  # sampling across Y axis -- no units
+    delta X: 30                             # delta X       -- in um
     delta Y: 30                              # delta Y       -- in um
+SLM:
+    sampling across X: 213                  # sampling across X axis -- no units
+    sampling across Y: 193                  # sampling across Y axis -- no units
+    delta X: 45                              # delta X       -- in um
+    delta Y: 45                              # delta Y       -- in um
 
 spectral range:
     wavelength min: 450     # minimum wavelength -- in nm
