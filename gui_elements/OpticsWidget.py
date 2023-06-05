@@ -29,13 +29,13 @@ class InputGridDisplay(QWidget):
 
     def display_mask_grid(self, X_cam, Y_cam):
 
+        self.figure_cam.clear()
+
         X_cam = undersample_grid(X_cam)
         Y_cam = undersample_grid(Y_cam)
 
-        self.figure_cam.clear()
-
         ax = self.figure_cam.add_subplot(111)
-        scatter = ax.scatter(X_cam, Y_cam)
+        ax.scatter(X_cam, Y_cam)
 
         # Set labels with LaTeX font.
         ax.set_xlabel(f'X input grid [um]', fontsize=12)
@@ -88,7 +88,7 @@ class InputGridPropagationDisplay(QWidget):
                 Y_detector = Y_detector.reshape(-1, 1)
 
 
-                scatter = ax.scatter(X_detector, Y_detector, alpha= 0.5,color=color, label=f'{int(wavelength[0, 0])} nm')
+                ax.scatter(X_detector, Y_detector, alpha= 0.5,color=color, label=f'{int(wavelength[0, 0])} nm')
 
         ax.set_xlabel(f'X image plane [um]', fontsize=12)
         ax.set_ylabel(f'Y image plane [um]', fontsize=12)
@@ -113,7 +113,7 @@ class DistorsionResultDisplay(QWidget):
 
     def display_results_distorsion(self, X_input_grid, Y_input_grid, list_X_detector, list_Y_detector,
                                    list_wavelengths):
-        self.figure_distorsion = plt.figure()
+
         self.figure_distorsion.clear()
 
         fig, axs = plt.subplots(3, 1)  # Create a new figure with 3 subplots
