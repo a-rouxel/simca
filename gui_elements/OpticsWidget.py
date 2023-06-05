@@ -97,21 +97,6 @@ class InputGridPropagationDisplay(QWidget):
 
         self.canvas_dmd.draw()
 
-
-class DispersionResultDisplay(QWidget):
-    def __init__(self):
-        super().__init__()
-
-        self.layout = QVBoxLayout()
-        self.setLayout(self.layout)
-
-        self.figure_dispersion= plt.figure()
-        self.canvas_dispersion = FigureCanvas(self.figure_dispersion)
-        self.toolbar_dispersion = NavigationToolbar(self.canvas_dispersion, self)
-
-        self.layout.addWidget(self.toolbar_dispersion)
-        self.layout.addWidget(self.canvas_dispersion)
-
 class DistorsionResultDisplay(QWidget):
     def __init__(self):
         super().__init__()
