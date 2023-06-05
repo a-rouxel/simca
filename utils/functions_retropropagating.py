@@ -78,7 +78,6 @@ def propagate_through_arm_vector(dispersive_element_type,X_mask,Y_mask,n, lba,A,
 
     [X_dmd, Y_dmd] = l_a_p_V2(theta_out,  phi_out, F)
 
-    print(angle_with_P1, angle_with_P2)
 
 
     return X_dmd, Y_dmd
@@ -89,15 +88,9 @@ def grating_in_to_grating_out(k_in, lba, m, G):
     alpha_in = np.arctan(k_in[0]) * np.sqrt(1 + np.tan(k_in[0])**2 + np.tan(k_in[1])**2)
     beta_in = np.arctan(k_in[1]) * np.sqrt(1 + np.tan(k_in[0])**2 + np.tan(k_in[1])**2)
 
-    # print(m)
-    # print(lba)
-    # print(G)
-    # print(np.sin(alpha_in))
-
     alpha_out = -1*np.arcsin(m * lba*10**-9  * G * 10**3 - np.sin(alpha_in))
     beta_out = beta_in
 
-    # print(alpha_in, alpha_out)
 
     k_out = [np.sin(alpha_out) * np.cos(beta_out), np.sin(beta_out)*np.cos(alpha_out),
                    np.cos(alpha_out) * np.cos(beta_out)]
@@ -252,7 +245,6 @@ def l_p_a_V2(x_obj, y_obj, F):
 
 def D_m(n, A):
     # A should be given in radians
-    print(2 * np.arcsin(n * np.sin(A / 2)) - A)
     return 2 * np.arcsin(n * np.sin(A / 2)) - A
 
 def alpha_c(A, D_m):
