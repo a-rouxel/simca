@@ -29,7 +29,7 @@ class CassiSystem():
     def __init__(self,system_config):
 
         self.system_config = system_config
-        self.alpha_c = self.calculate_alpha_c()
+
 
         self.X_dmd_grid, self.Y_dmd_grid = self.create_grid(self.system_config["SLM"]["sampling across X"],
                                                                         self.system_config["SLM"]["sampling across Y"],
@@ -165,8 +165,17 @@ class CassiSystem():
 
         self.Dm = D_m(sellmeier(self.system_config["system architecture"]["dispersive element"]["wavelength center"]),
                       np.radians(self.system_config["system architecture"]["dispersive element"]["A"]))
-        self.alpha_c = alpha_c(np.radians(self.system_config["system architecture"]["dispersive element"]["A"]),
+
+        if self.system_config["system architecture"]["dispersive element"]["type"] == "grating":
+            self.alpha_c = 0
+            self.alpha_c_transmis = simplified_grating_in_out(self.alpha_c,
+                                                              self.system_config["system architecture"]["dispersive element"]["wavelength center"],
+                                                              self.system_config["system architecture"]["dispersive element"]["m"],
+                                                              self.system_config["system architecture"]["dispersive element"]["G"])
+        elif self.system_config["system architecture"]["dispersive element"]["type"] == "prism":
+            self.alpha_c = alpha_c(np.radians(self.system_config["system architecture"]["dispersive element"]["A"]),
                                self.Dm)
+            self.alpha_c_transmis = self.alpha_c
 
         return self.alpha_c
     def propagate_mask_grid(self,X_input_grid,Y_input_grid,spectral_range,spectral_samples):
@@ -176,6 +185,8 @@ class CassiSystem():
 
         self.n_array_center = np.full(X_input_grid.shape,
                                       sellmeier(self.system_config["system architecture"]["dispersive element"]["wavelength center"]))
+        # self.lba_array_center = np.full(X_input_grid.shape,
+        #                             self.system_config["system architecture"]["dispersive element"]["wavelength center"])
 
         X_input_grid_flatten = X_input_grid.flatten()
         Y_input_grid_flatten = Y_input_grid.flatten()
@@ -185,22 +196,35 @@ class CassiSystem():
         self.list_X_propagated_mask = list()
         self.list_Y_propagated_mask = list()
 
+        self.alpha_c = self.calculate_alpha_c()
+
+
         for lba in np.linspace(wavelength_min,wavelength_max,spectral_samples):
 
             n_array_flatten = np.full(X_input_grid_flatten.shape, sellmeier(lba))
+            lba_array_flatten = np.full(X_input_grid_flatten.shape, lba)
 
-            X_propagated_mask, Y_propagated_mask = propagate_through_arm_vector(X_mask= X_input_grid_flatten ,
+            X_propagated_mask, Y_propagated_mask = propagate_through_arm_vector(
+                                                        dispersive_element_type=self.system_config["system architecture"]["dispersive element"]["type"],
+                                                        X_mask= X_input_grid_flatten ,
                                                         Y_mask= Y_input_grid_flatten,
                                                         n = n_array_flatten,
+                                                        lba = lba_array_flatten,
                                                         A =np.radians(self.system_config["system architecture"]["dispersive element"]["A"]),
+                                                        G = self.system_config["system architecture"]["dispersive element"]["G"],
+                                                        m = self.system_config["system architecture"]["dispersive element"]["m"],
                                                         F = self.system_config["system architecture"]["focal lens"],
                                                         alpha_c = self.alpha_c,
+                                                        alpha_c_transmis = self.alpha_c_transmis,
                                                         delta_alpha_c = np.radians(self.system_config["system architecture"]["dispersive element"]["delta alpha c"]),
                                                         delta_beta_c= np.radians(self.system_config["system architecture"]["dispersive element"]["delta beta c"])
                                                         )
             self.list_X_propagated_mask.append(X_propagated_mask.reshape(X_input_grid.shape))
             self.list_Y_propagated_mask.append(Y_propagated_mask.reshape(Y_input_grid.shape))
             self.list_wavelengths.append(np.full(X_input_grid.shape, lba).reshape(Y_input_grid.shape))
+
+
+
 
         return self.list_X_propagated_mask, self.list_Y_propagated_mask, self.list_wavelengths
 
