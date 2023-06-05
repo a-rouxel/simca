@@ -14,6 +14,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
+        self.setWindowIcon(QIcon('logo_SIMCA.png'))
         # self.setWindowIcon(QIcon('Figure_1.ico'))
         self.setWindowTitle('SIMCA')
 
@@ -67,7 +68,7 @@ class MainWindow(QMainWindow):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    app.setWindowIcon(QIcon('Figure_1.ico'))
+    app.setWindowIcon(QIcon('logo_SIMCA.png'))  # Add this line
     main_window = MainWindow()
     main_window.show()
     sys.exit(app.exec_())
