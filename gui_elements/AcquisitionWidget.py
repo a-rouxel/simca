@@ -9,7 +9,8 @@ from PyQt5.QtCore import Qt
 import pyqtgraph as pg
 import numpy as np
 import time
-from utils.functions_acquisition import get_measurement_in_3D, match_scene_to_instrument
+from utils.functions_acquisition import get_measurement_in_3D, match_scene_to_instrument, crop_center
+from CassiSystem import CassiSystem
 class AcquisitionPanchromaticWidget(QWidget):
 
     def __init__(self):
@@ -183,36 +184,87 @@ class Worker(QThread):
     finished_interpolated_scene = pyqtSignal(np.ndarray)
 
 
-    def __init__(self,filtering_widget, scene_widget,acquisition_config_editor):
+    def __init__(self,system_editor,filtering_widget, scene_widget,acquisition_config_editor):
         super().__init__()
-
+        self.system_editor = system_editor
         self.filtering_widget = filtering_widget
         self.scene_widget = scene_widget
+
+
 
     def run(self):
 
         print("Acquisition started")
+
+        self.system_editor.get_config()
 
         filtering_cube = self.filtering_widget.filtering_cube
         filtering_cube_wavelengths = self.filtering_widget.list_wavelengths
 
 
         scene = self.scene_widget.scene_config_editor.interpolate_scene(filtering_cube_wavelengths,chunk_size=50)
-        scene = match_scene_to_instrument(scene, filtering_cube)
 
-        self.finished_interpolated_scene.emit(scene)
+        if self.system_editor.config["system architecture"]["system type"] == "DD-CASSI":
 
-        # Define chunk size
-        chunk_size = 50  # Adjust this value based on your system's memory
+            scene = match_scene_to_instrument(scene, filtering_cube)
 
-        t_0 = time.time()
-        measurement_in_3D = get_measurement_in_3D(scene, filtering_cube, chunk_size)
-        print("Acquisition time: ", time.time() - t_0)
+            self.finished_interpolated_scene.emit(scene)
 
-        self.finished_acquire_measure.emit(measurement_in_3D)  # Emit a tuple of arrays
+            # Define chunk size
+            chunk_size = 50  # Adjust this value based on your system's memory
 
-        self.last_measurement_3D = measurement_in_3D
-        self.interpolated_scene = scene
+            t_0 = time.time()
+            measurement_in_3D = get_measurement_in_3D(scene, filtering_cube, chunk_size)
+            print("Acquisition time: ", time.time() - t_0)
+
+            self.last_measurement_3D = measurement_in_3D
+            self.interpolated_scene = scene
+
+            self.finished_acquire_measure.emit(self.last_measurement_3D)  # Emit a tuple of arrays
+
+        elif self.system_editor.config["system architecture"]["system type"] == "SD-CASSI":
+
+
+            self.cassi_system = CassiSystem(system_config=self.system_editor.config)
+
+            X_dmd_grid, Y_dmd_grid = self.cassi_system.create_dmd_mask()
+            X_dmd_grid_crop, Y_dmd_grid_crop = crop_center(X_dmd_grid, Y_dmd_grid, scene.shape[1], scene.shape[0])
+
+
+            scene = match_scene_to_instrument(scene,X_dmd_grid_crop)
+            self.finished_interpolated_scene.emit(scene)
+
+
+
+            mask_config = self.filtering_widget.filtering_config_editor.get_config()
+
+            mask = self.cassi_system.generate_2D_mask(mask_config["mask"]["type"],
+                                                      mask_config["mask"]["slit position"],
+                                                      mask_config["mask"]["slit width"])
+
+
+            mask_crop, mask_crop = crop_center(mask, mask, scene.shape[1], scene.shape[0])
+
+            filtered_scene = scene * np.tile(mask_crop[..., np.newaxis], (1, 1, scene.shape[2]))
+
+
+            list_X_propagated_masks, list_Y_propagated_masks, self.list_wavelengths = self.cassi_system.propagate_mask_grid(
+                X_dmd_grid_crop,
+                Y_dmd_grid_crop,
+                [self.system_editor.config["spectral range"]["wavelength min"],
+                 self.system_editor.config["spectral range"]["wavelength max"]],
+                self.system_editor.config["spectral range"]["number of spectral samples"])
+
+            sd_measurement = self.cassi_system.generate_sd_measurement_cube(self.cassi_system.X_detector_grid,
+                                                      self.cassi_system.Y_detector_grid,
+                                                      list_X_propagated_masks,
+                                                      list_Y_propagated_masks,
+                                                      filtered_scene)
+
+            self.last_measurement_3D = sd_measurement
+            self.interpolated_scene = scene
+
+            self.finished_acquire_measure.emit(self.last_measurement_3D)  # Emit a tuple of arrays
 
 
         print("Acquisition finished")
@@ -270,7 +322,7 @@ class AcquisitionWidget(QWidget):
     def run_acquisition(self):
         # Get the configs from the editors
 
-        self.worker = Worker(self.filtering_widget,self.scene_widget,self.acquisition_config_editor)
+        self.worker = Worker(self.system_editor,self.filtering_widget,self.scene_widget,self.acquisition_config_editor)
         self.worker.finished_acquire_measure.connect(self.display_acquisition)
         self.worker.finished_acquire_measure.connect(self.display_measurement_by_slide)
         self.worker.finished_interpolated_scene.connect(self.display_panchrom_display)

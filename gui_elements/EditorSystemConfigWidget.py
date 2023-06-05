@@ -244,4 +244,6 @@ class EditorSystemConfigWidget(QWidget):
 
             # Add the value to the config
             target_dict[sub_key] = value
+
+            self.config = config
         return config

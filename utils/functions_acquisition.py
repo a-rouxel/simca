@@ -33,9 +33,29 @@ def match_scene_to_instrument(scene, filtering_cube):
         scene = scene[0:filtering_cube.shape[0], 0:filtering_cube.shape[1], :]
         print("Filtering cube and scene must have the same lines and columns")
 
-
+    if len(filtering_cube.shape) == 3:
         if filtering_cube.shape[2] != scene.shape[2]:
             scene = scene[:, :, 0:filtering_cube.shape[2]]
             print("Filtering cube and scene must have the same number of wavelengths")
 
     return scene
+
+def crop_center(array_x, array_y, nb_of_samples_along_x, nb_of_samples_along_y):
+    y_len, x_len = array_x.shape
+
+    x_start = x_len//2 - nb_of_samples_along_x//2
+    x_end = x_start + nb_of_samples_along_x
+
+    y_start = y_len//2 - nb_of_samples_along_y//2
+    y_end = y_start + nb_of_samples_along_y
+
+    if nb_of_samples_along_x<array_x.shape[1]:
+        array_x_crop = array_x[:, x_start:x_end]
+    if nb_of_samples_along_y<array_x.shape[0]:
+        array_y_crop = array_y[y_start:y_end, :]
+    if nb_of_samples_along_y>=array_x.shape[0] and nb_of_samples_along_x>=array_x.shape[1]:
+        array_x_crop = array_x
+        array_y_crop = array_y
+
+
+    return array_x_crop, array_y_crop

@@ -137,6 +137,32 @@ class CassiSystem():
 
         return self.filtering_cube
 
+    def generate_sd_measurement_cube(self, X_detector_grid, Y_detector_grid, list_X_propagated_masks,
+                                list_Y_propagated_masks, scene):
+
+        print("--- Generating SD measurement cube ---- ")
+        if self.system_config["detector"]["sampling across Y"] %2 ==0:
+            self.system_config["detector"]["sampling across Y"] +=1
+        if self.system_config["detector"]["sampling across X"] %2 ==0:
+            self.system_config["detector"]["sampling across X"] +=1
+
+        self.measurement_sd = np.zeros((self.system_config["detector"]["sampling across Y"],
+                                        self.system_config["detector"]["sampling across X"],
+                                        self.system_config["spectral range"]["number of spectral samples"]))
+
+        wavelengths = np.linspace(self.system_config["spectral range"]["wavelength min"],
+                                  self.system_config["spectral range"]["wavelength max"],
+                                  self.system_config['spectral range']["number of spectral samples"])
+        with Pool(mp.cpu_count()) as p:
+            tasks = [(list_X_propagated_masks, list_Y_propagated_masks, scene[:,:,i], X_detector_grid, Y_detector_grid, i)
+                     for i in range(len(wavelengths))]
+            for index, zi in tqdm(enumerate(p.imap(worker, tasks)), total=len(wavelengths), desc='Processing tasks'):
+                self.measurement_sd[:, :, index] = zi
+
+        self.list_wavelengths = wavelengths
+
+        return self.measurement_sd
+
 
 
     def create_grid(self,nb_of_samples_along_x, nb_of_samples_along_y, delta_x, delta_y):
