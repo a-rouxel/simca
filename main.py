@@ -44,7 +44,7 @@ class MainWindow(QMainWindow):
         self.filtering_dock.setWidget(self.filtering_widget)
         self.addDockWidget(Qt.RightDockWidgetArea, self.filtering_dock)
 
-        self.acquisition_widget = AcquisitionWidget(self.scene_widget, self.filtering_widget,acquisition_config_path="config/acquisition.yml")
+        self.acquisition_widget = AcquisitionWidget(self.system_editor,self.scene_widget, self.filtering_widget,acquisition_config_path="config/acquisition.yml")
         self.acquisition_dock = QDockWidget("Acquisition")
         self.acquisition_dock.setWidget(self.acquisition_widget)
         self.addDockWidget(Qt.RightDockWidgetArea, self.acquisition_dock)

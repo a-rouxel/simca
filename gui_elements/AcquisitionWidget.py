@@ -218,9 +218,10 @@ class Worker(QThread):
         print("Acquisition finished")
 
 class AcquisitionWidget(QWidget):
-    def __init__(self,scene_widget, filtering_widget,acquisition_config_path="config/acquisition.yml"):
+    def __init__(self,system_editor,scene_widget, filtering_widget,acquisition_config_path="config/acquisition.yml"):
         super().__init__()
 
+        self.system_editor = system_editor
         self.scene_widget = scene_widget
         self.filtering_widget = filtering_widget
         self.last_measurement_3D = None
@@ -276,7 +277,15 @@ class AcquisitionWidget(QWidget):
         self.worker.start()
 
     def on_acquisition_saved(self):
+
         self.result_directory = initialize_directory(self.acquisition_config_editor.get_config())
+
+        self.system_editor_config = self.system_editor.get_config()
+        with open(self.result_directory + "/config_system.yml", 'w') as file:
+            yaml.safe_dump(self.system_editor_config, file)
+
+        with open(self.result_directory + "/config_acquisition.yml", 'w') as file:
+            yaml.safe_dump(self.acquisition_config_editor.get_config(), file)
 
         if self.last_measurement_3D is not None:
             last_measurement = self.last_measurement_3D
