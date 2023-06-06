@@ -34,7 +34,7 @@ pip install -r requirements.txt
 
 ## Quick Start
 
-4. Download the standard scenes from this [link](https://cloud.laas.fr/index.php/s/zfh5RFmsjYfk108) and paste the `datasets` folder in the root directory of SIMCA.
+4. Download the standard scenes from this [link](https://cloud.laas.fr/index.php/s/zfh5RFmsjYfk108/download), then unzip and paste the `datasets` folder in the root directory of SIMCA.
 
 5. Start the application:
 
