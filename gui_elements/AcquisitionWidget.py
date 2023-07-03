@@ -248,18 +248,12 @@ class Worker(QThread):
             filtered_scene = scene * np.tile(mask_crop[..., np.newaxis], (1, 1, scene.shape[2]))
 
 
-            list_X_propagated_masks, list_Y_propagated_masks, self.list_wavelengths = self.cassi_system.propagate_mask_grid(
-                X_dmd_grid_crop,
-                Y_dmd_grid_crop,
+            self.cassi_system.propagate_mask_grid(
                 [self.system_editor.config["spectral range"]["wavelength min"],
                  self.system_editor.config["spectral range"]["wavelength max"]],
-                self.system_editor.config["spectral range"]["number of spectral samples"])
+                self.system_editor.config["spectral range"]["number of spectral samples"],X_input_grid=X_dmd_grid_crop,Y_input_grid=Y_dmd_grid_crop)
 
-            sd_measurement = self.cassi_system.generate_sd_measurement_cube(self.cassi_system.X_detector_grid,
-                                                      self.cassi_system.Y_detector_grid,
-                                                      list_X_propagated_masks,
-                                                      list_Y_propagated_masks,
-                                                      filtered_scene)
+            sd_measurement = self.cassi_system.generate_sd_measurement_cube()
 
             self.last_measurement_3D = sd_measurement
             self.interpolated_scene = scene

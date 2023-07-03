@@ -425,6 +425,10 @@ class Worker(QThread):
         self.scene_config_editor.update_config()
         print(self.scene_config_editor.config)
         self.cassi_system.load_scene(self.scene_config_editor.directories_combo.currentText(),self.scene_config_editor.scenes_directory.text())
+
+        self.scene_config_editor.scene_loaded.emit(self.cassi_system.scene.shape[1],self.cassi_system.scene.shape[0],self.cassi_system.scene.shape[2],
+                                                   self.cassi_system.list_scene_wavelengths[0],self.cassi_system.list_scene_wavelengths[-1])
+
         self.stats_per_class = explore_spectrums(self.cassi_system.scene, self.cassi_system.scene_gt, self.cassi_system.scene_label_values,
                           ignored_labels=self.cassi_system.scene_ignored_labels, delta_lambda=None)
 
@@ -486,6 +490,7 @@ class SceneWidget(QWidget):
         self.worker.finished_explore_scene.connect(self.display_spectral_data)
         self.worker.finished_scene_labelisation.connect(self.display_ground_truth)
         self.worker.finished_scene_label_histogram.connect(self.scene_label_histogram.plot_label_histogram)
+
         self.worker.start()
 
     @pyqtSlot(np.ndarray,list)

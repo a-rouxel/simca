@@ -169,9 +169,7 @@ class Worker(QThread):
 
         self.finished_define_mask_grid.emit((cassi_system.X_dmd_grid, cassi_system.Y_dmd_grid))  # Emit a tuple of arrays
 
-        list_X_detector, list_Y_detector, list_wavelengths = cassi_system.propagate_mask_grid(cassi_system.X_dmd_grid,
-                                                                                              cassi_system.Y_dmd_grid,
-                                                                                              [self.system_config["spectral range"]["wavelength min"],
+        list_X_detector, list_Y_detector, list_wavelengths = cassi_system.propagate_mask_grid([self.system_config["spectral range"]["wavelength min"],
                                                                                                self.system_config["spectral range"]["wavelength max"]],
                                                                                               self.system_config["spectral range"]["number of spectral samples"])
         self.finished_propagate_mask_grid.emit((list_X_detector, list_Y_detector,list_wavelengths))

@@ -147,10 +147,15 @@ class CassiSystem():
 
 
 
-    def generate_filtering_cube(self, X_detector_grid, Y_detector_grid, list_X_propagated_masks,
-                                list_Y_propagated_masks, mask):
+    def generate_filtering_cube(self):
 
         print("--- Generating filtering cube ---- ")
+
+        X_detector_grid = self.X_detector_grid
+        Y_detector_grid = self.Y_detector_grid
+        list_X_propagated_masks = self.list_X_propagated_mask
+        list_Y_propagated_masks = self.list_Y_propagated_mask
+        mask =  self.mask
 
         if self.system_config["detector"]["sampling across Y"] %2 ==0:
             self.system_config["detector"]["sampling across Y"] +=1
@@ -174,8 +179,19 @@ class CassiSystem():
 
         return self.filtering_cube
 
-    def generate_sd_measurement_cube(self, X_detector_grid, Y_detector_grid, list_X_propagated_masks,
-                                list_Y_propagated_masks, scene):
+    def generate_sd_measurement_cube(self):
+
+
+        X_detector_grid = self.X_detector_grid
+        Y_detector_grid = self.Y_detector_grid
+        list_X_propagated_masks = self.list_X_propagated_mask
+        list_Y_propagated_masks = self.list_Y_propagated_mask
+        scene =  self.scene
+
+        print(X_detector_grid.shape)
+        print(Y_detector_grid.shape)
+        print(list_X_propagated_masks[0].shape)
+
 
         print("--- Generating SD measurement cube ---- ")
         if self.system_config["detector"]["sampling across Y"] %2 ==0:
@@ -241,7 +257,17 @@ class CassiSystem():
             self.alpha_c_transmis = self.alpha_c
 
         return self.alpha_c
-    def propagate_mask_grid(self,X_input_grid,Y_input_grid,spectral_range,spectral_samples):
+    def propagate_mask_grid(self,spectral_range,spectral_samples,X_input_grid=None,Y_input_grid=None):
+
+        if X_input_grid is None:
+            print("X_input_grid is None")
+            X_input_grid = self.X_dmd_grid
+        if Y_input_grid is None:
+            print("Y_input_grid is None")
+            Y_input_grid = self.Y_dmd_grid
+
+        print(X_input_grid.shape)
+        print(Y_input_grid.shape)
 
         wavelength_min = spectral_range[0]
         wavelength_max = spectral_range[1]
