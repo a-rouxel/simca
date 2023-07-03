@@ -184,8 +184,9 @@ class Worker(QThread):
     finished_interpolated_scene = pyqtSignal(np.ndarray)
 
 
-    def __init__(self,system_editor,filtering_widget, scene_widget,acquisition_config_editor):
+    def __init__(self,cassi_system,system_editor,filtering_widget, scene_widget,acquisition_config_editor):
         super().__init__()
+        self.cassi_system = cassi_system
         self.system_editor = system_editor
         self.filtering_widget = filtering_widget
         self.scene_widget = scene_widget
@@ -196,13 +197,14 @@ class Worker(QThread):
 
         print("Acquisition started")
 
-        self.system_editor.get_config()
+        self.system_config = self.system_editor.get_config()
+        self.cassi_system.update_config(self.system_config)
+        filtering_cube = self.cassi_system.filtering_cube
 
-        filtering_cube = self.filtering_widget.filtering_cube
-        filtering_cube_wavelengths = self.filtering_widget.list_wavelengths
+        filtering_cube_wavelengths = self.cassi_system.list_wavelengths
 
 
-        scene = self.scene_widget.scene_config_editor.interpolate_scene(filtering_cube_wavelengths,chunk_size=50)
+        scene = self.cassi_system.interpolate_scene(filtering_cube_wavelengths,chunk_size=50)
 
         if self.system_editor.config["system architecture"]["system type"] == "DD-CASSI":
 
@@ -224,8 +226,6 @@ class Worker(QThread):
 
         elif self.system_editor.config["system architecture"]["system type"] == "SD-CASSI":
 
-
-            self.cassi_system = CassiSystem(system_config=self.system_editor.config)
 
             X_dmd_grid, Y_dmd_grid = self.cassi_system.create_dmd_mask()
             X_dmd_grid_crop, Y_dmd_grid_crop = crop_center(X_dmd_grid, Y_dmd_grid, scene.shape[1], scene.shape[0])
@@ -270,9 +270,10 @@ class Worker(QThread):
         print("Acquisition finished")
 
 class AcquisitionWidget(QWidget):
-    def __init__(self,system_editor,scene_widget, filtering_widget,acquisition_config_path="config/acquisition.yml"):
+    def __init__(self,cassi_system,system_editor,scene_widget, filtering_widget,acquisition_config_path="config/acquisition.yml"):
         super().__init__()
 
+        self.cassi_system = cassi_system
         self.system_editor = system_editor
         self.scene_widget = scene_widget
         self.filtering_widget = filtering_widget
@@ -322,7 +323,7 @@ class AcquisitionWidget(QWidget):
     def run_acquisition(self):
         # Get the configs from the editors
 
-        self.worker = Worker(self.system_editor,self.filtering_widget,self.scene_widget,self.acquisition_config_editor)
+        self.worker = Worker(self.cassi_system,self.system_editor,self.filtering_widget,self.scene_widget,self.acquisition_config_editor)
         self.worker.finished_acquire_measure.connect(self.display_acquisition)
         self.worker.finished_acquire_measure.connect(self.display_measurement_by_slide)
         self.worker.finished_interpolated_scene.connect(self.display_panchrom_display)

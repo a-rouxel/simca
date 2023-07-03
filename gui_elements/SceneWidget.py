@@ -356,27 +356,27 @@ class SceneConfigEditor(QWidget):
         self.load_scenes()
 
 
-    def load_scene(self):
-
-
-            img, gt, list_wavelengths, label_values, ignored_labels, rgb_bands, palette, delta_lambda = get_dataset(self.directories_combo.currentText(), self.scenes_directory.text())
-            self.scene = img
-            self.scene_gt = gt
-            self.list_wavelengths = list_wavelengths
-            self.scene_label_values = label_values
-            self.scene_ignored_labels = ignored_labels
-            self.scene_rgb_bands = rgb_bands
-            self.scene_palette = palette
-            self.scene_delta_lambda = delta_lambda
-
-            self.scene_palette = palette_init(label_values, palette)
-            #
-            # print("Error: scene not found")
-            self.scene_loaded.emit(self.scene.shape[1],self.scene.shape[0],self.scene.shape[2],list_wavelengths[0],list_wavelengths[-1])
-
-    def interpolate_scene(self,new_sampling,chunk_size):
-        self.scene_interpolated = interpolate_scene_cube_along_wavelength(self.scene, self.list_wavelengths, new_sampling,chunk_size)
-        return self.scene_interpolated
+    # def load_scene(self):
+    #
+    #
+    #         img, gt, list_wavelengths, label_values, ignored_labels, rgb_bands, palette, delta_lambda = get_dataset(self.directories_combo.currentText(), self.scenes_directory.text())
+    #         self.scene = img
+    #         self.scene_gt = gt
+    #         self.list_wavelengths = list_wavelengths
+    #         self.scene_label_values = label_values
+    #         self.scene_ignored_labels = ignored_labels
+    #         self.scene_rgb_bands = rgb_bands
+    #         self.scene_palette = palette
+    #         self.scene_delta_lambda = delta_lambda
+    #
+    #         self.scene_palette = palette_init(label_values, palette)
+    #         #
+    #         # print("Error: scene not found")
+    #         self.scene_loaded.emit(self.scene.shape[1],self.scene.shape[0],self.scene.shape[2],list_wavelengths[0],list_wavelengths[-1])
+    #
+    # def interpolate_scene(self,new_sampling,chunk_size):
+    #     self.scene_interpolated = interpolate_scene_cube_along_wavelength(self.scene, self.list_wavelengths, new_sampling,chunk_size)
+    #     return self.scene_interpolated
 
     def load_scenes(self):
 
@@ -409,30 +409,35 @@ class SceneConfigEditor(QWidget):
 
 
 class Worker(QThread):
+
     finished_load_scene = pyqtSignal(np.ndarray,list)
     finished_explore_scene = pyqtSignal(dict,dict,list)
     finished_scene_labelisation = pyqtSignal(np.ndarray, list, dict)
     finished_scene_label_histogram = pyqtSignal(np.ndarray, list, list,dict)
 
-    def __init__(self,scene_config_editor):
+    def __init__(self,cassi_system,scene_config_editor):
         super().__init__()
 
+        self.cassi_system = cassi_system
         self.scene_config_editor = scene_config_editor
 
     def run(self):
+        self.scene_config_editor.update_config()
+        print(self.scene_config_editor.config)
+        self.cassi_system.load_scene(self.scene_config_editor.directories_combo.currentText(),self.scene_config_editor.scenes_directory.text())
+        self.stats_per_class = explore_spectrums(self.cassi_system.scene, self.cassi_system.scene_gt, self.cassi_system.scene_label_values,
+                          ignored_labels=self.cassi_system.scene_ignored_labels, delta_lambda=None)
 
-        self.scene_config_editor.load_scene()
-        self.stats_per_class = explore_spectrums(self.scene_config_editor.scene, self.scene_config_editor.scene_gt, self.scene_config_editor.scene_label_values,
-                          ignored_labels=self.scene_config_editor.scene_ignored_labels, delta_lambda=None)
 
-
-        self.finished_load_scene.emit(self.scene_config_editor.scene,self.scene_config_editor.list_wavelengths)  # Emit a tuple of arrays
-        self.finished_explore_scene.emit(self.stats_per_class,self.scene_config_editor.scene_palette,self.scene_config_editor.scene_label_values)
-        self.finished_scene_labelisation.emit(self.scene_config_editor.scene_gt,self.scene_config_editor.scene_label_values,self.scene_config_editor.scene_palette)# Emit a tuple of arrays
-        self.finished_scene_label_histogram.emit(self.scene_config_editor.scene_gt,self.scene_config_editor.scene_label_values,self.scene_config_editor.scene_ignored_labels,self.scene_config_editor.scene_palette)
+        self.finished_load_scene.emit(self.cassi_system.scene,self.cassi_system.list_wavelengths)  # Emit a tuple of arrays
+        self.finished_explore_scene.emit(self.stats_per_class,self.cassi_system.scene_palette,self.cassi_system.scene_label_values)
+        self.finished_scene_labelisation.emit(self.cassi_system.scene_gt,self.cassi_system.scene_label_values,self.cassi_system.scene_palette)# Emit a tuple of arrays
+        self.finished_scene_label_histogram.emit(self.cassi_system.scene_gt,self.cassi_system.scene_label_values,self.cassi_system.scene_ignored_labels,self.cassi_system.scene_palette)
 class SceneWidget(QWidget):
-    def __init__(self,scene_config_path="config/scene.yml"):
+    def __init__(self,cassi_system=None,scene_config_path="config/scene.yml"):
         super().__init__()
+
+        self.cassi_system = cassi_system
 
         self.layout = QHBoxLayout()
 
@@ -476,7 +481,7 @@ class SceneWidget(QWidget):
     def run_load_scene(self):
         # Get the configs from the editors
 
-        self.worker = Worker(self.scene_config_editor)
+        self.worker = Worker(self.cassi_system,self.scene_config_editor)
         self.worker.finished_load_scene.connect(self.display_scene_content)
         self.worker.finished_explore_scene.connect(self.display_spectral_data)
         self.worker.finished_scene_labelisation.connect(self.display_ground_truth)

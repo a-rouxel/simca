@@ -5,6 +5,8 @@ from multiprocessing import Pool
 from tqdm import tqdm
 from scipy import fftpack
 import numpy as np
+from utils.scenes_helper import *
+
 
 def worker(args):
     """
@@ -26,9 +28,9 @@ def worker(args):
 
 class CassiSystem():
 
-    def __init__(self,system_config):
+    def __init__(self,system_config_path):
 
-        self.system_config = system_config
+        self.system_config = load_yaml_config(system_config_path)
 
 
         self.X_dmd_grid, self.Y_dmd_grid = self.create_grid(self.system_config["SLM"]["sampling across X"],
@@ -42,7 +44,42 @@ class CassiSystem():
                                                                         self.system_config["detector"]["delta X"],
                                                                         self.system_config["detector"]["delta Y"])
 
+    def load_scene(self,directory,scene_name):
 
+
+            img, gt, list_wavelengths, label_values, ignored_labels, rgb_bands, palette, delta_lambda = get_dataset(directory,scene_name)
+            self.scene = img
+            self.scene_gt = gt
+            self.list_wavelengths = list_wavelengths
+            self.scene_label_values = label_values
+            self.scene_ignored_labels = ignored_labels
+            self.scene_rgb_bands = rgb_bands
+            self.scene_palette = palette
+            self.scene_delta_lambda = delta_lambda
+
+            self.scene_palette = palette_init(label_values, palette)
+            #
+            # print("Error: scene not found")
+            # self.scene_loaded.emit(self.scene.shape[1],self.scene.shape[0],self.scene.shape[2],list_wavelengths[0],list_wavelengths[-1])
+
+    def update_config(self,new_config):
+
+        self.system_config = new_config
+
+        self.X_dmd_grid, self.Y_dmd_grid = self.create_grid(self.system_config["SLM"]["sampling across X"],
+                                                                        self.system_config["SLM"]["sampling across Y"],
+                                                                        self.system_config["SLM"]["delta X"],
+                                                                        self.system_config["SLM"]["delta Y"])
+
+
+        self.X_detector_grid, self.Y_detector_grid = self.create_grid(self.system_config["detector"]["sampling across X"],
+                                                                        self.system_config["detector"]["sampling across Y"],
+                                                                        self.system_config["detector"]["delta X"],
+                                                                        self.system_config["detector"]["delta Y"])
+
+    def interpolate_scene(self,new_sampling,chunk_size):
+        self.scene_interpolated = interpolate_scene_cube_along_wavelength(self.scene, self.list_wavelengths, new_sampling,chunk_size)
+        return self.scene_interpolated
 
     def create_dmd_mask(self):
 

@@ -18,7 +18,9 @@ class MainWindow(QMainWindow):
         # self.setWindowIcon(QIcon('Figure_1.ico'))
         self.setWindowTitle('SIMCA')
 
-        self.scene_widget = SceneWidget(scene_config_path="config/scene.yml")
+        self.cassi_system = CassiSystem(system_config_path="config/cassi_system.yml")
+
+        self.scene_widget = SceneWidget(cassi_system=self.cassi_system,scene_config_path="config/scene.yml")
         self.scene_dock = QDockWidget("Scene")
         self.scene_dock.setWidget(self.scene_widget)
         self.addDockWidget(Qt.RightDockWidgetArea, self.scene_dock)
@@ -35,17 +37,17 @@ class MainWindow(QMainWindow):
 
 
 
-        self.optics_widget = OpticsWidget(self.system_editor,optics_config_path="config/optics.yml")
+        self.optics_widget = OpticsWidget(cassi_system=self.cassi_system,editor_system_config=self.system_editor,optics_config_path="config/optics.yml")
         self.optics_dock = QDockWidget("Optical Design")
         self.optics_dock.setWidget(self.optics_widget)
         self.addDockWidget(Qt.RightDockWidgetArea, self.optics_dock)
 
-        self.filtering_widget = FilteringCubeWidget(self.system_editor,filtering_config_path="config/filtering.yml")
+        self.filtering_widget = FilteringCubeWidget(cassi_system=self.cassi_system,system_editor=self.system_editor,filtering_config_path="config/filtering.yml")
         self.filtering_dock = QDockWidget("Masks")
         self.filtering_dock.setWidget(self.filtering_widget)
         self.addDockWidget(Qt.RightDockWidgetArea, self.filtering_dock)
 
-        self.acquisition_widget = AcquisitionWidget(self.system_editor,self.scene_widget, self.filtering_widget,acquisition_config_path="config/acquisition.yml")
+        self.acquisition_widget = AcquisitionWidget(self.cassi_system,self.system_editor,self.scene_widget, self.filtering_widget,acquisition_config_path="config/acquisition.yml")
         self.acquisition_dock = QDockWidget("Acquisition")
         self.acquisition_dock.setWidget(self.acquisition_widget)
         self.addDockWidget(Qt.RightDockWidgetArea, self.acquisition_dock)

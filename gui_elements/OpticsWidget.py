@@ -155,14 +155,17 @@ class Worker(QThread):
     finished_propagate_mask_grid = pyqtSignal(tuple)
     finished_distorsion = pyqtSignal(tuple)
 
-    def __init__(self, system_config):
+    def __init__(self, cassi_system,system_config):
         super().__init__()
+        self.cassi_system = cassi_system
         self.system_config = system_config
 
 
     def run(self):
         # Put your analysis here
-        cassi_system = CassiSystem(system_config=self.system_config)
+        self.cassi_system.update_config(self.system_config)
+
+        cassi_system = self.cassi_system
 
         self.finished_define_mask_grid.emit((cassi_system.X_dmd_grid, cassi_system.Y_dmd_grid))  # Emit a tuple of arrays
 
@@ -309,16 +312,13 @@ class OpticsConfigEditor(QWidget):
         }
 
 class OpticsWidget(QWidget):
-    def __init__(self, editor_system_config,optics_config_path=None):
+    def __init__(self, cassi_system=None,editor_system_config=None,optics_config_path=None):
         super().__init__()
 
+        self.cassi_system = cassi_system
         self.editor_system_config = editor_system_config
 
         self.layout = QHBoxLayout()
-
-        # Create the optics configuration editor
-        # if optics_config_path is not None:
-        #     self.optics_config_editor = OpticsConfigEditor(initial_config_file=optics_config_path)
 
         # Create the result display widget (tab widget in this case)
         self.result_display_widget = QTabWidget()
@@ -363,9 +363,10 @@ class OpticsWidget(QWidget):
 
 
         system_config = self.editor_system_config.get_config()
+        cassi_system = self.cassi_system
         # optics_config = self.optics_config_editor.get_config()
 
-        self.worker = Worker(system_config)
+        self.worker = Worker(cassi_system,system_config)
         self.worker.finished_define_mask_grid.connect(self.display_mask_grid)
         self.worker.finished_propagate_mask_grid.connect(self.display_mask_propagation)
         self.worker.finished_distorsion.connect(self.display_results_distorsion)

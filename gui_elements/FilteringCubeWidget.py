@@ -107,15 +107,15 @@ class Worker(QThread):
     finished_define_mask_grid = pyqtSignal(np.ndarray)
     finished_propagate_mask_grid = pyqtSignal(np.ndarray,np.ndarray)
 
-    def __init__(self, system_config,simulation_config):
+    def __init__(self, cassi_system,system_config,simulation_config):
         super().__init__()
+        self.cassi_system = cassi_system
         self.system_config = system_config
         self.simulation_config = simulation_config
 
     def run(self):
         # Put your analysis here
-
-        self.cassi_system = CassiSystem(self.system_config)
+        self.cassi_system.update_config(self.system_config)
 
         X_dmd_grid, Y_dmd_grid = self.cassi_system.create_dmd_mask()
         mask = self.cassi_system.generate_2D_mask(self.simulation_config["mask"]["type"],self.simulation_config["mask"]["slit position"],self.simulation_config["mask"]["slit width"])
@@ -279,9 +279,10 @@ class FilteringCubeWidgetEditor(QWidget):
         return config
 
 class FilteringCubeWidget(QWidget):
-    def __init__(self, system_editor,filtering_config_path=None):
+    def __init__(self, cassi_system=None,system_editor=None,filtering_config_path=None):
         super().__init__()
 
+        self.cassi_system = cassi_system
         self.system_editor = system_editor
 
 
@@ -338,7 +339,7 @@ class FilteringCubeWidget(QWidget):
         system_config = self.system_editor.get_config()
         filtering_config_editor = self.filtering_config_editor.get_config()
 
-        self.worker = Worker(system_config, filtering_config_editor)
+        self.worker = Worker(self.cassi_system,system_config, filtering_config_editor)
         self.worker.finished_define_mask_grid.connect(self.display_mask_grid)
         self.worker.finished_propagate_mask_grid.connect(self.display_propagated_masks)
         self.worker.start()
@@ -350,6 +351,6 @@ class FilteringCubeWidget(QWidget):
 
     @pyqtSlot(np.ndarray,np.ndarray)
     def display_propagated_masks(self, filtering_cube,np_of_wavelengths):
-        self.filtering_cube = filtering_cube
-        self.list_wavelengths = np_of_wavelengths
+        self.cassi_system.filtering_cube = filtering_cube
+        self.cassi_system.list_wavelengths = np_of_wavelengths
         self.propagated_mask_display.display_propagated_mask_grid(filtering_cube,np_of_wavelengths)
