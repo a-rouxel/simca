@@ -429,7 +429,7 @@ class Worker(QThread):
                           ignored_labels=self.cassi_system.scene_ignored_labels, delta_lambda=None)
 
 
-        self.finished_load_scene.emit(self.cassi_system.scene,self.cassi_system.list_wavelengths)  # Emit a tuple of arrays
+        self.finished_load_scene.emit(self.cassi_system.scene,self.cassi_system.list_scene_wavelengths)  # Emit a tuple of arrays
         self.finished_explore_scene.emit(self.stats_per_class,self.cassi_system.scene_palette,self.cassi_system.scene_label_values)
         self.finished_scene_labelisation.emit(self.cassi_system.scene_gt,self.cassi_system.scene_label_values,self.cassi_system.scene_palette)# Emit a tuple of arrays
         self.finished_scene_label_histogram.emit(self.cassi_system.scene_gt,self.cassi_system.scene_label_values,self.cassi_system.scene_ignored_labels,self.cassi_system.scene_palette)

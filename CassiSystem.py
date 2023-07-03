@@ -50,7 +50,7 @@ class CassiSystem():
             img, gt, list_wavelengths, label_values, ignored_labels, rgb_bands, palette, delta_lambda = get_dataset(directory,scene_name)
             self.scene = img
             self.scene_gt = gt
-            self.list_wavelengths = list_wavelengths
+            self.list_scene_wavelengths = list_wavelengths
             self.scene_label_values = label_values
             self.scene_ignored_labels = ignored_labels
             self.scene_rgb_bands = rgb_bands
@@ -78,7 +78,7 @@ class CassiSystem():
                                                                         self.system_config["detector"]["delta Y"])
 
     def interpolate_scene(self,new_sampling,chunk_size):
-        self.scene_interpolated = interpolate_scene_cube_along_wavelength(self.scene, self.list_wavelengths, new_sampling,chunk_size)
+        self.scene_interpolated = interpolate_scene_cube_along_wavelength(self.scene, self.list_scene_wavelengths, new_sampling,chunk_size)
         return self.scene_interpolated
 
     def create_dmd_mask(self):
