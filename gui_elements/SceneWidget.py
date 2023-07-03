@@ -423,7 +423,6 @@ class Worker(QThread):
 
     def run(self):
         self.scene_config_editor.update_config()
-        print(self.scene_config_editor.config)
         self.cassi_system.load_scene(self.scene_config_editor.directories_combo.currentText(),self.scene_config_editor.scenes_directory.text())
 
         self.scene_config_editor.scene_loaded.emit(self.cassi_system.scene.shape[1],self.cassi_system.scene.shape[0],self.cassi_system.scene.shape[2],
