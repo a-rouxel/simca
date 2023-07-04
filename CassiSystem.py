@@ -81,7 +81,7 @@ class CassiSystem():
         self.scene_interpolated = interpolate_scene_cube_along_wavelength(self.scene, self.list_scene_wavelengths, new_sampling,chunk_size)
         return self.scene_interpolated
 
-    def create_dmd_mask(self):
+    def generate_dmd_grid(self):
 
         self.X_dmd_mask, self.Y_dmd_mask = self.create_grid(
             self.system_config["SLM"]["sampling across X"],

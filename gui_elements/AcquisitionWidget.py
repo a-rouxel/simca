@@ -228,7 +228,7 @@ class Worker(QThread):
 
         elif self.system_editor.config["system architecture"]["system type"] == "SD-CASSI":
 
-            X_dmd_grid, Y_dmd_grid = self.cassi_system.create_dmd_mask()
+            X_dmd_grid, Y_dmd_grid = self.cassi_system.generate_dmd_grid()
 
 
             X_dmd_grid_crop, Y_dmd_grid_crop = crop_center(X_dmd_grid, Y_dmd_grid, scene.shape[1], scene.shape[0])

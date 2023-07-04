@@ -117,7 +117,7 @@ class Worker(QThread):
         # Put your analysis here
         self.cassi_system.update_config(self.system_config)
 
-        self.cassi_system.create_dmd_mask()
+        self.cassi_system.generate_dmd_grid()
         mask = self.cassi_system.generate_2D_mask(self.simulation_config["mask"]["type"],
                                                   self.simulation_config["mask"]["slit position"],
                                                   self.simulation_config["mask"]["slit width"])
