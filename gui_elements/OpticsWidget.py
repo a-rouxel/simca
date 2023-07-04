@@ -88,7 +88,7 @@ class InputGridPropagationDisplay(QWidget):
                 Y_detector = Y_detector.reshape(-1, 1)
 
 
-                ax.scatter(X_detector, Y_detector, alpha= 0.5,color=color, label=f'{int(wavelength[0, 0])} nm')
+                ax.scatter(X_detector, Y_detector, alpha= 0.5,color=color, label=f'{int(wavelength)} nm')
 
         ax.set_xlabel(f'X image plane [um]', fontsize=12)
         ax.set_ylabel(f'Y image plane [um]', fontsize=12)
@@ -140,7 +140,7 @@ class DistorsionResultDisplay(QWidget):
 
             scatter_new = ax.scatter(X_detector, Y_detector, c=dist, cmap='viridis',label=f'accurate model')
             cbar = fig.colorbar(scatter_new, ax=ax)  # Use the new figure for the colorbar
-            cbar.set_label(f'Distorsion at {int(wavelength[0, 0])} nm [um]')
+            cbar.set_label(f'Distorsion at {int(wavelength)} nm [um]')
             scatter_trad = ax.scatter(X_ref, Y_ref,alpha=0.1,label='classical model')
 
             ax.legend()
@@ -169,9 +169,7 @@ class Worker(QThread):
 
         self.finished_define_mask_grid.emit((cassi_system.X_dmd_grid, cassi_system.Y_dmd_grid))  # Emit a tuple of arrays
 
-        list_X_detector, list_Y_detector, list_wavelengths = cassi_system.propagate_mask_grid([self.system_config["spectral range"]["wavelength min"],
-                                                                                               self.system_config["spectral range"]["wavelength max"]],
-                                                                                              self.system_config["spectral range"]["number of spectral samples"])
+        list_X_detector, list_Y_detector, list_wavelengths = cassi_system.propagate_mask_grid()
         self.finished_propagate_mask_grid.emit((list_X_detector, list_Y_detector,list_wavelengths))
 
 
