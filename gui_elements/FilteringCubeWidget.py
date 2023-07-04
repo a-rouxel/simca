@@ -116,9 +116,7 @@ class Worker(QThread):
     def run(self):
         # Put your analysis here
         self.cassi_system.update_config(self.system_config)
-        self.cassi_system.propagate_mask_grid([self.system_config["spectral range"]["wavelength min"],
-                                               self.system_config["spectral range"]["wavelength max"]],
-                                               self.system_config["spectral range"]["number of spectral samples"])
+        self.cassi_system.propagate_mask_grid()
         self.cassi_system.generate_filtering_cube()
         self.finished_propagate_mask_grid.emit(self.cassi_system.filtering_cube,self.cassi_system.list_wavelengths)  # Emit a tuple of arrays
 
@@ -368,36 +366,22 @@ class FilteringCubeWidget(QWidget):
         # Get the configs from the editors
 
         system_config = self.system_editor.get_config()
-        filtering_config_editor = self.filtering_config_editor.get_config()
+        config_filtering = self.filtering_config_editor.get_config()
         self.run_button.setDisabled(True)
 
-        self.worker = Worker(self.cassi_system,system_config, filtering_config_editor)
+        self.worker = Worker(self.cassi_system,system_config, config_filtering)
         self.worker.finished_define_mask_grid.connect(self.display_mask_grid)
         self.worker.finished_propagate_mask_grid.connect(self.display_propagated_masks)
         self.worker.start()
 
     def generate_mask(self):
         system_config = self.system_editor.get_config()
-        self.cassi_system.update_config(system_config)
-        filtering_config_editor = self.filtering_config_editor.get_config()
+        config_filtering = self.filtering_config_editor.get_config()
 
         self.maskGenerated.connect(self.display_mask_grid)
 
-        if filtering_config_editor['mask']['type'] == "slit":
-            self.cassi_system.generate_2D_mask(filtering_config_editor['mask']['type'],
-                                               filtering_config_editor['mask']['slit position'],
-                                               filtering_config_editor['mask']['slit width'])
-
-        elif filtering_config_editor['mask']['type'] == "random":
-            self.cassi_system.generate_2D_mask(filtering_config_editor['mask']['type'])
-        elif filtering_config_editor['mask']['type'] == "blue":
-            self.cassi_system.generate_2D_mask(filtering_config_editor['mask']['type'])
-
-        elif filtering_config_editor['mask']['type'] == "custom h5 mask":
-            self.cassi_system.generate_2D_mask(filtering_config_editor['mask']['type'],
-                                               mask_path=filtering_config_editor['mask']['file path'])
-        else:
-            return
+        self.cassi_system.update_config(system_config)
+        self.cassi_system.generate_2D_mask(config_filtering)
 
         self.generate_mask_button.setDisabled(True)
         self.maskGenerated.emit(self.cassi_system.mask)

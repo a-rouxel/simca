@@ -138,12 +138,8 @@ class AcquisitionEditorWidget(QWidget):
         acquisition_group = QGroupBox("Settings")
         acquisition_group.setLayout(acquisition_layout)
 
-
         main_layout = QVBoxLayout()
         main_layout.addWidget(acquisition_group)
-
-
-
 
         # Set the layout on the widget within the scroll area
         scroll_widget.setLayout(main_layout)
@@ -192,73 +188,16 @@ class Worker(QThread):
         self.scene_widget = scene_widget
 
 
-
     def run(self):
 
         print("Acquisition started")
 
         self.system_config = self.system_editor.get_config()
         self.cassi_system.update_config(self.system_config)
-        filtering_cube = self.cassi_system.filtering_cube
 
-        filtering_cube_wavelengths = self.cassi_system.list_wavelengths
-
-
-        scene = self.cassi_system.interpolate_scene(filtering_cube_wavelengths,chunk_size=50)
-
-
-        if self.system_editor.config["system architecture"]["system type"] == "DD-CASSI":
-
-            scene = match_scene_to_instrument(scene, filtering_cube)
-
-            self.finished_interpolated_scene.emit(scene)
-
-            # Define chunk size
-            chunk_size = 50  # Adjust this value based on your system's memory
-
-            t_0 = time.time()
-            measurement_in_3D = generate_dd_measurement(scene, filtering_cube, chunk_size)
-            print("Acquisition time: ", time.time() - t_0)
-
-            self.last_measurement_3D = measurement_in_3D
-            self.interpolated_scene = scene
-
-            self.finished_acquire_measure.emit(self.last_measurement_3D)  # Emit a tuple of arrays
-
-        elif self.system_editor.config["system architecture"]["system type"] == "SD-CASSI":
-
-            X_dmd_grid_crop, Y_dmd_grid_crop = crop_center(self.cassi_system.X_dmd_grid, self.cassi_system.Y_dmd_grid, scene.shape[1], scene.shape[0])
-
-
-            scene = match_scene_to_instrument(scene,X_dmd_grid_crop)
-            self.finished_interpolated_scene.emit(scene)
-
-
-            mask_config = self.filtering_widget.filtering_config_editor.get_config()
-
-            mask = self.cassi_system.generate_2D_mask(mask_config["mask"]["type"],
-                                                      mask_config["mask"]["slit position"],
-                                                      mask_config["mask"]["slit width"])
-
-
-            mask_crop, mask_crop = crop_center(mask, mask, scene.shape[1], scene.shape[0])
-
-
-            filtered_scene = scene * np.tile(mask_crop[..., np.newaxis], (1, 1, scene.shape[2]))
-
-
-            self.cassi_system.propagate_mask_grid(
-                [self.system_editor.config["spectral range"]["wavelength min"],
-                 self.system_editor.config["spectral range"]["wavelength max"]],
-                self.system_editor.config["spectral range"]["number of spectral samples"],X_input_grid=X_dmd_grid_crop,Y_input_grid=Y_dmd_grid_crop)
-
-            sd_measurement = self.cassi_system.generate_sd_measurement_cube(filtered_scene)
-
-            self.last_measurement_3D = sd_measurement
-            self.interpolated_scene = scene
-
-            self.finished_acquire_measure.emit(self.last_measurement_3D)  # Emit a tuple of arrays
-
+        self.cassi_system.image_acquisition(chunck_size=50)
+        self.finished_interpolated_scene.emit(self.cassi_system.interpolated_scene)
+        self.finished_acquire_measure.emit(self.cassi_system.last_measurement_3D)  # Emit a tuple of arrays
 
         print("Acquisition finished")
 
@@ -313,6 +252,7 @@ class AcquisitionWidget(QWidget):
         self.layout.setStretchFactor(self.run_button_group_box, 1)
         self.layout.setStretchFactor(self.result_display_widget, 3)
         self.setLayout(self.layout)
+
     def run_acquisition(self):
         # Get the configs from the editors
 
@@ -323,44 +263,13 @@ class AcquisitionWidget(QWidget):
         self.worker.start()
 
     def on_acquisition_saved(self):
-
-        self.result_directory = initialize_directory(self.acquisition_config_editor.get_config())
-
-        self.system_editor_config = self.system_editor.get_config()
-        with open(self.result_directory + "/config_system.yml", 'w') as file:
-            yaml.safe_dump(self.system_editor_config, file)
-
-        with open(self.result_directory + "/config_acquisition.yml", 'w') as file:
-            yaml.safe_dump(self.acquisition_config_editor.get_config(), file)
-
-        if self.last_measurement_3D is not None:
-            last_measurement = self.last_measurement_3D
-
-            # Calculate the other two arrays
-            sum_last_measurement = np.sum(last_measurement, axis=2)
-            sum_scene_interpolated = np.sum(self.interpolated_scene, axis=2)
-
-            # Save the arrays in an H5 file
-            with h5py.File(self.result_directory + '/filtered_image.h5', 'w') as f:
-                f.create_dataset('filtered_image', data=last_measurement)
-            with h5py.File(self.result_directory + '/image.h5', 'w') as f:
-                f.create_dataset('image', data=sum_last_measurement)
-            with h5py.File(self.result_directory + '/panchro.h5', 'w') as f:
-                f.create_dataset('panchro', data=sum_scene_interpolated)
-            with h5py.File(self.result_directory + '/filtering_cube.h5', 'w') as f:
-                f.create_dataset('filtering_cube', data=self.filtering_widget.filtering_cube)
-            with h5py.File(self.result_directory + '/wavelengths.h5', 'w') as f:
-                f.create_dataset('wavelengths', data=self.filtering_widget.list_wavelengths)
-
-            print("Measurement saved")
-        else:
-            print("No measurement to save")
+        self.config_acquisition = self.acquisition_config_editor.get_config()
+        self.config_filtering = self.filtering_widget.get_config()
+        self.cassi_system.save_acquisition(self.config_filtering,self.config_acquisition)
 
     @pyqtSlot(np.ndarray)
     def display_acquisition(self, measurement_3D):
-
         self.acquisition_display.display_acquisition(measurement_3D)
-
     def display_measurement_by_slide(self, measurement_3D):
         self.last_measurement_3D = measurement_3D
         self.acquisition_by_slice_display.display_measurement_slice_by_slice(measurement_3D)

@@ -6,6 +6,7 @@ from tqdm import tqdm
 from scipy import fftpack
 import numpy as np
 from utils.scenes_helper import *
+from utils.functions_acquisition import *
 
 
 def worker(args):
@@ -78,18 +79,10 @@ class CassiSystem():
         self.scene_interpolated = interpolate_scene_cube_along_wavelength(self.scene, self.list_scene_wavelengths, new_sampling,chunk_size)
         return self.scene_interpolated
 
-    # def generate_dmd_grid(self):
-    #
-    #     self.X_dmd_mask, self.Y_dmd_mask = self.create_grid(
-    #         self.system_config["SLM"]["sampling across X"],
-    #         self.system_config["SLM"]["sampling across Y"],
-    #         self.system_config["SLM"]["delta X"],
-    #         self.system_config["SLM"]["delta Y"])
-    #
-    #     return self.X_dmd_mask, self.Y_dmd_mask
 
-    def generate_2D_mask(self, mask_type,slit_position=None,slit_width=None,mask_path=None):
+    def generate_2D_mask(self,config_filtering):
 
+        mask_type = config_filtering['mask']['type']
 
         if self.system_config["SLM"]["sampling across Y"] % 2 == 0:
             self.system_config["SLM"]["sampling across Y"] += 1
@@ -100,15 +93,13 @@ class CassiSystem():
             self.mask = np.random.randint(0, 2, (self.system_config["SLM"]["sampling across Y"],
                                                  self.system_config["SLM"]["sampling across X"]))
         elif mask_type == "slit":
+            slit_position = config_filtering['mask']['slit position']
+            slit_width = config_filtering['mask']['slit width']
+
             self.mask = np.zeros((self.system_config["SLM"]["sampling across Y"],
                                   self.system_config["SLM"]["sampling across X"]))
 
-            if slit_position is not None:
-                slit_position = int(self.system_config["SLM"]["sampling across X"] / 2) + slit_position
-            else :
-                slit_position = int(self.system_config["SLM"]["sampling across X"] / 2)
-            if slit_width is None:
-                slit_width = 1
+            slit_position = int(self.system_config["SLM"]["sampling across X"] / 2) + slit_position
 
             self.mask[:,slit_position-slit_width//2:slit_position+slit_width] = 1
 
@@ -117,6 +108,7 @@ class CassiSystem():
             self.mask = self.generate_blue_noise(size)
 
         elif mask_type == "custom h5 mask":
+            mask_path = config_filtering['mask']['file path']
             if mask_path is None:
                 raise ValueError("Please provide h5 file path for custom mask.")
             else:
@@ -142,7 +134,6 @@ class CassiSystem():
                     # Confirm the mask is the correct shape
                     if mask.shape[0] != slm_sampling_y or mask.shape[1] != slm_sampling_x:
                         raise ValueError("Error cropping the mask, its shape does not match the SLM sampling.")
-
 
                 self.mask = mask
 
@@ -172,8 +163,6 @@ class CassiSystem():
 
         return binary_mask
 
-
-
     def generate_filtering_cube(self):
 
         print("--- Generating filtering cube ---- ")
@@ -193,18 +182,53 @@ class CassiSystem():
                                         self.system_config["detector"]["sampling across X"],
                                         self.system_config["spectral range"]["number of spectral samples"]))
 
-        wavelengths = np.linspace(self.system_config["spectral range"]["wavelength min"],
-                                  self.system_config["spectral range"]["wavelength max"],
-                                  self.system_config['spectral range']["number of spectral samples"])
         with Pool(mp.cpu_count()) as p:
             tasks = [(list_X_propagated_masks, list_Y_propagated_masks, mask, X_detector_grid, Y_detector_grid, i)
-                     for i in range(len(wavelengths))]
-            for index, zi in tqdm(enumerate(p.imap(worker, tasks)), total=len(wavelengths), desc='Processing tasks'):
+                     for i in range(len(self.list_wavelengths))]
+            for index, zi in tqdm(enumerate(p.imap(worker, tasks)), total=len(self.list_wavelengths), desc='Processing tasks'):
                 self.filtering_cube[:, :, index] = zi
 
-        self.list_wavelengths = wavelengths
 
         return self.filtering_cube
+
+
+    def image_acquisition(self,chunck_size=50):
+
+        scene = self.interpolate_scene(self.list_wavelengths, chunck_size)
+
+        if self.system_config["system architecture"]["system type"] == "DD-CASSI":
+
+            try:
+                self.filtering_cube
+            except:
+                return "Please generate filtering cube first"
+
+            scene = match_scene_to_instrument(scene, self.filtering_cube)
+            measurement_in_3D = generate_dd_measurement(scene, self.filtering_cube, chunck_size)
+
+            self.last_measurement_3D = measurement_in_3D
+            self.interpolated_scene = scene
+
+
+        elif self.system_config["system architecture"]["system type"] == "SD-CASSI":
+
+            X_dmd_grid_crop, Y_dmd_grid_crop = crop_center(self.X_dmd_grid, self.Y_dmd_grid,
+                                                           scene.shape[1], scene.shape[0])
+
+            scene = match_scene_to_instrument(scene, X_dmd_grid_crop)
+
+            mask_crop, mask_crop = crop_center(self.mask, self.mask, scene.shape[1], scene.shape[0])
+
+            filtered_scene = scene * np.tile(mask_crop[..., np.newaxis], (1, 1, scene.shape[2]))
+
+            self.propagate_mask_grid(X_input_grid=X_dmd_grid_crop,Y_input_grid=Y_dmd_grid_crop)
+
+            sd_measurement = self.generate_sd_measurement_cube(filtered_scene)
+
+            self.last_measurement_3D = sd_measurement
+            self.interpolated_scene = scene
+
+        return self.last_measurement_3D, self.interpolated_scene
 
     def generate_sd_measurement_cube(self,scene):
 
@@ -214,7 +238,6 @@ class CassiSystem():
         list_X_propagated_masks = self.list_X_propagated_mask
         list_Y_propagated_masks = self.list_Y_propagated_mask
         scene =  scene
-
 
 
 
@@ -282,15 +305,22 @@ class CassiSystem():
             self.alpha_c_transmis = self.alpha_c
 
         return self.alpha_c
-    def propagate_mask_grid(self,spectral_range,spectral_samples,X_input_grid=None,Y_input_grid=None):
+    def propagate_mask_grid(self,X_input_grid=None,Y_input_grid=None):
+
+        wavelength_min = self.system_config["spectral range"]["wavelength min"]
+        wavelength_max = self.system_config["spectral range"]["wavelength max"]
+        spectral_samples = self.system_config["spectral range"]["number of spectral samples"]
 
         if X_input_grid is None:
             X_input_grid = self.X_dmd_grid
         if Y_input_grid is None:
             Y_input_grid = self.Y_dmd_grid
 
-        wavelength_min = spectral_range[0]
-        wavelength_max = spectral_range[1]
+
+        wavelengths = np.linspace(wavelength_min,
+                                  wavelength_max,
+                                  spectral_samples)
+        self.list_wavelengths = wavelengths
 
         self.n_array_center = np.full(X_input_grid.shape,
                                       sellmeier(self.system_config["system architecture"]["dispersive element"]["wavelength center"]))
@@ -301,7 +331,6 @@ class CassiSystem():
         Y_input_grid_flatten = Y_input_grid.flatten()
 
 
-        self.list_wavelengths= list()
         self.list_X_propagated_mask = list()
         self.list_Y_propagated_mask = list()
 
@@ -330,10 +359,41 @@ class CassiSystem():
                                                         )
             self.list_X_propagated_mask.append(X_propagated_mask.reshape(X_input_grid.shape))
             self.list_Y_propagated_mask.append(Y_propagated_mask.reshape(Y_input_grid.shape))
-            self.list_wavelengths.append(np.full(X_input_grid.shape, lba).reshape(Y_input_grid.shape))
 
 
 
 
         return self.list_X_propagated_mask, self.list_Y_propagated_mask, self.list_wavelengths
+
+    def save_acquisition(self, config_filtering,config_acquisition):
+
+        self.result_directory = initialize_directory(config_acquisition)
+
+        with open(self.result_directory + "/config_system.yml", 'w') as file:
+            yaml.safe_dump(self.system_config, file)
+
+        with open(self.result_directory + "/config_filtering.yml", 'w') as file:
+            yaml.safe_dump(config_filtering, file)
+
+        with open(self.result_directory + "/config_acquisition.yml", 'w') as file:
+            yaml.safe_dump(config_acquisition, file)
+
+
+            # Calculate the other two arrays
+            sum_last_measurement = np.sum(self.last_measurement_3D, axis=2)
+            sum_scene_interpolated = np.sum(self.interpolated_scene, axis=2)
+
+            # Save the arrays in an H5 file
+            with h5py.File(self.result_directory + '/filtered_image.h5', 'w') as f:
+                f.create_dataset('filtered_image', data=self.last_measurement_3D)
+            with h5py.File(self.result_directory + '/image.h5', 'w') as f:
+                f.create_dataset('image', data=sum_last_measurement)
+            with h5py.File(self.result_directory + '/panchro.h5', 'w') as f:
+                f.create_dataset('panchro', data=sum_scene_interpolated)
+            with h5py.File(self.result_directory + '/filtering_cube.h5', 'w') as f:
+                f.create_dataset('filtering_cube', data=self.filtering_cube)
+            with h5py.File(self.result_directory + '/wavelengths.h5', 'w') as f:
+                f.create_dataset('wavelengths', data=self.list_wavelengths)
+
+        print("Acquisition saved in " + self.result_directory)
 
