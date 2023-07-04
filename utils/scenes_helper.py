@@ -7,6 +7,7 @@ import numpy as np
 import matplotlib.image as mpimg
 import re
 import seaborn as sns
+import h5py
 
 DATASETS_CONFIG = {
     "PaviaU": {
@@ -25,6 +26,10 @@ DATASETS_CONFIG = {
         "img":"Salinas_corrected.mat",
         "gt":"Salinas_gt.mat"
     },
+    "Chikusei": {
+        "img":"HyperspecVNIR_Chikusei_20140729.mat",
+        "gt":"HyperspecVNIR_Chikusei_20140729_Ground_Truth.mat"
+    }
 }
 
 
@@ -55,10 +60,11 @@ def get_dataset(dataset_name, target_folder="./", datasets=DATASETS_CONFIG):
     dataset = datasets[dataset_name]
 
     folder = target_folder + datasets[dataset_name].get("folder", dataset_name + "/")
+
     if dataset_name == "WashMall":
         # Load the image
         img = open_file(folder + "DC.tif")
-        gt = open_file(folder + "GT.png")
+        gt = open_file(folder + "gt.pkl")
 
         gt = gt + np.ones_like(gt)
 
@@ -68,6 +74,9 @@ def get_dataset(dataset_name, target_folder="./", datasets=DATASETS_CONFIG):
         rgb_bands = (60, 27, 17)
 
         delta_lambda = 2505-401
+
+        list_wavelengths = text_reader_wavelengths_washmall(folder + "wavelengths.txt")
+
 
     elif dataset_name == "dfc":
         # Load the image
@@ -93,6 +102,8 @@ def get_dataset(dataset_name, target_folder="./", datasets=DATASETS_CONFIG):
 
         gt = open_file(folder + "PaviaU_gt.mat")["paviaU_gt"]
 
+        print(gt)
+
         label_values = [
             "Undefined",
             "Asphalt",
@@ -112,12 +123,19 @@ def get_dataset(dataset_name, target_folder="./", datasets=DATASETS_CONFIG):
 
         list_wavelengths = np.linspace(430, 850, img.shape[-1]).tolist()
 
-    # elif dataset_name == "Salinas":
-    #     img = open_file(folder + "Salinas_corrected.mat")["salinas_corrected"]
-    #
-    #     rgb_bands = (55, 41, 12) # ????
-    #
-    #     get = open_file(folder + "Salinas_gt.mat")["salinas_gt"]
+    elif dataset_name == "Chikusei":
+
+        # Load the image
+        with h5py.File(folder + "HyperspecVNIR_Chikusei_20140729.mat", 'r') as f:
+            img = f['chikusei'][:]
+            img = np.transpose(img, (1, 2, 0))
+        # img = open_file(folder + "HyperspecVNIR_Chikusei_20140729.mat")["paviaU"]
+
+        rgb_bands = (55, 41, 12)
+
+
+        gt = open_file("./datasets/Chikusei/" + "HyperspecVNIR_Chikusei_20140729_Ground_Truth.mat")['GT'][0, 0][0]
+
 
     elif dataset_name == "IndianPines":
         # Load the image
@@ -163,6 +181,7 @@ def get_dataset(dataset_name, target_folder="./", datasets=DATASETS_CONFIG):
     # No NaN accepted
     nan_mask = np.isnan(img.sum(axis=-1))
     assert np.count_nonzero(nan_mask) == 0
+
 
     img[nan_mask] = 0
     gt[nan_mask] = 0
@@ -235,7 +254,29 @@ def text_reader_wvelengths_indian_pines(text_path):
                     }
     return aviris_data
 
+def text_reader_wavelengths_washmall(text_path):
 
+    list_wavelengths = []
+    with open(text_path, 'r') as file:
+        data = file.read()
+
+    # Split data by lines
+    lines = data.split('\n')
+
+    # Initialize the dictionary
+    washmall = {}
+
+    # Loop over each line in the data
+    for line in lines:
+        # Check if line is empty or not
+        if line.strip() != "":
+            # Check if line starts with a number (which indicates a data row)
+            if line.strip()[0].isdigit():
+                # Split line by multiple spaces
+                items = re.split(r'\s{1,}', line.strip())
+                wav = float(items[1])
+                list_wavelengths.append(wav)
+    return  list_wavelengths
 def palette_init(label_values, palette):
     if palette is None:
         palette = {0: (0, 0, 0)}
