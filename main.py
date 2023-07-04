@@ -62,7 +62,7 @@ class MainWindow(QMainWindow):
 
     def check_dock_visibility(self, dock_widget):
         # If the currently selected dock widget is the Scene dock, hide the system_config_dock
-        if dock_widget is self.scene_dock or dock_widget is self.acquisition_dock:
+        if dock_widget is self.scene_dock or dock_widget is self.acquisition_dock or dock_widget is self.filtering_dock:
             self.system_config_dock.setVisible(False)
         else:
             self.system_config_dock.setVisible(True)
@@ -71,6 +71,7 @@ class MainWindow(QMainWindow):
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     app.setWindowIcon(QIcon('logo_SIMCA.png'))  # Add this line
+
     main_window = MainWindow()
     main_window.show()
     sys.exit(app.exec_())
