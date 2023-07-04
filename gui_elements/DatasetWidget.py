@@ -1,19 +1,16 @@
 import yaml
-from PyQt5.QtWidgets import (QTabWidget,QHBoxLayout, QPushButton, QLabel, QLineEdit,
-                             QWidget, QFormLayout, QScrollArea, QGroupBox,QComboBox)
+from PyQt5.QtWidgets import (QTabWidget,QHBoxLayout, QPushButton, QLineEdit,
+                             QWidget, QFormLayout, QGroupBox,QComboBox)
 from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot
-from PyQt5.QtWidgets import  QVBoxLayout, QSlider
+from PyQt5.QtWidgets import  QSlider
 from PyQt5.QtCore import Qt
-import pyqtgraph as pg
 from utils.scenes_helper import *
 from utils.toolbox import *
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
-from matplotlib.colors import ListedColormap
-import matplotlib.patches as mpatches
 import os
 
-class SceneContentDisplay(QWidget):
+class datasetContentDisplay(QWidget):
 
     def __init__(self):
         super().__init__()
@@ -35,12 +32,12 @@ class SceneContentDisplay(QWidget):
         self.imageView = pg.ImageView(view=pg.PlotItem())
         self.layout.addWidget(self.imageView)
 
-    def diplay_scene_content(self, scene, list_wavelengths):
+    def diplay_dataset_content(self, dataset, list_wavelengths):
 
         self.list_wavelengths = list_wavelengths
 
         # Normalize filtering_cube values to range [0, 255] for ImageView
-        self.data = (scene - np.min(scene)) / (np.max(scene) - np.min(scene)) * 255
+        self.data = (dataset - np.min(dataset)) / (np.max(dataset) - np.min(dataset)) * 255
         self.data = self.data.astype(np.uint8)
 
         # Set slider maximum value
@@ -57,7 +54,7 @@ class SceneContentDisplay(QWidget):
         image = np.rot90(self.data[:, :, slice_index],1)
         self.imageView.setImage(np.flip(image, axis=0))
 
-class SceneHistogram(QWidget):
+class datasetHistogram(QWidget):
 
     def __init__(self):
         super().__init__()
@@ -123,7 +120,7 @@ import pyqtgraph as pg
 import numpy as np
 
 
-class SceneLabelisation(QWidget):
+class datasetLabelisation(QWidget):
     def __init__(self):
         super().__init__()
 
@@ -169,7 +166,7 @@ class SceneLabelisation(QWidget):
         legend_widget = LegendWidget(label_values, palette, ground_truth)
         self.legend_scroll_area.setWidget(legend_widget)
 
-class RGBSceneDisplay(QWidget):
+class RGBdatasetDisplay(QWidget):
     def __init__(self):
         super().__init__()
 
@@ -184,21 +181,21 @@ class RGBSceneDisplay(QWidget):
         self.layout.addWidget(self.toolbar)
         self.layout.addWidget(self.canvas)
 
-    def display_rgb_img(self, scene, rgb_bands):
-        rgb_array = np.zeros((scene.shape[0], scene.shape[1], 3))
+    def display_rgb_img(self, dataset, rgb_bands):
+        rgb_array = np.zeros((dataset.shape[0], dataset.shape[1], 3))
 
-        rgb = spectral.get_rgb(scene, rgb_bands)
+        rgb = spectral.get_rgb(dataset, rgb_bands)
         rgb /= np.max(rgb)
         rgb = np.asarray(255 * rgb, dtype='uint8')
 
-        # rgb_array[:, :, 0] = scene[:, :, rgb_bands[0]]
-        # rgb_array[:, :, 1] = scene[:, :, rgb_bands[1]]
-        # rgb_array[:, :, 2] = scene[:, :, rgb_bands[2]]
+        # rgb_array[:, :, 0] = dataset[:, :, rgb_bands[0]]
+        # rgb_array[:, :, 1] = dataset[:, :, rgb_bands[1]]
+        # rgb_array[:, :, 2] = dataset[:, :, rgb_bands[2]]
 
         self.figure.clear()
         ax1 = self.figure.add_subplot(111)
         im = ax1.imshow(rgb)
-        ax1.set_title('RGB image of the scene')
+        ax1.set_title('RGB image of the dataset')
         self.canvas.draw()
 
 class LegendWidget(QWidget):
@@ -295,9 +292,9 @@ class SpectralDataDisplay(QWidget):
 
 
 
-class SceneConfigEditor(QWidget):
+class datasetConfigEditor(QWidget):
 
-    scene_loaded = pyqtSignal(int,int,int,float,float)
+    dataset_loaded = pyqtSignal(int,int,int,float,float)
     def __init__(self,initial_config_file=None):
         super().__init__()
         self.initial_config_file = initial_config_file
@@ -309,7 +306,7 @@ class SceneConfigEditor(QWidget):
         # Create a widget for the scroll area
         scroll_widget = QWidget()
 
-        self.scenes_directory = QLineEdit()
+        self.datasets_directory = QLineEdit()
 
 
         self.directories_combo = QComboBox()
@@ -317,56 +314,56 @@ class SceneConfigEditor(QWidget):
 
 
 
-        self.scene_dimension_x = QLineEdit()
-        self.scene_dimension_x.setReadOnly(True)  # The dimensions should be read-only
-        self.scene_dimension_y = QLineEdit()
-        self.scene_dimension_y.setReadOnly(True)  # The dimensions should be read-only
-        self.scene_nb_of_spectral_bands = QLineEdit()
-        self.scene_nb_of_spectral_bands.setReadOnly(True)  # The dimensions should be read-only
+        self.dataset_dimension_x = QLineEdit()
+        self.dataset_dimension_x.setReadOnly(True)  # The dimensions should be read-only
+        self.dataset_dimension_y = QLineEdit()
+        self.dataset_dimension_y.setReadOnly(True)  # The dimensions should be read-only
+        self.dataset_nb_of_spectral_bands = QLineEdit()
+        self.dataset_nb_of_spectral_bands.setReadOnly(True)  # The dimensions should be read-only
         self.minimum_wavelengths = QLineEdit()
         self.minimum_wavelengths.setReadOnly(True)  # The dimensions should be read-only
         self.maximum_wavelengths = QLineEdit()
         self.maximum_wavelengths.setReadOnly(True)  # The dimensions should be read-only
 
-        self.scene_loaded.connect(self.update_scene_dimensions)
+        self.dataset_loaded.connect(self.update_dataset_dimensions)
 
         # Add the dimensioning configuration editor, the result display widget, and the run button to the layout
 
 
-        scene_layout = QFormLayout()
-        scene_layout.addRow("scenes directory", self.scenes_directory)
+        dataset_layout = QFormLayout()
+        dataset_layout.addRow("datasets directory", self.datasets_directory)
 
-        self.reload_scenes_button = QPushButton('reload scenes')
-        self.reload_scenes_button.clicked.connect(self.load_scenes)
+        self.reload_datasets_button = QPushButton('reload datasets')
+        self.reload_datasets_button.clicked.connect(self.load_datasets)
 
-        scene_layout.addWidget(self.reload_scenes_button)
+        dataset_layout.addWidget(self.reload_datasets_button)
 
-        chosen_scene = QFormLayout()
-
-
-
-        chosen_scene.addRow("scene name",self.directories_combo)
-        chosen_scene.addRow("dimension along X", self.scene_dimension_x)
-        chosen_scene.addRow("dimension along Y", self.scene_dimension_y)
-        chosen_scene.addRow("number of spectral bands", self.scene_nb_of_spectral_bands)
-        chosen_scene.addRow("minimum wavelength", self.minimum_wavelengths)
-        chosen_scene.addRow("maximum wavelength", self.maximum_wavelengths)
-
-        chosen_scene_group = QGroupBox("Chosen Scene")
-        chosen_scene_group.setLayout(chosen_scene)
-
-        # scene_layout.addRow("chosen scene", chosen_scene)
+        chosen_dataset = QFormLayout()
 
 
-        scene_group = QGroupBox("Settings")
-        scene_group.setLayout(scene_layout)
+
+        chosen_dataset.addRow("dataset name",self.directories_combo)
+        chosen_dataset.addRow("dimension along X", self.dataset_dimension_x)
+        chosen_dataset.addRow("dimension along Y", self.dataset_dimension_y)
+        chosen_dataset.addRow("number of spectral bands", self.dataset_nb_of_spectral_bands)
+        chosen_dataset.addRow("minimum wavelength", self.minimum_wavelengths)
+        chosen_dataset.addRow("maximum wavelength", self.maximum_wavelengths)
+
+        chosen_dataset_group = QGroupBox("Chosen dataset")
+        chosen_dataset_group.setLayout(chosen_dataset)
+
+        # dataset_layout.addRow("chosen dataset", chosen_dataset)
+
+
+        dataset_group = QGroupBox("Settings")
+        dataset_group.setLayout(dataset_layout)
 
 
 
 
         main_layout = QVBoxLayout()
-        main_layout.addWidget(scene_group)
-        main_layout.addWidget(chosen_scene_group)
+        main_layout.addWidget(dataset_group)
+        main_layout.addWidget(chosen_dataset_group)
 
 
 
@@ -384,15 +381,15 @@ class SceneConfigEditor(QWidget):
         if self.initial_config_file is not None:
             self.load_config(initial_config_file)
 
-        self.load_scenes()
+        self.load_datasets()
 
-    def load_scenes(self):
+    def load_datasets(self):
 
-        scene_dir = self.scenes_directory.text()
+        dataset_dir = self.datasets_directory.text()
         self.directories_combo.clear()
-        if os.path.isdir(scene_dir):
-            sub_dirs = [name for name in os.listdir(scene_dir)
-                        if os.path.isdir(os.path.join(scene_dir, name))]
+        if os.path.isdir(dataset_dir):
+            sub_dirs = [name for name in os.listdir(dataset_dir)
+                        if os.path.isdir(os.path.join(dataset_dir, name))]
             self.directories_combo.clear()
             self.directories_combo.addItems(sub_dirs)
 
@@ -403,50 +400,50 @@ class SceneConfigEditor(QWidget):
         self.update_config()
     def update_config(self):
         # This method should update your QLineEdit and QSpinBox widgets with the loaded config.
-        self.scenes_directory.setText(self.config['scenes directory'])
+        self.datasets_directory.setText(self.config['datasets directory'])
 
     @pyqtSlot(int,int,int,float,float)
-    def update_scene_dimensions(self, x_dim,y_dim,wav_dim,min_wav,max_wav):
+    def update_dataset_dimensions(self, x_dim,y_dim,wav_dim,min_wav,max_wav):
         # Update the GUI in this slot function, which is called from the main thread
-        self.scene_dimension_x.setText(str(x_dim))
-        self.scene_dimension_y.setText(str(y_dim))
-        self.scene_nb_of_spectral_bands.setText(str(wav_dim))
+        self.dataset_dimension_x.setText(str(x_dim))
+        self.dataset_dimension_y.setText(str(y_dim))
+        self.dataset_nb_of_spectral_bands.setText(str(wav_dim))
         self.minimum_wavelengths.setText(str(min_wav))
         self.maximum_wavelengths.setText(str(max_wav))
 
 
 class Worker(QThread):
 
-    finished_load_scene = pyqtSignal(np.ndarray,list)
-    finished_rgb_scene = pyqtSignal(np.ndarray,tuple)
-    finished_explore_scene = pyqtSignal(dict,dict,list)
-    finished_scene_labelisation = pyqtSignal(np.ndarray, list, dict)
-    finished_scene_label_histogram = pyqtSignal(np.ndarray, list, list,dict)
+    finished_load_dataset = pyqtSignal(np.ndarray,list)
+    finished_rgb_dataset = pyqtSignal(np.ndarray,tuple)
+    finished_explore_dataset = pyqtSignal(dict,dict,list)
+    finished_dataset_labelisation = pyqtSignal(np.ndarray, list, dict)
+    finished_dataset_label_histogram = pyqtSignal(np.ndarray, list, list,dict)
 
-    def __init__(self,cassi_system,scene_config_editor):
+    def __init__(self,cassi_system,dataset_config_editor):
         super().__init__()
 
         self.cassi_system = cassi_system
-        self.scene_config_editor = scene_config_editor
+        self.dataset_config_editor = dataset_config_editor
 
     def run(self):
-        self.scene_config_editor.update_config()
-        self.cassi_system.load_scene(self.scene_config_editor.directories_combo.currentText(),self.scene_config_editor.scenes_directory.text())
+        self.dataset_config_editor.update_config()
+        self.cassi_system.load_dataset(self.dataset_config_editor.directories_combo.currentText(),self.dataset_config_editor.datasets_directory.text())
 
-        self.scene_config_editor.scene_loaded.emit(self.cassi_system.scene.shape[1],self.cassi_system.scene.shape[0],self.cassi_system.scene.shape[2],
-                                                   self.cassi_system.list_scene_wavelengths[0],self.cassi_system.list_scene_wavelengths[-1])
+        self.dataset_config_editor.dataset_loaded.emit(self.cassi_system.dataset.shape[1],self.cassi_system.dataset.shape[0],self.cassi_system.dataset.shape[2],
+                                                   self.cassi_system.list_dataset_wavelengths[0],self.cassi_system.list_dataset_wavelengths[-1])
 
-        self.stats_per_class = explore_spectrums(self.cassi_system.scene, self.cassi_system.scene_gt, self.cassi_system.scene_label_values,
-                          ignored_labels=self.cassi_system.scene_ignored_labels, delta_lambda=None)
+        self.stats_per_class = explore_spectrums(self.cassi_system.dataset, self.cassi_system.dataset_gt, self.cassi_system.dataset_label_values,
+                          ignored_labels=self.cassi_system.dataset_ignored_labels, delta_lambda=None)
 
 
-        self.finished_load_scene.emit(self.cassi_system.scene,self.cassi_system.list_scene_wavelengths)  # Emit a tuple of arrays
-        self.finished_rgb_scene.emit(self.cassi_system.scene,self.cassi_system.scene_rgb_bands)  # Emit a tuple of arrays
-        self.finished_explore_scene.emit(self.stats_per_class,self.cassi_system.scene_palette,self.cassi_system.scene_label_values)
-        self.finished_scene_labelisation.emit(self.cassi_system.scene_gt,self.cassi_system.scene_label_values,self.cassi_system.scene_palette)# Emit a tuple of arrays
-        self.finished_scene_label_histogram.emit(self.cassi_system.scene_gt,self.cassi_system.scene_label_values,self.cassi_system.scene_ignored_labels,self.cassi_system.scene_palette)
-class SceneWidget(QWidget):
-    def __init__(self,cassi_system=None,scene_config_path="config/scene.yml"):
+        self.finished_load_dataset.emit(self.cassi_system.dataset,self.cassi_system.list_dataset_wavelengths)  # Emit a tuple of arrays
+        self.finished_rgb_dataset.emit(self.cassi_system.dataset,self.cassi_system.dataset_rgb_bands)  # Emit a tuple of arrays
+        self.finished_explore_dataset.emit(self.stats_per_class,self.cassi_system.dataset_palette,self.cassi_system.dataset_label_values)
+        self.finished_dataset_labelisation.emit(self.cassi_system.dataset_gt,self.cassi_system.dataset_label_values,self.cassi_system.dataset_palette)# Emit a tuple of arrays
+        self.finished_dataset_label_histogram.emit(self.cassi_system.dataset_gt,self.cassi_system.dataset_label_values,self.cassi_system.dataset_ignored_labels,self.cassi_system.dataset_palette)
+class DatasetWidget(QWidget):
+    def __init__(self,cassi_system=None,dataset_config_path="config/dataset.yml"):
         super().__init__()
 
         self.cassi_system = cassi_system
@@ -455,31 +452,31 @@ class SceneWidget(QWidget):
 
         self.result_display_widget = QTabWidget()
 
-        self.scene_content_display = SceneContentDisplay()
-        self.rgb_scene_display = RGBSceneDisplay()
-        self.scene_spectral_data_display = SpectralDataDisplay()
-        self.scene_labelisation_display = SceneLabelisation()
-        self.scene_label_histogram = SceneHistogram()
+        self.dataset_content_display = datasetContentDisplay()
+        self.rgb_dataset_display = RGBdatasetDisplay()
+        self.dataset_spectral_data_display = SpectralDataDisplay()
+        self.dataset_labelisation_display = datasetLabelisation()
+        self.dataset_label_histogram = datasetHistogram()
 
-        self.result_display_widget.addTab(self.scene_content_display, "Scene Content")
-        self.result_display_widget.addTab(self.rgb_scene_display, "Scene RGB")
-        self.result_display_widget.addTab(self.scene_spectral_data_display, "Scene Caracterization")
-        self.result_display_widget.addTab(self.scene_labelisation_display, "Scene Labelisation")
-        self.result_display_widget.addTab(self.scene_label_histogram, "Scene Labels Histogram")
+        self.result_display_widget.addTab(self.dataset_content_display, "dataset Content")
+        self.result_display_widget.addTab(self.rgb_dataset_display, "dataset RGB")
+        self.result_display_widget.addTab(self.dataset_spectral_data_display, "dataset Caracterization")
+        self.result_display_widget.addTab(self.dataset_labelisation_display, "dataset Labelisation")
+        self.result_display_widget.addTab(self.dataset_label_histogram, "dataset Labels Histogram")
 
 
-        self.run_button = QPushButton('Load Scene')
+        self.run_button = QPushButton('Load dataset')
         # self.run_button.setStyleSheet('QPushButton {background-color: green; color: white;}')        # Connect the button to the run_dimensioning method
-        self.run_button.clicked.connect(self.run_load_scene)
+        self.run_button.clicked.connect(self.run_load_dataset)
 
         # Create a group box for the run button
         self.run_button_group_box = QGroupBox()
         run_button_group_layout = QVBoxLayout()
 
-        if scene_config_path is not None:
-            self.scene_config_editor = SceneConfigEditor(scene_config_path)
+        if dataset_config_path is not None:
+            self.dataset_config_editor = datasetConfigEditor(dataset_config_path)
 
-        self.layout.addWidget(self.scene_config_editor)
+        self.layout.addWidget(self.dataset_config_editor)
 
         run_button_group_layout.addWidget(self.run_button)
         run_button_group_layout.addWidget(self.result_display_widget)
@@ -492,37 +489,37 @@ class SceneWidget(QWidget):
         self.layout.setStretchFactor(self.result_display_widget, 3)
         self.setLayout(self.layout)
     #
-    def run_load_scene(self):
+    def run_load_dataset(self):
         # Get the configs from the editors
 
 
-        self.worker = Worker(self.cassi_system,self.scene_config_editor)
-        self.worker.finished_load_scene.connect(self.display_scene_content)
-        self.worker.finished_rgb_scene.connect(self.display_rgb_scene)
-        self.worker.finished_explore_scene.connect(self.display_spectral_data)
-        self.worker.finished_scene_labelisation.connect(self.display_ground_truth)
-        self.worker.finished_scene_label_histogram.connect(self.scene_label_histogram.plot_label_histogram)
+        self.worker = Worker(self.cassi_system,self.dataset_config_editor)
+        self.worker.finished_load_dataset.connect(self.display_dataset_content)
+        self.worker.finished_rgb_dataset.connect(self.display_rgb_dataset)
+        self.worker.finished_explore_dataset.connect(self.display_spectral_data)
+        self.worker.finished_dataset_labelisation.connect(self.display_ground_truth)
+        self.worker.finished_dataset_label_histogram.connect(self.dataset_label_histogram.plot_label_histogram)
         self.worker.start()
 
     @pyqtSlot(np.ndarray,list)
-    def display_scene_content(self, scene,list_wavelengths):
-        self.scene = scene
-        self.scene_content_display.diplay_scene_content(scene,list_wavelengths)
+    def display_dataset_content(self, dataset,list_wavelengths):
+        self.dataset = dataset
+        self.dataset_content_display.diplay_dataset_content(dataset,list_wavelengths)
 
     @pyqtSlot(np.ndarray,tuple)
-    def display_rgb_scene(self, scene,rgb_bands):
+    def display_rgb_dataset(self, dataset,rgb_bands):
         print(rgb_bands)
-        self.rgb_scene_display.display_rgb_img(scene,rgb_bands)
+        self.rgb_dataset_display.display_rgb_img(dataset,rgb_bands)
 
     @pyqtSlot(dict,dict,list)
     def display_spectral_data(self,stats_class,palette,label_values):
         mean_spectrums, std_spectrums= stats_class["mean_spectrums"], stats_class["std_spectrums"]
-        self.scene_spectral_data_display.display_spectral_data(mean_spectrums, std_spectrums,palette, label_values)
+        self.dataset_spectral_data_display.display_spectral_data(mean_spectrums, std_spectrums,palette, label_values)
 
     @pyqtSlot(np.ndarray, list, dict)
     def display_ground_truth(self,ground_truth, label_values, palette):
-        self.scene_labelisation_display.display_ground_truth(ground_truth, label_values, palette)
+        self.dataset_labelisation_display.display_ground_truth(ground_truth, label_values, palette)
 
     @pyqtSlot(np.ndarray, list, list,dict)
     def display_plot_label_histogram(self, ground_truth, label_values, ignored_labels,palette):
-        self.scene_label_histogram.plot_label_histogram(ground_truth, label_values, ignored_labels,palette)
+        self.dataset_label_histogram.plot_label_histogram(ground_truth, label_values, ignored_labels,palette)

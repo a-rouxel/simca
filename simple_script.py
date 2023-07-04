@@ -15,7 +15,7 @@ if __name__ == '__main__':
     cassi_system = CassiSystem(system_config_path="config/cassi_system.yml")
 
     # SCENE : Load the hyperspectral scene
-    cassi_system.load_scene(scene_name, scene_directory)
+    cassi_system.load_dataset(scene_name, scene_directory)
 
     # MASK : Generate the dmd mask
     cassi_system.generate_2D_mask(config_masks)

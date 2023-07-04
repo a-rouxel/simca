@@ -5,7 +5,7 @@ from PyQt5.QtGui import QIcon
 from gui_elements import OpticsWidget
 from gui_elements import EditorSystemConfigWidget
 from gui_elements import FilteringCubeWidget
-from gui_elements import SceneWidget
+from gui_elements import DatasetWidget
 from gui_elements import AcquisitionWidget
 
 from CassiSystem import CassiSystem
@@ -20,7 +20,7 @@ class MainWindow(QMainWindow):
 
         self.cassi_system = CassiSystem(system_config_path="config/cassi_system.yml")
 
-        self.scene_widget = SceneWidget(cassi_system=self.cassi_system,scene_config_path="config/scene.yml")
+        self.scene_widget = DatasetWidget(cassi_system=self.cassi_system, dataset_config_path="config/dataset.yml")
         self.scene_dock = QDockWidget("Scene")
         self.scene_dock.setWidget(self.scene_widget)
         self.addDockWidget(Qt.RightDockWidgetArea, self.scene_dock)

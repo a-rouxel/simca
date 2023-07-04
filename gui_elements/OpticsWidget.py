@@ -167,13 +167,13 @@ class Worker(QThread):
 
         cassi_system = self.cassi_system
 
-        self.finished_define_mask_grid.emit((cassi_system.X_dmd_grid, cassi_system.Y_dmd_grid))  # Emit a tuple of arrays
+        self.finished_define_mask_grid.emit((cassi_system.X_dmd_coordinates_grid, cassi_system.Y_dmd_coordinates_grid))  # Emit a tuple of arrays
 
         list_X_detector, list_Y_detector, list_wavelengths = cassi_system.propagate_mask_grid()
         self.finished_propagate_mask_grid.emit((list_X_detector, list_Y_detector,list_wavelengths))
 
 
-        self.finished_distorsion.emit((cassi_system.X_dmd_grid, cassi_system.Y_dmd_grid,list_X_detector, list_Y_detector, list_wavelengths))
+        self.finished_distorsion.emit((cassi_system.X_dmd_coordinates_grid, cassi_system.Y_dmd_coordinates_grid,list_X_detector, list_Y_detector, list_wavelengths))
 
 
 

@@ -2,85 +2,115 @@ from utils.functions_retropropagating import *
 from scipy.interpolate import griddata
 import multiprocessing as mp
 from multiprocessing import Pool
-from tqdm import tqdm
 from scipy import fftpack
-import numpy as np
 from utils.scenes_helper import *
 from utils.functions_acquisition import *
 
-
-def worker(args):
-    """
-    Process to parallellize
-    :param args:
-    :return:
-    """
-    list_X_propagated_masks, list_Y_propagated_masks, mask, X_detector_grid, Y_detector_grid, wavelength_index = args
-
-    list_X_propagated_masks = np.nan_to_num(list_X_propagated_masks)
-    interpolated_mask = griddata((list_X_propagated_masks[wavelength_index][:, :].flatten(),
-                                  list_Y_propagated_masks[wavelength_index][:, :].flatten()),
-                                 mask.flatten(),
-                                 (X_detector_grid, Y_detector_grid),
-                                 method='linear')
-    return interpolated_mask
-
-
-
 class CassiSystem():
+    """Class that contains the optical system main attributes and methods"""
 
     def __init__(self,system_config_path):
+        """
+        Load the system configuration file and initialize the grids for the DMD and the detector
+
+        Args:
+            system_config_path:
+
+        Initial Attributes:
+            system_config (dict): system configuration
+            X_dmd_coordinates_grid (numpy array): X grid coordinates of the center of the DMD pixels
+            Y_dmd_coordinates_grid (numpy array): Y grid coordinates of the center of the DMD pixels
+            X_detector_coordinates_grid (numpy array): X grid coordinates of the center of the detector pixels
+            Y_detector_coordinates_grid (numpy array): Y grid coordinates of the center of the detector pixels
+        """
 
         self.system_config = load_yaml_config(system_config_path)
 
 
-        self.X_dmd_grid, self.Y_dmd_grid = self.create_grid(self.system_config["SLM"]["sampling across X"],
+        self.X_dmd_coordinates_grid, self.Y_dmd_coordinates_grid = self.create_coordinates_grid(self.system_config["SLM"]["sampling across X"],
                                                                         self.system_config["SLM"]["sampling across Y"],
                                                                         self.system_config["SLM"]["delta X"],
                                                                         self.system_config["SLM"]["delta Y"])
 
 
-        self.X_detector_grid, self.Y_detector_grid = self.create_grid(self.system_config["detector"]["sampling across X"],
+        self.X_detector_coordinates_grid, self.Y_detector_coordinates_grid = self.create_coordinates_grid(self.system_config["detector"]["sampling across X"],
                                                                         self.system_config["detector"]["sampling across Y"],
                                                                         self.system_config["detector"]["delta X"],
                                                                         self.system_config["detector"]["delta Y"])
 
-    def load_scene(self,directory,scene_name):
+    def load_dataset(self,directory,dataset_name):
+        """Loading the dataset
+
+        Args:
+            directory (str): name of the directory containing the dataset
+            dataset_name (str): dataset name
+        
+        Returns:
+            list: a list containing the dataset, the ground truth, the list of wavelengths, the label values, the ignored labels, the rgb bands, the palette and the delta lambda
+        """
 
 
-            img, gt, list_wavelengths, label_values, ignored_labels, rgb_bands, palette, delta_lambda = get_dataset(directory,scene_name)
-            self.scene = img
-            self.scene_gt = gt
-            self.list_scene_wavelengths = list_wavelengths
-            self.scene_label_values = label_values
-            self.scene_ignored_labels = ignored_labels
-            self.scene_rgb_bands = rgb_bands
-            self.scene_palette = palette
-            self.scene_delta_lambda = delta_lambda
+        img, gt, list_wavelengths, label_values, ignored_labels, rgb_bands, palette, delta_lambda = get_dataset(directory,dataset_name)
+        self.dataset = img
+        self.dataset_gt = gt
+        self.list_dataset_wavelengths = list_wavelengths
+        self.dataset_label_values = label_values
+        self.dataset_ignored_labels = ignored_labels
+        self.dataset_rgb_bands = rgb_bands
+        self.dataset_palette = palette
+        self.dataset_delta_lambda = delta_lambda
 
-            self.scene_palette = palette_init(label_values, palette)
+        self.dataset_palette = palette_init(label_values, palette)
+
+        return [self.dataset, self.dataset_gt, self.list_dataset_wavelengths, self.dataset_label_values, self.dataset_ignored_labels, self.dataset_rgb_bands, self.dataset_palette, self.dataset_delta_lambda,self.dataset_palette]
 
     def update_config(self,new_config):
+        """
+        Update the system configuration and recalculate the DMD and detector grids coordinates
+        Args:
+            new_config (dict): new system configuration
+
+        Returns:
+
+        """
 
         self.system_config = new_config
 
-        self.X_dmd_grid, self.Y_dmd_grid = self.create_grid(self.system_config["SLM"]["sampling across X"],
+        self.X_dmd_coordinates_grid, self.Y_dmd_coordinates_grid = self.create_coordinates_grid(self.system_config["SLM"]["sampling across X"],
                                                                         self.system_config["SLM"]["sampling across Y"],
                                                                         self.system_config["SLM"]["delta X"],
                                                                         self.system_config["SLM"]["delta Y"])
 
 
-        self.X_detector_grid, self.Y_detector_grid = self.create_grid(self.system_config["detector"]["sampling across X"],
+        self.X_detector_coordinates_grid, self.Y_detector_coordinates_grid = self.create_coordinates_grid(self.system_config["detector"]["sampling across X"],
                                                                         self.system_config["detector"]["sampling across Y"],
                                                                         self.system_config["detector"]["delta X"],
                                                                         self.system_config["detector"]["delta Y"])
 
-    def interpolate_scene(self,new_sampling,chunk_size):
-        self.scene_interpolated = interpolate_scene_cube_along_wavelength(self.scene, self.list_scene_wavelengths, new_sampling,chunk_size)
-        return self.scene_interpolated
+    def interpolate_dataset(self,new_sampling,chunk_size):
+        """
+        Interpolate the dataset to a new sampling
+        Args:
+            new_sampling:
+            chunk_size:
+
+        Returns:
+            dataset_interpolated (numpy array): interpolated dataset
+
+        """
+        self.dataset_interpolated = interpolate_dataset_cube_along_wavelength(self.dataset, self.list_dataset_wavelengths, new_sampling,chunk_size)
+        return self.dataset_interpolated
 
 
     def generate_2D_mask(self,config_filtering):
+        """
+
+        Args:
+            config_filtering:
+
+        Returns:
+            mask (numpy array): 2D DMD mask based on the configuration file
+        """
 
         mask_type = config_filtering['mask']['type']
 
@@ -141,6 +171,15 @@ class CassiSystem():
 
     @staticmethod
     def generate_blue_noise(size):
+        """
+        Generate blue noise (high frequency pseudo-random) type mask
+        Args:
+            size:
+
+        Returns:
+            binary mask (numpy array): binary blue noise type mask
+
+        """
         shape = (size[0], size[1])
         N = shape[0] * shape[1]
         rng = np.random.default_rng()
@@ -164,14 +203,13 @@ class CassiSystem():
         return binary_mask
 
     def generate_filtering_cube(self):
+        """
+        Generate filtering cube, each slice is a propagated mask interpolated on the detector grid
 
-        print("--- Generating filtering cube ---- ")
+        Returns:
+            filtering_cube (numpy array): 3D filtering cube
 
-        X_detector_grid = self.X_detector_grid
-        Y_detector_grid = self.Y_detector_grid
-        list_X_propagated_masks = self.list_X_propagated_mask
-        list_Y_propagated_masks = self.list_Y_propagated_mask
-        mask =  self.mask
+        """
 
         if self.system_config["detector"]["sampling across Y"] %2 ==0:
             self.system_config["detector"]["sampling across Y"] +=1
@@ -183,7 +221,7 @@ class CassiSystem():
                                         self.system_config["spectral range"]["number of spectral samples"]))
 
         with Pool(mp.cpu_count()) as p:
-            tasks = [(list_X_propagated_masks, list_Y_propagated_masks, mask, X_detector_grid, Y_detector_grid, i)
+            tasks = [(self.list_X_propagated_mask, self.list_Y_propagated_mask, self.mask, self.X_detector_coordinates_grid, self.Y_detector_coordinates_grid, i)
                      for i in range(len(self.list_wavelengths))]
             for index, zi in tqdm(enumerate(p.imap(worker, tasks)), total=len(self.list_wavelengths), desc='Processing tasks'):
                 self.filtering_cube[:, :, index] = zi
@@ -193,8 +231,17 @@ class CassiSystem():
 
 
     def image_acquisition(self,chunck_size=50):
+        """
+        Contains the acquisition process depending on the cassi system type
+        Args:
+            chunck_size (int): default block size for the dataset
 
-        scene = self.interpolate_scene(self.list_wavelengths, chunck_size)
+        Returns:
+
+        """
+
+
+        dataset = self.interpolate_dataset(self.list_wavelengths, chunck_size)
 
         if self.system_config["system architecture"]["system type"] == "DD-CASSI":
 
@@ -203,7 +250,7 @@ class CassiSystem():
             except:
                 return "Please generate filtering cube first"
 
-            scene = match_scene_to_instrument(scene, self.filtering_cube)
+            scene = match_scene_to_instrument(dataset, self.filtering_cube)
             measurement_in_3D = generate_dd_measurement(scene, self.filtering_cube, chunck_size)
 
             self.last_measurement_3D = measurement_in_3D
@@ -212,16 +259,16 @@ class CassiSystem():
 
         elif self.system_config["system architecture"]["system type"] == "SD-CASSI":
 
-            X_dmd_grid_crop, Y_dmd_grid_crop = crop_center(self.X_dmd_grid, self.Y_dmd_grid,
-                                                           scene.shape[1], scene.shape[0])
+            X_dmd_coordinates_grid_crop, Y_dmd_coordinates_grid_crop = crop_center(self.X_dmd_coordinates_grid, self.Y_dmd_coordinates_grid,
+                                                           dataset.shape[1], dataset.shape[0])
 
-            scene = match_scene_to_instrument(scene, X_dmd_grid_crop)
+            scene = match_scene_to_instrument(dataset, X_dmd_coordinates_grid_crop)
 
             mask_crop, mask_crop = crop_center(self.mask, self.mask, scene.shape[1], scene.shape[0])
 
             filtered_scene = scene * np.tile(mask_crop[..., np.newaxis], (1, 1, scene.shape[2]))
 
-            self.propagate_mask_grid(X_input_grid=X_dmd_grid_crop,Y_input_grid=Y_dmd_grid_crop)
+            self.propagate_mask_grid(X_input_grid=X_dmd_coordinates_grid_crop,Y_input_grid=Y_dmd_coordinates_grid_crop)
 
             sd_measurement = self.generate_sd_measurement_cube(filtered_scene)
 
@@ -233,8 +280,8 @@ class CassiSystem():
     def generate_sd_measurement_cube(self,scene):
 
 
-        X_detector_grid = self.X_detector_grid
-        Y_detector_grid = self.Y_detector_grid
+        X_detector_coordinates_grid = self.X_detector_coordinates_grid
+        Y_detector_coordinates_grid = self.Y_detector_coordinates_grid
         list_X_propagated_masks = self.list_X_propagated_mask
         list_Y_propagated_masks = self.list_Y_propagated_mask
         scene =  scene
@@ -255,7 +302,7 @@ class CassiSystem():
                                   self.system_config["spectral range"]["wavelength max"],
                                   self.system_config['spectral range']["number of spectral samples"])
         with Pool(mp.cpu_count()) as p:
-            tasks = [(list_X_propagated_masks, list_Y_propagated_masks, scene[:,:,i], X_detector_grid, Y_detector_grid, i)
+            tasks = [(list_X_propagated_masks, list_Y_propagated_masks, scene[:,:,i], X_detector_coordinates_grid, Y_detector_coordinates_grid, i)
                      for i in range(len(wavelengths))]
             for index, zi in tqdm(enumerate(p.imap(worker, tasks)), total=len(wavelengths), desc='Processing tasks'):
                 self.measurement_sd[:, :, index] = zi
@@ -266,7 +313,7 @@ class CassiSystem():
 
 
 
-    def create_grid(self,nb_of_samples_along_x, nb_of_samples_along_y, delta_x, delta_y):
+    def create_coordinates_grid(self,nb_of_samples_along_x, nb_of_samples_along_y, delta_x, delta_y):
 
             if nb_of_samples_along_x % 2 == 0:
                 nb_of_samples_along_x += 1
@@ -312,9 +359,9 @@ class CassiSystem():
         spectral_samples = self.system_config["spectral range"]["number of spectral samples"]
 
         if X_input_grid is None:
-            X_input_grid = self.X_dmd_grid
+            X_input_grid = self.X_dmd_coordinates_grid
         if Y_input_grid is None:
-            Y_input_grid = self.Y_dmd_grid
+            Y_input_grid = self.Y_dmd_coordinates_grid
 
 
         wavelengths = np.linspace(wavelength_min,
@@ -397,3 +444,18 @@ class CassiSystem():
 
         print("Acquisition saved in " + self.result_directory)
 
+def worker(args):
+    """
+    Process to parallellize
+    :param args:
+    :return:
+    """
+    list_X_propagated_masks, list_Y_propagated_masks, mask, X_detector_coordinates_grid, Y_detector_coordinates_grid, wavelength_index = args
+
+    list_X_propagated_masks = np.nan_to_num(list_X_propagated_masks)
+    interpolated_mask = griddata((list_X_propagated_masks[wavelength_index][:, :].flatten(),
+                                  list_Y_propagated_masks[wavelength_index][:, :].flatten()),
+                                 mask.flatten(),
+                                 (X_detector_coordinates_grid, Y_detector_coordinates_grid),
+                                 method='linear')
+    return interpolated_mask

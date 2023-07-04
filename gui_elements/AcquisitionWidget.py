@@ -1,16 +1,12 @@
-import yaml
-from PyQt5.QtWidgets import (QTabWidget,QHBoxLayout, QPushButton,QComboBox,QLineEdit)
+from PyQt5.QtWidgets import (QTabWidget, QHBoxLayout, QPushButton, QComboBox, QLineEdit)
 from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot
 from PyQt5.QtWidgets import QFormLayout, QGroupBox, QScrollArea
 from PyQt5.QtWidgets import QVBoxLayout, QSlider, QLabel, QWidget
 from utils.helpers import *
-import h5py
 from PyQt5.QtCore import Qt
 import pyqtgraph as pg
 import numpy as np
-import time
-from utils.functions_acquisition import generate_dd_measurement, match_scene_to_instrument, crop_center
-from CassiSystem import CassiSystem
+
 class AcquisitionPanchromaticWidget(QWidget):
 
     def __init__(self):
@@ -25,12 +21,7 @@ class AcquisitionPanchromaticWidget(QWidget):
 
     def display_panchrom_acquisition(self, measurement_3D):
         """
-        Display the ground truth with each color corresponding to a label_value.
 
-        :param ground_truth: np.array, ground truth labels
-        :param label_values: list, label_values[i] = name of the class i
-        :param palette: color palette to use, must be a list of colors where the index corresponds to the label
-        :param ignored_labels: list of ignored labels (pixel with no label)
         """
         # Compute the sum along the third axis
         image = np.sum(measurement_3D, axis=2)
@@ -91,12 +82,7 @@ class AcquisitionDisplay(QWidget):
 
     def display_acquisition(self, measurement_3D):
         """
-        Display the ground truth with each color corresponding to a label_value.
 
-        :param ground_truth: np.array, ground truth labels
-        :param label_values: list, label_values[i] = name of the class i
-        :param palette: color palette to use, must be a list of colors where the index corresponds to the label
-        :param ignored_labels: list of ignored labels (pixel with no label)
         """
         # Compute the sum along the third axis
         image = np.sum(measurement_3D, axis=2)
@@ -180,12 +166,12 @@ class Worker(QThread):
     finished_interpolated_scene = pyqtSignal(np.ndarray)
 
 
-    def __init__(self,cassi_system,system_editor,filtering_widget, scene_widget,acquisition_config_editor):
+    def __init__(self,cassi_system,system_editor,filtering_widget, dataset_widget,acquisition_config_editor):
         super().__init__()
         self.cassi_system = cassi_system
         self.system_editor = system_editor
         self.filtering_widget = filtering_widget
-        self.scene_widget = scene_widget
+        self.dataset_widget = dataset_widget
 
 
     def run(self):
@@ -202,12 +188,12 @@ class Worker(QThread):
         print("Acquisition finished")
 
 class AcquisitionWidget(QWidget):
-    def __init__(self,cassi_system,system_editor,scene_widget, filtering_widget,acquisition_config_path="config/acquisition.yml"):
+    def __init__(self,cassi_system,system_editor,dataset_widget, filtering_widget,acquisition_config_path="config/acquisition.yml"):
         super().__init__()
 
         self.cassi_system = cassi_system
         self.system_editor = system_editor
-        self.scene_widget = scene_widget
+        self.dataset_widget = dataset_widget
         self.filtering_widget = filtering_widget
         self.last_measurement_3D = None
         self.interpolated_scene = None
@@ -256,7 +242,7 @@ class AcquisitionWidget(QWidget):
     def run_acquisition(self):
         # Get the configs from the editors
 
-        self.worker = Worker(self.cassi_system,self.system_editor,self.filtering_widget,self.scene_widget,self.acquisition_config_editor)
+        self.worker = Worker(self.cassi_system,self.system_editor,self.filtering_widget,self.dataset_widget,self.acquisition_config_editor)
         self.worker.finished_acquire_measure.connect(self.display_acquisition)
         self.worker.finished_acquire_measure.connect(self.display_measurement_by_slide)
         self.worker.finished_interpolated_scene.connect(self.display_panchrom_display)
