@@ -179,14 +179,14 @@ class CassiSystem():
 
         return self.filtering_cube
 
-    def generate_sd_measurement_cube(self):
+    def generate_sd_measurement_cube(self,scene):
 
 
         X_detector_grid = self.X_detector_grid
         Y_detector_grid = self.Y_detector_grid
         list_X_propagated_masks = self.list_X_propagated_mask
         list_Y_propagated_masks = self.list_Y_propagated_mask
-        scene =  self.scene
+        scene =  scene
 
 
 

@@ -206,6 +206,8 @@ class Worker(QThread):
 
         scene = self.cassi_system.interpolate_scene(filtering_cube_wavelengths,chunk_size=50)
 
+        print("scene size: ", scene.shape)
+
         if self.system_editor.config["system architecture"]["system type"] == "DD-CASSI":
 
             scene = match_scene_to_instrument(scene, filtering_cube)
@@ -226,40 +228,40 @@ class Worker(QThread):
 
         elif self.system_editor.config["system architecture"]["system type"] == "SD-CASSI":
 
-            print("Not working yet")
+            X_dmd_grid, Y_dmd_grid = self.cassi_system.create_dmd_mask()
 
-            # X_dmd_grid, Y_dmd_grid = self.cassi_system.create_dmd_mask()
-            # X_dmd_grid_crop, Y_dmd_grid_crop = crop_center(X_dmd_grid, Y_dmd_grid, scene.shape[1], scene.shape[0])
-            #
-            #
-            # scene = match_scene_to_instrument(scene,X_dmd_grid_crop)
-            # self.finished_interpolated_scene.emit(scene)
-            #
-            #
-            #
-            # mask_config = self.filtering_widget.filtering_config_editor.get_config()
-            #
-            # mask = self.cassi_system.generate_2D_mask(mask_config["mask"]["type"],
-            #                                           mask_config["mask"]["slit position"],
-            #                                           mask_config["mask"]["slit width"])
-            #
-            #
-            # mask_crop, mask_crop = crop_center(mask, mask, scene.shape[1], scene.shape[0])
-            #
-            # filtered_scene = scene * np.tile(mask_crop[..., np.newaxis], (1, 1, scene.shape[2]))
-            #
-            #
-            # self.cassi_system.propagate_mask_grid(
-            #     [self.system_editor.config["spectral range"]["wavelength min"],
-            #      self.system_editor.config["spectral range"]["wavelength max"]],
-            #     self.system_editor.config["spectral range"]["number of spectral samples"],X_input_grid=X_dmd_grid_crop,Y_input_grid=Y_dmd_grid_crop)
-            #
-            # sd_measurement = self.cassi_system.generate_sd_measurement_cube()
-            #
-            # self.last_measurement_3D = sd_measurement
-            # self.interpolated_scene = scene
-            #
-            self.finished_acquire_measure.emit(None)  # Emit a tuple of arrays
+
+            X_dmd_grid_crop, Y_dmd_grid_crop = crop_center(X_dmd_grid, Y_dmd_grid, scene.shape[1], scene.shape[0])
+
+
+            scene = match_scene_to_instrument(scene,X_dmd_grid_crop)
+            self.finished_interpolated_scene.emit(scene)
+
+
+            mask_config = self.filtering_widget.filtering_config_editor.get_config()
+
+            mask = self.cassi_system.generate_2D_mask(mask_config["mask"]["type"],
+                                                      mask_config["mask"]["slit position"],
+                                                      mask_config["mask"]["slit width"])
+
+
+            mask_crop, mask_crop = crop_center(mask, mask, scene.shape[1], scene.shape[0])
+
+
+            filtered_scene = scene * np.tile(mask_crop[..., np.newaxis], (1, 1, scene.shape[2]))
+
+
+            self.cassi_system.propagate_mask_grid(
+                [self.system_editor.config["spectral range"]["wavelength min"],
+                 self.system_editor.config["spectral range"]["wavelength max"]],
+                self.system_editor.config["spectral range"]["number of spectral samples"],X_input_grid=X_dmd_grid_crop,Y_input_grid=Y_dmd_grid_crop)
+
+            sd_measurement = self.cassi_system.generate_sd_measurement_cube(filtered_scene)
+
+            self.last_measurement_3D = sd_measurement
+            self.interpolated_scene = scene
+
+            self.finished_acquire_measure.emit(self.last_measurement_3D)  # Emit a tuple of arrays
 
 
         print("Acquisition finished")
