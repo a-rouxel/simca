@@ -295,7 +295,7 @@ class AcquisitionWidget(QWidget):
         self.result_display_widget.addTab(self.acquisition_panchro_display, "Panchromatic Image")
 
         self.run_button = QPushButton('Run Acquisition')
-        self.run_button.setStyleSheet('QPushButton {background-color: black; color: white;}')        # Connect the button to the run_dimensioning method
+        # self.run_button.setStyleSheet('QPushButton {background-color: black; color: white;}')        # Connect the button to the run_dimensioning method
         self.run_button.clicked.connect(self.run_acquisition)
 
         self.save_acquisition_button = QPushButton("Save Acquisition")
