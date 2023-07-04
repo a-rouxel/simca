@@ -91,7 +91,7 @@ class CassiSystem():
 
         return self.X_dmd_mask, self.Y_dmd_mask
 
-    def generate_2D_mask(self, mask_type,slit_position=None,slit_width=None):
+    def generate_2D_mask(self, mask_type,slit_position=None,slit_width=None,mask_path=None):
 
 
         if self.system_config["SLM"]["sampling across Y"] % 2 == 0:
@@ -118,6 +118,36 @@ class CassiSystem():
         elif mask_type == "blue":
             size = (self.system_config["SLM"]["sampling across Y"], self.system_config["SLM"]["sampling across X"])
             self.mask = self.generate_blue_noise(size)
+
+        elif mask_type == "custom h5 mask":
+            if mask_path is None:
+                raise ValueError("Please provide h5 file path for custom mask.")
+            else:
+                with h5py.File(mask_path, 'r') as f:
+                    mask = f['mask'][:]
+
+                slm_sampling_y = self.system_config["SLM"]["sampling across Y"]
+                slm_sampling_x = self.system_config["SLM"]["sampling across X"]
+
+                if mask.shape[0] != slm_sampling_y or mask.shape[1] != slm_sampling_x:
+                    # Find center point of the mask
+                    center_y, center_x = mask.shape[0] // 2, mask.shape[1] // 2
+
+                    # Determine starting and ending indices for the crop
+                    start_y = center_y - slm_sampling_y // 2
+                    end_y = start_y + slm_sampling_y
+                    start_x = center_x - slm_sampling_x // 2
+                    end_x = start_x + slm_sampling_x
+
+                    # Crop the mask
+                    mask = mask[start_y:end_y, start_x:end_x]
+
+                    # Confirm the mask is the correct shape
+                    if mask.shape[0] != slm_sampling_y or mask.shape[1] != slm_sampling_x:
+                        raise ValueError("Error cropping the mask, its shape does not match the SLM sampling.")
+
+
+                self.mask = mask
 
         return self.mask
 
