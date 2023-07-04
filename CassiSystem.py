@@ -58,9 +58,6 @@ class CassiSystem():
             self.scene_delta_lambda = delta_lambda
 
             self.scene_palette = palette_init(label_values, palette)
-            #
-            # print("Error: scene not found")
-            # self.scene_loaded.emit(self.scene.shape[1],self.scene.shape[0],self.scene.shape[2],list_wavelengths[0],list_wavelengths[-1])
 
     def update_config(self,new_config):
 
@@ -81,15 +78,15 @@ class CassiSystem():
         self.scene_interpolated = interpolate_scene_cube_along_wavelength(self.scene, self.list_scene_wavelengths, new_sampling,chunk_size)
         return self.scene_interpolated
 
-    def generate_dmd_grid(self):
-
-        self.X_dmd_mask, self.Y_dmd_mask = self.create_grid(
-            self.system_config["SLM"]["sampling across X"],
-            self.system_config["SLM"]["sampling across Y"],
-            self.system_config["SLM"]["delta X"],
-            self.system_config["SLM"]["delta Y"])
-
-        return self.X_dmd_mask, self.Y_dmd_mask
+    # def generate_dmd_grid(self):
+    #
+    #     self.X_dmd_mask, self.Y_dmd_mask = self.create_grid(
+    #         self.system_config["SLM"]["sampling across X"],
+    #         self.system_config["SLM"]["sampling across Y"],
+    #         self.system_config["SLM"]["delta X"],
+    #         self.system_config["SLM"]["delta Y"])
+    #
+    #     return self.X_dmd_mask, self.Y_dmd_mask
 
     def generate_2D_mask(self, mask_type,slit_position=None,slit_width=None,mask_path=None):
 
