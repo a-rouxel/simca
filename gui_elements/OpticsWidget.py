@@ -333,7 +333,7 @@ class OpticsWidget(QWidget):
 
         # Create the run button
         self.run_button = QPushButton('Run Simulation')
-        self.run_button.setStyleSheet('QPushButton {background-color: blue; color: white;}')        # Connect the button to the run_optics method
+        # self.run_button.setStyleSheet('QPushButton {background-color: blue; color: white;}')        # Connect the button to the run_optics method
         self.run_button.clicked.connect(self.run_optics)
 
         # Create a group box for the run button
