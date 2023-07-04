@@ -355,29 +355,6 @@ class SceneConfigEditor(QWidget):
 
         self.load_scenes()
 
-
-    # def load_scene(self):
-    #
-    #
-    #         img, gt, list_wavelengths, label_values, ignored_labels, rgb_bands, palette, delta_lambda = get_dataset(self.directories_combo.currentText(), self.scenes_directory.text())
-    #         self.scene = img
-    #         self.scene_gt = gt
-    #         self.list_wavelengths = list_wavelengths
-    #         self.scene_label_values = label_values
-    #         self.scene_ignored_labels = ignored_labels
-    #         self.scene_rgb_bands = rgb_bands
-    #         self.scene_palette = palette
-    #         self.scene_delta_lambda = delta_lambda
-    #
-    #         self.scene_palette = palette_init(label_values, palette)
-    #         #
-    #         # print("Error: scene not found")
-    #         self.scene_loaded.emit(self.scene.shape[1],self.scene.shape[0],self.scene.shape[2],list_wavelengths[0],list_wavelengths[-1])
-    #
-    # def interpolate_scene(self,new_sampling,chunk_size):
-    #     self.scene_interpolated = interpolate_scene_cube_along_wavelength(self.scene, self.list_wavelengths, new_sampling,chunk_size)
-    #     return self.scene_interpolated
-
     def load_scenes(self):
 
         scene_dir = self.scenes_directory.text()
@@ -396,7 +373,6 @@ class SceneConfigEditor(QWidget):
     def update_config(self):
         # This method should update your QLineEdit and QSpinBox widgets with the loaded config.
         self.scenes_directory.setText(self.config['scenes directory'])
-
 
     @pyqtSlot(int,int,int,float,float)
     def update_scene_dimensions(self, x_dim,y_dim,wav_dim,min_wav,max_wav):
@@ -444,11 +420,6 @@ class SceneWidget(QWidget):
 
         self.layout = QHBoxLayout()
 
-        if scene_config_path is not None:
-            self.scene_config_editor = SceneConfigEditor(scene_config_path)
-
-        self.layout.addWidget(self.scene_config_editor)
-
         self.result_display_widget = QTabWidget()
 
         self.scene_content_display = SceneContentDisplay()
@@ -463,12 +434,17 @@ class SceneWidget(QWidget):
 
 
         self.run_button = QPushButton('Load Scene')
-        self.run_button.setStyleSheet('QPushButton {background-color: green; color: white;}')        # Connect the button to the run_dimensioning method
+        # self.run_button.setStyleSheet('QPushButton {background-color: green; color: white;}')        # Connect the button to the run_dimensioning method
         self.run_button.clicked.connect(self.run_load_scene)
 
         # Create a group box for the run button
         self.run_button_group_box = QGroupBox()
         run_button_group_layout = QVBoxLayout()
+
+        if scene_config_path is not None:
+            self.scene_config_editor = SceneConfigEditor(scene_config_path)
+
+        self.layout.addWidget(self.scene_config_editor)
 
         run_button_group_layout.addWidget(self.run_button)
         run_button_group_layout.addWidget(self.result_display_widget)
@@ -484,12 +460,12 @@ class SceneWidget(QWidget):
     def run_load_scene(self):
         # Get the configs from the editors
 
+
         self.worker = Worker(self.cassi_system,self.scene_config_editor)
         self.worker.finished_load_scene.connect(self.display_scene_content)
         self.worker.finished_explore_scene.connect(self.display_spectral_data)
         self.worker.finished_scene_labelisation.connect(self.display_ground_truth)
         self.worker.finished_scene_label_histogram.connect(self.scene_label_histogram.plot_label_histogram)
-
         self.worker.start()
 
     @pyqtSlot(np.ndarray,list)
@@ -500,7 +476,6 @@ class SceneWidget(QWidget):
 
     @pyqtSlot(dict,dict,list)
     def display_spectral_data(self,stats_class,palette,label_values):
-
         mean_spectrums, std_spectrums= stats_class["mean_spectrums"], stats_class["std_spectrums"]
         self.scene_spectral_data_display.display_spectral_data(mean_spectrums, std_spectrums,palette, label_values)
 
