@@ -117,8 +117,10 @@ class Worker(QThread):
         # Put your analysis here
         self.cassi_system.update_config(self.system_config)
 
-        X_dmd_grid, Y_dmd_grid = self.cassi_system.create_dmd_mask()
-        mask = self.cassi_system.generate_2D_mask(self.simulation_config["mask"]["type"],self.simulation_config["mask"]["slit position"],self.simulation_config["mask"]["slit width"])
+        self.cassi_system.create_dmd_mask()
+        mask = self.cassi_system.generate_2D_mask(self.simulation_config["mask"]["type"],
+                                                  self.simulation_config["mask"]["slit position"],
+                                                  self.simulation_config["mask"]["slit width"])
 
 
         self.finished_define_mask_grid.emit(mask)  # Emit a tuple of arrays
@@ -135,9 +137,10 @@ class Worker(QThread):
 
 
 class FilteringCubeWidgetEditor(QWidget):
-    def __init__(self,initial_config_file=None):
+    def __init__(self,filtering_widget,initial_config_file=None):
         super().__init__()
 
+        self.filtering_widget = filtering_widget
         self.initial_config_file = initial_config_file
 
 
@@ -152,7 +155,7 @@ class FilteringCubeWidgetEditor(QWidget):
         self.results_directory = QLineEdit()
 
         self.mask_type = QComboBox()
-        self.mask_type.addItems(["slit","random","blue"])
+        self.mask_type.addItems(["slit","random","blue","custom h5 mask"])
         self.mask_type.currentTextChanged.connect(self.on_mask_type_changed)
 
         self.slit_position_slider = QSlider(Qt.Horizontal)
@@ -167,15 +170,15 @@ class FilteringCubeWidgetEditor(QWidget):
 
 
 
-        general_layout = QFormLayout()
-        general_layout.addRow("mask type", self.mask_type)
-        general_layout.addRow("slit position", self.slit_position_slider)
-        general_layout.addRow("slit width", self.slit_width_slider)
+        self.general_layout = QFormLayout()
+        self.general_layout.addRow("mask type", self.mask_type)
+        self.general_layout.addRow("slit position", self.slit_position_slider)
+        self.general_layout.addRow("slit width", self.slit_width_slider)
 
 
 
         general_group = QGroupBox("Settings")
-        general_group.setLayout(general_layout)
+        general_group.setLayout(self.general_layout)
 
 
         # Load config button
@@ -241,13 +244,45 @@ class FilteringCubeWidgetEditor(QWidget):
 
 
     def on_mask_type_changed(self, mask_type):
-        if mask_type == "slit":
-            self.slit_position_slider.setEnabled(True)
-            self.slit_width_slider.setEnabled(True)
-        else:
-            self.slit_position_slider.setEnabled(False)
-            self.slit_width_slider.setEnabled(False)
 
+        self.filtering_widget.enable_generate_mask_button()
+
+        for i in range(self.general_layout.rowCount() - 1, 0, -1):  # start from last row, stop at 2 (exclusive), step backwards
+            # Remove row at index i from the layout
+            self.general_layout.removeRow(i)
+
+        if mask_type == "slit":
+            self.slit_position_slider = QSlider(Qt.Horizontal)
+            self.slit_position_slider.setMinimum(-200)
+            self.slit_position_slider.setMaximum(200)  # Adjust as needed
+            self.slit_position_slider.valueChanged.connect(self.on_slit_position_changed)
+
+            self.slit_width_slider = QSlider(Qt.Horizontal)
+            self.slit_width_slider.setMinimum(1)
+            self.slit_width_slider.setMaximum(30)  # Adjust as needed
+            self.slit_width_slider.valueChanged.connect(self.on_slit_width_changed)
+
+            self.slit_position_slider.valueChanged.connect(self.filtering_widget.enable_generate_mask_button)
+            self.slit_width_slider.valueChanged.connect(self.filtering_widget.enable_generate_mask_button)
+            self.general_layout.addRow("slit position", self.slit_position_slider)
+            self.general_layout.addRow("slit width", self.slit_width_slider)
+
+
+        if mask_type == "custom h5 mask":
+
+            self.file_path = QLineEdit()
+
+            self.browse_button = QPushButton("Browse")
+            self.browse_button.clicked.connect(self.browse_file)
+
+            self.file_path.textChanged.connect(self.filtering_widget.enable_generate_mask_button)
+            self.general_layout.addRow("File Path", self.file_path)
+            self.general_layout.addRow("", self.browse_button)
+
+    def browse_file(self):
+        file_path, _ = QFileDialog.getOpenFileName(self, "Select h5 file", "", "H5 Files (*.h5)")
+        if file_path:
+            self.file_path.setText(file_path)
     def on_slit_position_changed(self, position):
         # Update the slit position in your config
         self.config['mask']['slit position'] = position
@@ -266,6 +301,9 @@ class FilteringCubeWidgetEditor(QWidget):
         if config['mask']['type'] == "slit":
             config['mask']['slit position'] = self.slit_position_slider.value()
             config['mask']['slit width'] = self.slit_width_slider.value()
+
+        elif config['mask']['type'] == "custom h5 mask":
+            config['mask']['file path'] = self.file_path.text()
         else :
             config['mask']['slit position'] = None
             config['mask']['slit width'] = None
@@ -273,6 +311,8 @@ class FilteringCubeWidgetEditor(QWidget):
         return config
 
 class FilteringCubeWidget(QWidget):
+
+    maskGenerated = pyqtSignal(np.ndarray)
     def __init__(self, cassi_system=None,system_editor=None,filtering_config_path=None):
         super().__init__()
 
@@ -283,7 +323,7 @@ class FilteringCubeWidget(QWidget):
         self.layout = QHBoxLayout()
 
         # Create the dimensioning configuration editor
-        self.filtering_config_editor = FilteringCubeWidgetEditor(initial_config_file=filtering_config_path)
+        self.filtering_config_editor = FilteringCubeWidgetEditor(self,initial_config_file=filtering_config_path)
 
         # Create the result display widget (tab widget in this case)
         self.result_display_widget = QTabWidget()
@@ -297,16 +337,22 @@ class FilteringCubeWidget(QWidget):
         self.result_display_widget.addTab(self.camera_result_display, "Mask Grid")
         self.result_display_widget.addTab(self.propagated_mask_display, "Filtering cube, slide by slide")
 
+        # Create the generate mask button
+        self.generate_mask_button = QPushButton('Generate mask')
+        # self.generate_mask_button.setStyleSheet('QPushButton {background-color: red; color: white;}')        # Connect the button to the run_dimensioning method
+        self.generate_mask_button.clicked.connect(self.generate_mask)
+
 
         # Create the run button
         self.run_button = QPushButton('Generate Filtering Cube')
-        self.run_button.setStyleSheet('QPushButton {background-color: red; color: white;}')        # Connect the button to the run_dimensioning method
+        # self.run_button.setStyleSheet('QPushButton {background-color: red; color: white;}')        # Connect the button to the run_dimensioning method
         self.run_button.clicked.connect(self.run_dimensioning)
 
         # Create a group box for the run button
         self.run_button_group_box = QGroupBox()
         run_button_group_layout = QVBoxLayout()
 
+        run_button_group_layout.addWidget(self.generate_mask_button)
         run_button_group_layout.addWidget(self.run_button)
         run_button_group_layout.addWidget(self.result_display_widget)
 
@@ -325,6 +371,10 @@ class FilteringCubeWidget(QWidget):
         self.setLayout(self.layout)
 
 
+    def enable_generate_mask_button(self):
+        # Enable the "Generate Mask" button
+        self.generate_mask_button.setEnabled(True)
+        self.run_button.setEnabled(True)
 
 
     def run_dimensioning(self):
@@ -332,12 +382,38 @@ class FilteringCubeWidget(QWidget):
 
         system_config = self.system_editor.get_config()
         filtering_config_editor = self.filtering_config_editor.get_config()
+        self.run_button.setDisabled(True)
 
         self.worker = Worker(self.cassi_system,system_config, filtering_config_editor)
         self.worker.finished_define_mask_grid.connect(self.display_mask_grid)
         self.worker.finished_propagate_mask_grid.connect(self.display_propagated_masks)
         self.worker.start()
 
+    def generate_mask(self):
+        system_config = self.system_editor.get_config()
+        self.cassi_system.update_config(system_config)
+        filtering_config_editor = self.filtering_config_editor.get_config()
+
+        self.maskGenerated.connect(self.display_mask_grid)
+
+        if filtering_config_editor['mask']['type'] == "slit":
+            self.cassi_system.generate_2D_mask(filtering_config_editor['mask']['type'],
+                                               filtering_config_editor['mask']['slit position'],
+                                               filtering_config_editor['mask']['slit width'])
+
+        elif filtering_config_editor['mask']['type'] == "random":
+            self.cassi_system.generate_2D_mask(filtering_config_editor['mask']['type'])
+        elif filtering_config_editor['mask']['type'] == "blue":
+            self.cassi_system.generate_2D_mask(filtering_config_editor['mask']['type'])
+
+        elif filtering_config_editor['mask']['type'] == "custom h5 mask":
+            self.cassi_system.generate_2D_mask(filtering_config_editor['mask']['type'],
+                                               mask_path=filtering_config_editor['mask']['file path'])
+        else:
+            return
+
+        self.generate_mask_button.setDisabled(True)
+        self.maskGenerated.emit(self.cassi_system.mask)
 
     @pyqtSlot(np.ndarray)
     def display_mask_grid(self, mask):
