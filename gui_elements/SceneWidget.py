@@ -169,6 +169,37 @@ class SceneLabelisation(QWidget):
         legend_widget = LegendWidget(label_values, palette, ground_truth)
         self.legend_scroll_area.setWidget(legend_widget)
 
+class RGBSceneDisplay(QWidget):
+    def __init__(self):
+        super().__init__()
+
+        # Create a QVBoxLayout for the widget
+        self.layout = QVBoxLayout(self)
+
+        # Create a figure and a canvas
+        self.figure = plt.figure()
+        self.canvas = FigureCanvas(self.figure)
+        self.toolbar = NavigationToolbar(self.canvas, self)
+
+        self.layout.addWidget(self.toolbar)
+        self.layout.addWidget(self.canvas)
+
+    def display_rgb_img(self, scene, rgb_bands):
+        rgb_array = np.zeros((scene.shape[0], scene.shape[1], 3))
+
+        rgb = spectral.get_rgb(scene, rgb_bands)
+        rgb /= np.max(rgb)
+        rgb = np.asarray(255 * rgb, dtype='uint8')
+
+        # rgb_array[:, :, 0] = scene[:, :, rgb_bands[0]]
+        # rgb_array[:, :, 1] = scene[:, :, rgb_bands[1]]
+        # rgb_array[:, :, 2] = scene[:, :, rgb_bands[2]]
+
+        self.figure.clear()
+        ax1 = self.figure.add_subplot(111)
+        im = ax1.imshow(rgb)
+        ax1.set_title('RGB image of the scene')
+        self.canvas.draw()
 
 class LegendWidget(QWidget):
     def __init__(self, label_values, palette, ground_truth):
@@ -387,6 +418,7 @@ class SceneConfigEditor(QWidget):
 class Worker(QThread):
 
     finished_load_scene = pyqtSignal(np.ndarray,list)
+    finished_rgb_scene = pyqtSignal(np.ndarray,tuple)
     finished_explore_scene = pyqtSignal(dict,dict,list)
     finished_scene_labelisation = pyqtSignal(np.ndarray, list, dict)
     finished_scene_label_histogram = pyqtSignal(np.ndarray, list, list,dict)
@@ -409,6 +441,7 @@ class Worker(QThread):
 
 
         self.finished_load_scene.emit(self.cassi_system.scene,self.cassi_system.list_scene_wavelengths)  # Emit a tuple of arrays
+        self.finished_rgb_scene.emit(self.cassi_system.scene,self.cassi_system.scene_rgb_bands)  # Emit a tuple of arrays
         self.finished_explore_scene.emit(self.stats_per_class,self.cassi_system.scene_palette,self.cassi_system.scene_label_values)
         self.finished_scene_labelisation.emit(self.cassi_system.scene_gt,self.cassi_system.scene_label_values,self.cassi_system.scene_palette)# Emit a tuple of arrays
         self.finished_scene_label_histogram.emit(self.cassi_system.scene_gt,self.cassi_system.scene_label_values,self.cassi_system.scene_ignored_labels,self.cassi_system.scene_palette)
@@ -423,11 +456,13 @@ class SceneWidget(QWidget):
         self.result_display_widget = QTabWidget()
 
         self.scene_content_display = SceneContentDisplay()
+        self.rgb_scene_display = RGBSceneDisplay()
         self.scene_spectral_data_display = SpectralDataDisplay()
         self.scene_labelisation_display = SceneLabelisation()
         self.scene_label_histogram = SceneHistogram()
 
         self.result_display_widget.addTab(self.scene_content_display, "Scene Content")
+        self.result_display_widget.addTab(self.rgb_scene_display, "Scene RGB")
         self.result_display_widget.addTab(self.scene_spectral_data_display, "Scene Caracterization")
         self.result_display_widget.addTab(self.scene_labelisation_display, "Scene Labelisation")
         self.result_display_widget.addTab(self.scene_label_histogram, "Scene Labels Histogram")
@@ -463,6 +498,7 @@ class SceneWidget(QWidget):
 
         self.worker = Worker(self.cassi_system,self.scene_config_editor)
         self.worker.finished_load_scene.connect(self.display_scene_content)
+        self.worker.finished_rgb_scene.connect(self.display_rgb_scene)
         self.worker.finished_explore_scene.connect(self.display_spectral_data)
         self.worker.finished_scene_labelisation.connect(self.display_ground_truth)
         self.worker.finished_scene_label_histogram.connect(self.scene_label_histogram.plot_label_histogram)
@@ -473,6 +509,10 @@ class SceneWidget(QWidget):
         self.scene = scene
         self.scene_content_display.diplay_scene_content(scene,list_wavelengths)
 
+    @pyqtSlot(np.ndarray,tuple)
+    def display_rgb_scene(self, scene,rgb_bands):
+        print(rgb_bands)
+        self.rgb_scene_display.display_rgb_img(scene,rgb_bands)
 
     @pyqtSlot(dict,dict,list)
     def display_spectral_data(self,stats_class,palette,label_values):
