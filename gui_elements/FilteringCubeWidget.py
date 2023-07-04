@@ -116,23 +116,11 @@ class Worker(QThread):
     def run(self):
         # Put your analysis here
         self.cassi_system.update_config(self.system_config)
-
         self.cassi_system.generate_dmd_grid()
-        mask = self.cassi_system.generate_2D_mask(self.simulation_config["mask"]["type"],
-                                                  self.simulation_config["mask"]["slit position"],
-                                                  self.simulation_config["mask"]["slit width"])
-
-
-        self.finished_define_mask_grid.emit(mask)  # Emit a tuple of arrays
-
         self.cassi_system.propagate_mask_grid([self.system_config["spectral range"]["wavelength min"],
                                                self.system_config["spectral range"]["wavelength max"]],
                                                self.system_config["spectral range"]["number of spectral samples"])
         self.cassi_system.generate_filtering_cube()
-
-        # self.cassi_system.interpolate_filtering_cube_along_wavelength(1000)
-
-
         self.finished_propagate_mask_grid.emit(self.cassi_system.filtering_cube,self.cassi_system.list_wavelengths)  # Emit a tuple of arrays
 
 
