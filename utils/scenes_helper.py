@@ -102,8 +102,6 @@ def get_dataset(dataset_name, target_folder="./", datasets=DATASETS_CONFIG):
 
         gt = open_file(folder + "PaviaU_gt.mat")["paviaU_gt"]
 
-        print(gt)
-
         label_values = [
             "Undefined",
             "Asphalt",
