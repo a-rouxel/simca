@@ -116,7 +116,6 @@ class Worker(QThread):
     def run(self):
         # Put your analysis here
         self.cassi_system.update_config(self.system_config)
-        self.cassi_system.generate_dmd_grid()
         self.cassi_system.propagate_mask_grid([self.system_config["spectral range"]["wavelength min"],
                                                self.system_config["spectral range"]["wavelength max"]],
                                                self.system_config["spectral range"]["number of spectral samples"])
