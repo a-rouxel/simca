@@ -15,7 +15,6 @@ if __name__ == '__main__':
     # Initialize the CASSI system object
     cassi_system = CassiSystem(system_config_path="config/cassi_system.yml")
 
-
     # SCENE : Load the scene
     cassi_system.load_scene(scene_name, scene_directory)
 
@@ -33,7 +32,7 @@ if __name__ == '__main__':
     # crop if scene is too big
     interpolated_scene = match_scene_to_instrument(cassi_system.scene, cassi_system.filtering_cube)
     # Apply the filtering cube to the scene
-    measurement_in_3D = get_measurement_in_3D(interpolated_scene, cassi_system.filtering_cube, chunk_size = 50)
+    measurement_in_3D = generate_dd_measurement(interpolated_scene, cassi_system.filtering_cube, chunk_size = 50)
 
     plt.imshow(np.sum(measurement_in_3D[:,:],axis=2))
     plt.show()

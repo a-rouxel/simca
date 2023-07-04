@@ -1,6 +1,6 @@
 import numpy as np
 from tqdm import tqdm
-def get_measurement_in_3D(scene, filtering_cube,chunk_size):
+def generate_dd_measurement(scene, filtering_cube,chunk_size):
 
     # Initialize an empty array for the result
     measurement_in_3D = np.empty_like(filtering_cube)

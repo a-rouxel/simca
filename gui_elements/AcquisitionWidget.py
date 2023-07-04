@@ -9,7 +9,7 @@ from PyQt5.QtCore import Qt
 import pyqtgraph as pg
 import numpy as np
 import time
-from utils.functions_acquisition import get_measurement_in_3D, match_scene_to_instrument, crop_center
+from utils.functions_acquisition import generate_dd_measurement, match_scene_to_instrument, crop_center
 from CassiSystem import CassiSystem
 class AcquisitionPanchromaticWidget(QWidget):
 
@@ -206,7 +206,6 @@ class Worker(QThread):
 
         scene = self.cassi_system.interpolate_scene(filtering_cube_wavelengths,chunk_size=50)
 
-        print("scene size: ", scene.shape)
 
         if self.system_editor.config["system architecture"]["system type"] == "DD-CASSI":
 
@@ -218,7 +217,7 @@ class Worker(QThread):
             chunk_size = 50  # Adjust this value based on your system's memory
 
             t_0 = time.time()
-            measurement_in_3D = get_measurement_in_3D(scene, filtering_cube, chunk_size)
+            measurement_in_3D = generate_dd_measurement(scene, filtering_cube, chunk_size)
             print("Acquisition time: ", time.time() - t_0)
 
             self.last_measurement_3D = measurement_in_3D
