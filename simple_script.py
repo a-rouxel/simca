@@ -28,7 +28,7 @@ if __name__ == '__main__':
     cassi_system.generate_filtering_cube()
 
     # PSF (optional) : Generate the psf
-    psf = cassi_system.generate_psf("Gaussian",100)
+    cassi_system.generate_psf("Gaussian",100)
 
     # ACQUISITION : Simulate the acquisition with psf (use_psf is optional)
     cassi_system.image_acquisition(use_psf=True,chunck_size=50)
