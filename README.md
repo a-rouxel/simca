@@ -47,7 +47,7 @@ python main.py
 
 ## Quick Start from script (option 2)
 
-6. Run the example script :
+5. Run the example script :
 
 ```bash
 # run the script
