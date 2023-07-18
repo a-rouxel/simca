@@ -36,7 +36,7 @@ pip install -r requirements.txt
 
 4. Download the standard datasets from this [link](https://cloud.laas.fr/index.php/s/zfh5RFmsjYfk108/download), then unzip and paste the `datasets` folder in the root directory of SIMCA.
 
-## Quick Start with GUI
+## Quick Start with GUI (option 1)
 
 5. Start the application:
 
@@ -45,9 +45,9 @@ pip install -r requirements.txt
 python main.py
 ```
 
-## Quick Start from script
+## Quick Start from script (option 2)
 
-6. Run example script :
+6. Run the example script :
 
 ```bash
 # run the script
