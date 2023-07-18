@@ -30,11 +30,8 @@ if __name__ == '__main__':
     # PSF (optional) : Generate the psf
     psf = cassi_system.generate_psf("Gaussian",100)
 
-    # ACQUISITION : Simulate the acquisition with psf (optional)
+    # ACQUISITION : Simulate the acquisition with psf (use_psf is optional)
     cassi_system.image_acquisition(use_psf=True,chunck_size=50)
-
-    plt.imshow(cassi_system.last_measurement_3D[:,:,0],cmap='gray')
-    plt.show()
 
     # Save the acquisition
     cassi_system.save_acquisition(config_masks, config_acquisition)
