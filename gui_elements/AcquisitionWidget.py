@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import (QTabWidget, QHBoxLayout, QPushButton, QComboBox, QLineEdit)
+from PyQt5.QtWidgets import (QTabWidget, QHBoxLayout, QPushButton, QComboBox, QLineEdit, QCheckBox)
 from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot
 from PyQt5.QtWidgets import QFormLayout, QGroupBox, QScrollArea
 from PyQt5.QtWidgets import QVBoxLayout, QSlider, QLabel, QWidget
@@ -111,15 +111,31 @@ class AcquisitionEditorWidget(QWidget):
         self.acquisition_types = ['single acq.']
         self.directories_combo.addItems(self.acquisition_types)
 
-        # Add the dimensioning configuration editor, the result display widget, and the run button to the layout
+
         self.results_directory = QLineEdit()
         self.acquisition_name = QLineEdit()
+        self.use_psf = QCheckBox()
+        self.psf_combo = QComboBox()
+        self.psf_radius = QLineEdit()
+        self.psf_radius.setText("10")
+        self.psf_types = ['Gaussian']
+        self.psf_combo.addItems(self.psf_types)
+
+
+        PSF_form = QFormLayout()
+        PSF_form.addRow("apply PSF",self.use_psf)
+        PSF_form.addRow("type",self.psf_combo)
+        PSF_form.addRow("radius [in um]", self.psf_radius)
+        PSF_form_group = QGroupBox("PSF Settings")
+        PSF_form_group.setLayout(PSF_form)
+
 
 
         acquisition_layout = QFormLayout()
         acquisition_layout.addRow("acquisition name", self.acquisition_name)
         acquisition_layout.addRow("acquisition type", self.directories_combo)
         acquisition_layout.addRow("results directory", self.results_directory)
+        acquisition_layout.addRow(PSF_form_group)
 
         acquisition_group = QGroupBox("Settings")
         acquisition_group.setLayout(acquisition_layout)
@@ -152,12 +168,20 @@ class AcquisitionEditorWidget(QWidget):
         self.directories_combo.setCurrentText(self.config['acquisition type'])
         self.results_directory.setText(self.config['results directory'])
         self.acquisition_name.setText(self.config['acquisition name'])
+        self.use_psf.setChecked(self.config['psf']['use_psf'])
+        self.psf_combo.setCurrentText(self.config['psf']['type'])
+        self.psf_radius.setText(str(self.config['psf']['radius']))
 
     def get_config(self):
         return {
             "acquisition name": self.acquisition_name.text(),
             "acquisition type": self.directories_combo.currentText(),
             "results directory": self.results_directory.text(),
+            "psf": {
+                "use_psf": self.use_psf.isChecked(),
+                "type": self.psf_combo.currentText(),
+                "radius": float(self.psf_radius.text())
+            }
 
         }
 
@@ -172,6 +196,7 @@ class Worker(QThread):
         self.system_editor = system_editor
         self.filtering_widget = filtering_widget
         self.dataset_widget = dataset_widget
+        self.acquisition_config = acquisition_config_editor.get_config()
 
 
     def run(self):
@@ -181,7 +206,9 @@ class Worker(QThread):
         self.system_config = self.system_editor.get_config()
         self.cassi_system.update_config(self.system_config)
 
-        self.cassi_system.image_acquisition(chunck_size=50)
+        if self.acquisition_config["psf"]["use_psf"] == True:
+            self.cassi_system.generate_psf(self.acquisition_config["psf"]["type"],self.acquisition_config["psf"]["radius"])
+        self.cassi_system.image_acquisition(use_psf=self.acquisition_config["psf"]["use_psf"],chunck_size=50)
         self.finished_interpolated_scene.emit(self.cassi_system.interpolated_scene)
         self.finished_acquire_measure.emit(self.cassi_system.last_measurement_3D)  # Emit a tuple of arrays
 

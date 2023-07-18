@@ -1,4 +1,8 @@
 acquisition name : test_acquisition
 acquisition type: single acq.
 results directory: ./data/results/
+psf:
+  use_psf: False
+  type: Gaussian
+  radius: 100
 

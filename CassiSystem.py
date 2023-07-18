@@ -5,6 +5,7 @@ from multiprocessing import Pool
 from scipy import fftpack
 from utils.scenes_helper import *
 from utils.functions_acquisition import *
+from scipy.signal import convolve
 
 class CassiSystem():
     """Class that contains the optical system main attributes and methods"""
@@ -230,7 +231,7 @@ class CassiSystem():
         return self.filtering_cube
 
 
-    def image_acquisition(self,chunck_size=50):
+    def image_acquisition(self,use_psf=False,chunck_size=50):
         """
         Contains the acquisition process depending on the cassi system type
         Args:
@@ -274,6 +275,11 @@ class CassiSystem():
 
             self.last_measurement_3D = sd_measurement
             self.interpolated_scene = scene
+
+        if use_psf:
+            self.apply_psf()
+        else:
+            print("No PSF was applied")
 
         return self.last_measurement_3D, self.interpolated_scene
 
@@ -411,6 +417,30 @@ class CassiSystem():
 
 
         return self.list_X_propagated_mask, self.list_Y_propagated_mask, self.list_wavelengths
+
+    def generate_psf(self,type,radius):
+
+        if type =="Gaussian":
+
+            X, Y, PSF = generate_2D_gaussian(radius,self.system_config["detector"]["delta X"],self.system_config["detector"]["delta Y"], 10)
+            self.psf = PSF
+
+        return self.psf
+
+    def apply_psf(self):
+
+        if (self.psf is not None) and (self.last_measurement_3D is not None):
+            # Expand the dimensions of the 2D matrix to match the 3D matrix
+            psf_3D = np.expand_dims(self.psf, axis=-1)
+
+            # Perform the convolution using convolve
+            result = convolve(self.last_measurement_3D, psf_3D, mode='same')
+
+        self.last_measurement_3D = result
+
+        return self.last_measurement_3D
+
+
 
     def save_acquisition(self, config_filtering,config_acquisition):
 
