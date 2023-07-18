@@ -32,15 +32,26 @@ conda activate simca-env
 pip install -r requirements.txt
 ```
 
-## Quick Start
+## Download datasets
 
-4. Download the standard scenes from this [link](https://cloud.laas.fr/index.php/s/zfh5RFmsjYfk108/download), then unzip and paste the `datasets` folder in the root directory of SIMCA.
+4. Download the standard datasets from this [link](https://cloud.laas.fr/index.php/s/zfh5RFmsjYfk108/download), then unzip and paste the `datasets` folder in the root directory of SIMCA.
+
+## Quick Start with GUI
 
 5. Start the application:
 
 ```bash
 # run the app
 python main.py
+```
+
+## Quick Start from script
+
+6. Run example script :
+
+```bash
+# run the script
+python simple_script.py
 ```
 
 ## Main Features
