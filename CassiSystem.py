@@ -17,14 +17,17 @@ class CassiSystem():
         Load the system configuration file and initialize the grids for the DMD and the detector
 
         Args:
-            system_config_path:
+            system_config_path (str): path to the config file
             system_config (dict): system configuration
 
         Initial Attributes:
             system_config (dict): system configuration
+            X_dmd_coordinates_grid (numpy array): X grid coordinates of the center of the DMD pixels
+            Y_dmd_coordinates_grid (numpy array): Y grid coordinates of the center of the DMD pixels
             X_detector_coordinates_grid (numpy array): X grid coordinates of the center of the detector pixels
             Y_detector_coordinates_grid (numpy array): Y grid coordinates of the center of the detector pixels
         """
+
 
         self.system_config = load_yaml_config(system_config_path)
         if system_config_path is not None:
