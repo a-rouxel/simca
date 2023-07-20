@@ -1,40 +1,41 @@
 from utils.functions_retropropagating import *
+from utils.functions_acquisition import *
+from utils.functions_masks_generation import *
+from utils.scenes_helper import *
+
 from scipy.interpolate import griddata
 import multiprocessing as mp
 from multiprocessing import Pool
-from scipy import fftpack
-from utils.scenes_helper import *
-from utils.functions_acquisition import *
+
 from scipy.signal import convolve
+
 
 class CassiSystem():
     """Class that contains the optical system main attributes and methods"""
-
     def __init__(self,system_config=None,system_config_path=None):
         """
         Load the system configuration file and initialize the grids for the DMD and the detector
 
         Args:
+            system_config_path:
             system_config (dict): system configuration
 
         Initial Attributes:
             system_config (dict): system configuration
-            X_dmd_coordinates_grid (numpy array): X grid coordinates of the center of the DMD pixels
-            Y_dmd_coordinates_grid (numpy array): Y grid coordinates of the center of the DMD pixels
             X_detector_coordinates_grid (numpy array): X grid coordinates of the center of the detector pixels
             Y_detector_coordinates_grid (numpy array): Y grid coordinates of the center of the detector pixels
         """
+
+        self.system_config = load_yaml_config(system_config_path)
         if system_config_path is not None:
             self.system_config = load_yaml_config(system_config_path)
         elif system_config is not None:
             self.system_config = system_config
 
-
         self.X_dmd_coordinates_grid, self.Y_dmd_coordinates_grid = self.create_coordinates_grid(self.system_config["SLM"]["sampling across X"],
                                                                         self.system_config["SLM"]["sampling across Y"],
                                                                         self.system_config["SLM"]["delta X"],
                                                                         self.system_config["SLM"]["delta Y"])
-
 
         self.X_detector_coordinates_grid, self.Y_detector_coordinates_grid = self.create_coordinates_grid(self.system_config["detector"]["sampling across X"],
                                                                         self.system_config["detector"]["sampling across Y"],
@@ -49,7 +50,7 @@ class CassiSystem():
             dataset_name (str): dataset name
         
         Returns:
-            list: a list containing the dataset, the ground truth, the list of wavelengths, the label values, the ignored labels, the rgb bands, the palette and the delta lambda
+            list_dataset_data (list) : a list containing the dataset, the ground truth, the list of wavelengths, the label values, the ignored labels, the rgb bands, the palette and the delta lambda
         """
 
 
@@ -64,8 +65,9 @@ class CassiSystem():
         self.dataset_delta_lambda = delta_lambda
 
         self.dataset_palette = palette_init(label_values, palette)
+        list_dataset_data = [self.dataset, self.dataset_gt, self.list_dataset_wavelengths, self.dataset_label_values, self.dataset_ignored_labels, self.dataset_rgb_bands, self.dataset_palette, self.dataset_delta_lambda,self.dataset_palette]
 
-        return [self.dataset, self.dataset_gt, self.list_dataset_wavelengths, self.dataset_label_values, self.dataset_ignored_labels, self.dataset_rgb_bands, self.dataset_palette, self.dataset_delta_lambda,self.dataset_palette]
+        return list_dataset_data
 
     def update_config(self,new_config):
         """
@@ -74,7 +76,7 @@ class CassiSystem():
             new_config (dict): new system configuration
 
         Returns:
-
+            config (dict) : updated system configuration
         """
 
         self.system_config = new_config
@@ -89,33 +91,33 @@ class CassiSystem():
                                                                         self.system_config["detector"]["sampling across Y"],
                                                                         self.system_config["detector"]["delta X"],
                                                                         self.system_config["detector"]["delta Y"])
+        return self.system_config
 
-    def interpolate_dataset(self,new_sampling,chunk_size):
+    def interpolate_dataset_along_wavelengths(self,new_wavelengths_sampling,chunk_size):
         """
-        Interpolate the dataset to a new sampling
+        Interpolate the dataset cube along the wavelength axis to match the system sampling
         Args:
-            new_sampling:
-            chunk_size:
+            new_wavelengths_sampling (numpy array): system wavelengths sampling
+            chunk_size (int): chunk size for the multiprocessing
 
         Returns:
-            dataset_interpolated (numpy array): interpolated dataset
+            dataset_interpolated (numpy array): interpolated dataset cube along the wavelength axis
 
         """
-        self.dataset_interpolated = interpolate_dataset_cube_along_wavelength(self.dataset, self.list_dataset_wavelengths, new_sampling,chunk_size)
+        self.dataset_interpolated = interpolate_dataset_cube_along_wavelength(self.dataset, self.list_dataset_wavelengths, new_wavelengths_sampling,chunk_size)
         return self.dataset_interpolated
 
 
-    def generate_2D_mask(self,config_filtering):
+    def generate_2D_mask(self,config_mask_and_filtering):
         """
-
         Args:
-            config_filtering:
+            config_mask_and_filtering (dict): masks and filtering configuration
 
         Returns:
             mask (numpy array): 2D DMD mask based on the configuration file
         """
 
-        mask_type = config_filtering['mask']['type']
+        mask_type = config_mask_and_filtering['mask']['type']
 
         if self.system_config["SLM"]["sampling across Y"] % 2 == 0:
             self.system_config["SLM"]["sampling across Y"] += 1
@@ -123,25 +125,26 @@ class CassiSystem():
             self.system_config["SLM"]["sampling across X"] += 1
 
         if mask_type == "random":
-            self.mask = np.random.randint(0, 2, (self.system_config["SLM"]["sampling across Y"],
+            mask = np.random.randint(0, 2, (self.system_config["SLM"]["sampling across Y"],
                                                  self.system_config["SLM"]["sampling across X"]))
         elif mask_type == "slit":
-            slit_position = config_filtering['mask']['slit position']
-            slit_width = config_filtering['mask']['slit width']
+            slit_position = config_mask_and_filtering['mask']['slit position']
+            slit_width = config_mask_and_filtering['mask']['slit width']
 
-            self.mask = np.zeros((self.system_config["SLM"]["sampling across Y"],
+            mask = np.zeros((self.system_config["SLM"]["sampling across Y"],
                                   self.system_config["SLM"]["sampling across X"]))
 
             slit_position = int(self.system_config["SLM"]["sampling across X"] / 2) + slit_position
 
-            self.mask[:,slit_position-slit_width//2:slit_position+slit_width] = 1
+            mask[:,slit_position-slit_width//2:slit_position+slit_width] = 1
 
         elif mask_type == "blue":
             size = (self.system_config["SLM"]["sampling across Y"], self.system_config["SLM"]["sampling across X"])
-            self.mask = self.generate_blue_noise(size)
+            mask = generate_blue_noise(size)
+
 
         elif mask_type == "custom h5 mask":
-            mask_path = config_filtering['mask']['file path']
+            mask_path = config_mask_and_filtering['mask']['file path']
             if mask_path is None:
                 raise ValueError("Please provide h5 file path for custom mask.")
             else:
@@ -168,49 +171,21 @@ class CassiSystem():
                     if mask.shape[0] != slm_sampling_y or mask.shape[1] != slm_sampling_x:
                         raise ValueError("Error cropping the mask, its shape does not match the SLM sampling.")
 
-                self.mask = mask
 
-        return self.mask
+        else:
+            print("Mask type is not supported")
+            mask = None
 
-    @staticmethod
-    def generate_blue_noise(size):
-        """
-        Generate blue noise (high frequency pseudo-random) type mask
-        Args:
-            size:
+        self.mask = mask
+        return mask
 
-        Returns:
-            binary mask (numpy array): binary blue noise type mask
-
-        """
-        shape = (size[0], size[1])
-        N = shape[0] * shape[1]
-        rng = np.random.default_rng()
-        noise = rng.standard_normal(N)
-        noise = np.reshape(noise, shape)
-
-        f_x = fftpack.fftfreq(shape[1])
-        f_y = fftpack.fftfreq(shape[0])
-        f_x_shift = fftpack.fftshift(f_x)
-        f_y_shift = fftpack.fftshift(f_y)
-        f_matrix = np.sqrt(f_x_shift[None, :] ** 2 + f_y_shift[:, None] ** 2)
-
-        spectrum = fftpack.fftshift(fftpack.fft2(noise))
-        filtered_spectrum = spectrum * f_matrix
-        filtered_noise = fftpack.ifft2(fftpack.ifftshift(filtered_spectrum)).real
-
-        # Make the mask binary
-        threshold = np.median(filtered_noise)
-        binary_mask = np.where(filtered_noise > threshold, 1, 0)
-
-        return binary_mask
 
     def generate_filtering_cube(self):
         """
         Generate filtering cube, each slice is a propagated mask interpolated on the detector grid
 
         Returns:
-            filtering_cube (numpy array): 3D filtering cube
+            filtering_cube (numpy array): 3D filtering cube generated according to the system configuration
 
         """
 
@@ -225,8 +200,8 @@ class CassiSystem():
 
         with Pool(mp.cpu_count()) as p:
             tasks = [(self.list_X_propagated_mask, self.list_Y_propagated_mask, self.mask, self.X_detector_coordinates_grid, self.Y_detector_coordinates_grid, i)
-                     for i in range(len(self.list_wavelengths))]
-            for index, zi in tqdm(enumerate(p.imap(worker, tasks)), total=len(self.list_wavelengths), desc='Processing tasks'):
+                     for i in range(len(self.system_wavelengths))]
+            for index, zi in tqdm(enumerate(p.imap(worker, tasks)), total=len(self.system_wavelengths), desc='Processing tasks'):
                 self.filtering_cube[:, :, index] = zi
 
 
@@ -235,16 +210,17 @@ class CassiSystem():
 
     def image_acquisition(self,use_psf=False,chunck_size=50):
         """
-        Contains the acquisition process depending on the cassi system type
+        Run the acquisition process depending on the cassi system type
         Args:
             chunck_size (int): default block size for the dataset
 
         Returns:
-
+            last_filtered_interpolated_scene (numpy array): filtered scene cube
+            interpolated_scene (numpy array): interpolated scene cube
         """
 
 
-        dataset = self.interpolate_dataset(self.list_wavelengths, chunck_size)
+        dataset = self.interpolate_dataset_along_wavelengths(self.system_wavelengths, chunck_size)
 
         if self.system_config["system architecture"]["system type"] == "DD-CASSI":
 
@@ -256,7 +232,7 @@ class CassiSystem():
             scene = match_scene_to_instrument(dataset, self.filtering_cube)
             measurement_in_3D = generate_dd_measurement(scene, self.filtering_cube, chunck_size)
 
-            self.last_measurement_3D = measurement_in_3D
+            self.last_filtered_interpolated_scene = measurement_in_3D
             self.interpolated_scene = scene
 
 
@@ -275,7 +251,7 @@ class CassiSystem():
 
             sd_measurement = self.generate_sd_measurement_cube(filtered_scene)
 
-            self.last_measurement_3D = sd_measurement
+            self.last_filtered_interpolated_scene = sd_measurement
             self.interpolated_scene = scene
 
         if use_psf:
@@ -283,18 +259,23 @@ class CassiSystem():
         else:
             print("No PSF was applied")
 
-        return self.last_measurement_3D, self.interpolated_scene
+        return self.last_filtered_interpolated_scene, self.interpolated_scene
 
     def generate_sd_measurement_cube(self,scene):
+        """
+        Generate SD measurement cube from the scene cube and the filtering cube
+        Args:
+            scene (numpy array): scene cube
 
+        Returns:
+            measurement_sd (numpy array): SD measurement cube
+        """
 
         X_detector_coordinates_grid = self.X_detector_coordinates_grid
         Y_detector_coordinates_grid = self.Y_detector_coordinates_grid
         list_X_propagated_masks = self.list_X_propagated_mask
         list_Y_propagated_masks = self.list_Y_propagated_mask
         scene =  scene
-
-
 
         print("--- Generating SD measurement cube ---- ")
         if self.system_config["detector"]["sampling across Y"] %2 ==0:
@@ -315,13 +296,26 @@ class CassiSystem():
             for index, zi in tqdm(enumerate(p.imap(worker, tasks)), total=len(wavelengths), desc='Processing tasks'):
                 self.measurement_sd[:, :, index] = zi
 
-        self.list_wavelengths = wavelengths
+        self.system_wavelengths = wavelengths
 
         return self.measurement_sd
 
 
-
     def create_coordinates_grid(self,nb_of_samples_along_x, nb_of_samples_along_y, delta_x, delta_y):
+            """
+            Create a coordinates grid for a given number of samples along x and y axis and a given pixel size
+            Args:
+                nb_of_samples_along_x (int): number of samples along x axis
+                nb_of_samples_along_y (int): number of samples along y axis
+                delta_x (float): pixel size along x axis
+                delta_y (float): pixel size along y axis
+
+            Returns:
+                X_input_grid (numpy array): x coordinates grid
+                Y_input_grid (numpy array): y coordinates grid
+            """
+
+            # Check if the number of samples is odd. If not, increase it by 1
 
             if nb_of_samples_along_x % 2 == 0:
                 nb_of_samples_along_x += 1
@@ -342,10 +336,15 @@ class CassiSystem():
 
 
     def calculate_alpha_c(self):
+        """
+        Calculate the relative angle of incidence between the lenses and the dispersive element
+        Returns:
+            alpha_c (float): angle of incidence
+        """
+        if self.system_config["system architecture"]["dispersive element"]["type"] == "prism":
 
 
-
-        self.Dm = D_m(sellmeier(self.system_config["system architecture"]["dispersive element"]["wavelength center"]),
+            self.Dm = D_m(sellmeier(self.system_config["system architecture"]["dispersive element"]["wavelength center"]),
                       np.radians(self.system_config["system architecture"]["dispersive element"]["A"]))
 
         if self.system_config["system architecture"]["dispersive element"]["type"] == "grating":
@@ -361,6 +360,16 @@ class CassiSystem():
 
         return self.alpha_c
     def propagate_mask_grid(self,X_input_grid=None,Y_input_grid=None):
+        """
+        Propagate the SLM mask through one CASSI system
+        Args:
+            X_input_grid (numpy array): x coordinates grid
+            Y_input_grid (numpy array): y coordinates grid
+
+        Returns:
+            list_X_propagated_mask (list): list of the X coordinates of the propagated masks
+            list_Y_propagated_mask (list): list of the Y coordinates of the propagated masks
+        """
 
         wavelength_min = self.system_config["spectral range"]["wavelength min"]
         wavelength_max = self.system_config["spectral range"]["wavelength max"]
@@ -375,12 +384,10 @@ class CassiSystem():
         wavelengths = np.linspace(wavelength_min,
                                   wavelength_max,
                                   spectral_samples)
-        self.list_wavelengths = wavelengths
+        self.system_wavelengths = wavelengths
 
         self.n_array_center = np.full(X_input_grid.shape,
                                       sellmeier(self.system_config["system architecture"]["dispersive element"]["wavelength center"]))
-        # self.lba_array_center = np.full(X_input_grid.shape,
-        #                             self.system_config["system architecture"]["dispersive element"]["wavelength center"])
 
         X_input_grid_flatten = X_input_grid.flatten()
         Y_input_grid_flatten = Y_input_grid.flatten()
@@ -418,9 +425,18 @@ class CassiSystem():
 
 
 
-        return self.list_X_propagated_mask, self.list_Y_propagated_mask, self.list_wavelengths
+        return self.list_X_propagated_mask, self.list_Y_propagated_mask, self.system_wavelengths
 
     def generate_psf(self,type,radius):
+        """
+        Generate a PSF
+        Args:
+            type (str): type of PSF to generate
+            radius (float): radius of the PSF
+
+        Returns:
+            PSF (numpy array): PSF generated
+        """
 
         if type =="Gaussian":
 
@@ -430,41 +446,57 @@ class CassiSystem():
         return self.psf
 
     def apply_psf(self):
-
-        if (self.psf is not None) and (self.last_measurement_3D is not None):
+        """
+        Apply the PSF to the last measurement
+        Args:
+        Returns:
+            last_filtered_interpolated_scene (numpy array): last measurement convolved with by PSF. Each slice of the 3D filtered scene is convolved with the PSF
+        """
+        if (self.psf is not None) and (self.last_filtered_interpolated_scene is not None):
             # Expand the dimensions of the 2D matrix to match the 3D matrix
             psf_3D = np.expand_dims(self.psf, axis=-1)
 
             # Perform the convolution using convolve
-            result = convolve(self.last_measurement_3D, psf_3D, mode='same')
+            result = convolve(self.last_filtered_interpolated_scene, psf_3D, mode='same')
 
-        self.last_measurement_3D = result
+        else:
+            print("No PSF or last measurement to apply PSF")
+            result = self.last_filtered_interpolated_scene
 
-        return self.last_measurement_3D
+        self.last_filtered_interpolated_scene = result
+
+        return self.last_filtered_interpolated_scene
 
 
 
-    def save_acquisition(self, config_filtering,config_acquisition):
+    def save_acquisition(self, config_mask_and_filtering,config_acquisition):
+        """
+        Save the all data related to an acquisition
+        Args:
+            config_mask_and_filtering (dict): configuration dictionary for the mask and filtering parameters
+            config_acquisition (dict): configuration dictionary for the acquisition parameters
+        Returns:
+        """
 
         self.result_directory = initialize_directory(config_acquisition)
 
         with open(self.result_directory + "/config_system.yml", 'w') as file:
             yaml.safe_dump(self.system_config, file)
 
-        with open(self.result_directory + "/config_filtering.yml", 'w') as file:
-            yaml.safe_dump(config_filtering, file)
+        with open(self.result_directory + "/config_mask_and_filtering.yml", 'w') as file:
+            yaml.safe_dump(config_mask_and_filtering, file)
 
         with open(self.result_directory + "/config_acquisition.yml", 'w') as file:
             yaml.safe_dump(config_acquisition, file)
 
 
             # Calculate the other two arrays
-            sum_last_measurement = np.sum(self.last_measurement_3D, axis=2)
+            sum_last_measurement = np.sum(self.last_filtered_interpolated_scene, axis=2)
             sum_scene_interpolated = np.sum(self.interpolated_scene, axis=2)
 
             # Save the arrays in an H5 file
             with h5py.File(self.result_directory + '/filtered_image.h5', 'w') as f:
-                f.create_dataset('filtered_image', data=self.last_measurement_3D)
+                f.create_dataset('filtered_image', data=self.last_filtered_interpolated_scene)
             with h5py.File(self.result_directory + '/image.h5', 'w') as f:
                 f.create_dataset('image', data=sum_last_measurement)
             with h5py.File(self.result_directory + '/panchro.h5', 'w') as f:
@@ -472,7 +504,7 @@ class CassiSystem():
             with h5py.File(self.result_directory + '/filtering_cube.h5', 'w') as f:
                 f.create_dataset('filtering_cube', data=self.filtering_cube)
             with h5py.File(self.result_directory + '/wavelengths.h5', 'w') as f:
-                f.create_dataset('wavelengths', data=self.list_wavelengths)
+                f.create_dataset('wavelengths', data=self.system_wavelengths)
 
         print("Acquisition saved in " + self.result_directory)
 
