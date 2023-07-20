@@ -277,7 +277,7 @@ class AcquisitionWidget(QWidget):
 
     def on_acquisition_saved(self):
         self.config_acquisition = self.acquisition_config_editor.get_config()
-        self.config_filtering = self.filtering_widget.get_config()
+        self.config_filtering = self.filtering_widget.filtering_config_editor.get_config()
         self.cassi_system.save_acquisition(self.config_filtering,self.config_acquisition)
 
     @pyqtSlot(np.ndarray)
