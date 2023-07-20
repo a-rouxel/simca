@@ -210,7 +210,7 @@ class Worker(QThread):
             self.cassi_system.generate_psf(self.acquisition_config["psf"]["type"],self.acquisition_config["psf"]["radius"])
         self.cassi_system.image_acquisition(use_psf=self.acquisition_config["psf"]["use_psf"],chunck_size=50)
         self.finished_interpolated_scene.emit(self.cassi_system.interpolated_scene)
-        self.finished_acquire_measure.emit(self.cassi_system.last_measurement_3D)  # Emit a tuple of arrays
+        self.finished_acquire_measure.emit(self.cassi_system.last_filtered_interpolated_scene)  # Emit a tuple of arrays
 
         print("Acquisition finished")
 
@@ -222,7 +222,7 @@ class AcquisitionWidget(QWidget):
         self.system_editor = system_editor
         self.dataset_widget = dataset_widget
         self.filtering_widget = filtering_widget
-        self.last_measurement_3D = None
+        self.last_filtered_interpolated_scene = None
         self.interpolated_scene = None
 
         self.layout = QHBoxLayout()
@@ -284,7 +284,7 @@ class AcquisitionWidget(QWidget):
     def display_acquisition(self, measurement_3D):
         self.acquisition_display.display_acquisition(measurement_3D)
     def display_measurement_by_slide(self, measurement_3D):
-        self.last_measurement_3D = measurement_3D
+        self.last_filtered_interpolated_scene = measurement_3D
         self.acquisition_by_slice_display.display_measurement_slice_by_slice(measurement_3D)
     def display_panchrom_display(self, scene):
         self.interpolated_scene = scene

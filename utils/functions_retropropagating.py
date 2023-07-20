@@ -4,33 +4,7 @@ from utils.helpers import *
 
 
 def propagate_through_arm_vector(dispersive_element_type,X_mask,Y_mask,n, lba,A,G,m,F, alpha_c,alpha_c_transmis,delta_alpha_c, delta_beta_c):
-    """
-    Mapping function between the DMD and the scene (ray tracing type function)
 
-
-    Parameters
-    ----------
-    x_dmd : float -- in um
-        X position, on the DMD, of the pixel for a given lambda
-    y_dmd : float -- in um
-        Y position, on the DMD, of the pixel for a given lambda
-    n : float
-        refractive index of the prism of a given lambda.
-    F : float -- in um
-        focal length of the lens L3.
-    A : float -- in rad
-        apex angle of the BK7 prism.
-    alpha_c : float -- in rad
-        minimum angle of deviation for the central wavelength.
-
-    Returns
-    -------
-    x_scene : float -- in um
-        X position, on the scene, of the pixel for a given lambda.
-    y_scene : float -- in um
-        Y position, on the scene, of the pixel for a given lambda.
-
-    """
 
 
     if dispersive_element_type == "prism":
