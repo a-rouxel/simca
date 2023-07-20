@@ -10,12 +10,12 @@ from scipy.signal import convolve
 class CassiSystem():
     """Class that contains the optical system main attributes and methods"""
 
-    def __init__(self,system_config_path):
+    def __init__(self,system_config=None,system_config_path=None):
         """
         Load the system configuration file and initialize the grids for the DMD and the detector
 
         Args:
-            system_config_path:
+            system_config (dict): system configuration
 
         Initial Attributes:
             system_config (dict): system configuration
@@ -24,8 +24,10 @@ class CassiSystem():
             X_detector_coordinates_grid (numpy array): X grid coordinates of the center of the detector pixels
             Y_detector_coordinates_grid (numpy array): Y grid coordinates of the center of the detector pixels
         """
-
-        self.system_config = load_yaml_config(system_config_path)
+        if system_config_path is not None:
+            self.system_config = load_yaml_config(system_config_path)
+        elif system_config is not None:
+            self.system_config = system_config
 
 
         self.X_dmd_coordinates_grid, self.Y_dmd_coordinates_grid = self.create_coordinates_grid(self.system_config["SLM"]["sampling across X"],
