@@ -28,8 +28,6 @@ class CassiSystem():
             Y_detector_coordinates_grid (numpy array): Y grid coordinates of the center of the detector pixels
         """
 
-
-        self.system_config = load_yaml_config(system_config_path)
         if system_config_path is not None:
             self.system_config = load_yaml_config(system_config_path)
         elif system_config is not None:
