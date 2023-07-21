@@ -1,5 +1,5 @@
 import numpy as np
-
+from scipy import fftpack
 
 def generate_blue_noise(size):
     """
