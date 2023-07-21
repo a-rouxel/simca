@@ -536,9 +536,6 @@ class CassiSystem():
         with open(self.result_directory + "/config_acquisition.yml", 'w') as file:
             yaml.safe_dump(config_acquisition, file)
 
-
-
-
         self.save_interpolated_scene("interpolated_scene")
         self.save_filtered_interpolated_scene("filtered_interpolated_scene")
         self.save_measurement("measurement")
