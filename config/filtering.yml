@@ -4,7 +4,8 @@ infos:
     results directory: ./data/masks/
 
 mask:
-    type: slit
+    type: random
     slit position: 0
     slit width: 3
+    ROM : 0.5
 
