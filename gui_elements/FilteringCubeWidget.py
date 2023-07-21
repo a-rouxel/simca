@@ -153,6 +153,9 @@ class FilteringCubeWidgetEditor(QWidget):
         self.slit_width_slider.setMaximum(30)  # Adjust as needed
         self.slit_width_slider.valueChanged.connect(self.on_slit_width_changed)
 
+        self.random_ROM = QLineEdit()
+        self.random_ROM.setText("0.5")
+
 
 
         self.general_layout = QFormLayout()
@@ -221,6 +224,7 @@ class FilteringCubeWidgetEditor(QWidget):
         self.results_directory.setText(self.config['infos']['results directory'])
         self.mask_type.setCurrentText(self.config['mask']['type'])
 
+
         if 'slit position' in self.config['mask']:
             self.slit_position_slider.setValue(self.config['mask']['slit position'])
 
@@ -235,6 +239,14 @@ class FilteringCubeWidgetEditor(QWidget):
         for i in range(self.general_layout.rowCount() - 1, 0, -1):  # start from last row, stop at 2 (exclusive), step backwards
             # Remove row at index i from the layout
             self.general_layout.removeRow(i)
+
+        if mask_type == "random":
+            self.random_ROM = QLineEdit()
+            self.random_ROM.setText("0.5")
+            self.general_layout.addRow("ROM", self.random_ROM)
+
+            self.random_ROM.textChanged.connect(self.filtering_widget.enable_generate_mask_button)
+            self.random_ROM.textChanged.connect(self.filtering_widget.enable_generate_mask_button)
 
         if mask_type == "slit":
             self.slit_position_slider = QSlider(Qt.Horizontal)
@@ -289,6 +301,8 @@ class FilteringCubeWidgetEditor(QWidget):
 
         elif config['mask']['type'] == "custom h5 mask":
             config['mask']['file path'] = self.file_path.text()
+        elif config['mask']['type'] == "random":
+            config['mask']['ROM'] = float(self.random_ROM.text())
         else :
             config['mask']['slit position'] = None
             config['mask']['slit width'] = None

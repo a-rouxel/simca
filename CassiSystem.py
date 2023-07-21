@@ -126,8 +126,9 @@ class CassiSystem():
             self.system_config["SLM"]["sampling across X"] += 1
 
         if mask_type == "random":
-            mask = np.random.randint(0, 2, (self.system_config["SLM"]["sampling across Y"],
-                                                 self.system_config["SLM"]["sampling across X"]))
+            ROM = config_mask_and_filtering['mask']['ROM']
+            mask = np.random.choice([0, 1], size=(self.system_config["SLM"]["sampling across Y"],self.system_config["SLM"]["sampling across X"]), p=[1-ROM,ROM])
+
         elif mask_type == "slit":
             slit_position = config_mask_and_filtering['mask']['slit position']
             slit_width = config_mask_and_filtering['mask']['slit width']
@@ -259,6 +260,10 @@ class CassiSystem():
             self.apply_psf()
         else:
             print("No PSF was applied")
+
+        # Calculate the other two arrays
+        self.measurement = np.sum(self.last_filtered_interpolated_scene, axis=2)
+        self.panchro = np.sum(self.interpolated_scene, axis=2)
 
         return self.last_filtered_interpolated_scene, self.interpolated_scene
 
@@ -469,6 +474,47 @@ class CassiSystem():
         return self.last_filtered_interpolated_scene
 
 
+    def save_interpolated_scene(self,scene_name):
+
+        with h5py.File(self.result_directory + f'/{scene_name}.h5', 'w') as f:
+            f.create_dataset('interpolated_scene', data=self.interpolated_scene)
+        print(f"Interpolated scene saved in {self.result_directory}")
+
+    def save_filtered_interpolated_scene(self,filtered_scene_name):
+
+        with h5py.File(self.result_directory + f'/{filtered_scene_name}.h5', 'w') as f:
+            f.create_dataset('filtered_image', data=self.last_filtered_interpolated_scene)
+        print( f"Filtered interpolated scene saved in {self.result_directory}")
+
+    def save_measurement(self,measurement_name):
+
+        with h5py.File(self.result_directory + f'/{measurement_name}.h5', 'w') as f:
+            f.create_dataset('measurement', data=self.measurement)
+        print(f"Measurement saved in {self.result_directory}")
+
+    def save_panchromatic_image(self,panchromatic_image_name):
+
+        with h5py.File(self.result_directory + f'/{panchromatic_image_name}.h5', 'w') as f:
+            f.create_dataset('panchromatic_image', data=self.panchro)
+        print(f"Panchromatic image saved in {self.result_directory}")
+
+    def save_filtering_cube(self,filtering_cube_name):
+
+        with h5py.File(self.result_directory + f'/{filtering_cube_name}.h5', 'w') as f:
+            f.create_dataset('filtering_cube', data=self.filtering_cube)
+        print(f"Filtering cube saved in {self.result_directory}")
+
+    def save_mask(self,mask_name):
+
+        with h5py.File(self.result_directory + f'/{mask_name}.h5', 'w') as f:
+            f.create_dataset('mask', data=self.mask)
+        print(f"Mask saved in {self.result_directory}")
+
+    def save_wavelengths(self,wavelengths_name):
+
+        with h5py.File(self.result_directory + f'/{wavelengths_name}.h5', 'w') as f:
+            f.create_dataset('wavelengths', data=self.system_wavelengths)
+        print(f"Wavelengths saved in {self.result_directory}")
 
     def save_acquisition(self, config_mask_and_filtering,config_acquisition):
         """
@@ -491,21 +537,15 @@ class CassiSystem():
             yaml.safe_dump(config_acquisition, file)
 
 
-            # Calculate the other two arrays
-            sum_last_measurement = np.sum(self.last_filtered_interpolated_scene, axis=2)
-            sum_scene_interpolated = np.sum(self.interpolated_scene, axis=2)
 
-            # Save the arrays in an H5 file
-            with h5py.File(self.result_directory + '/filtered_image.h5', 'w') as f:
-                f.create_dataset('filtered_image', data=self.last_filtered_interpolated_scene)
-            with h5py.File(self.result_directory + '/image.h5', 'w') as f:
-                f.create_dataset('image', data=sum_last_measurement)
-            with h5py.File(self.result_directory + '/panchro.h5', 'w') as f:
-                f.create_dataset('panchro', data=sum_scene_interpolated)
-            with h5py.File(self.result_directory + '/filtering_cube.h5', 'w') as f:
-                f.create_dataset('filtering_cube', data=self.filtering_cube)
-            with h5py.File(self.result_directory + '/wavelengths.h5', 'w') as f:
-                f.create_dataset('wavelengths', data=self.system_wavelengths)
+
+        self.save_interpolated_scene("interpolated_scene")
+        self.save_filtered_interpolated_scene("filtered_interpolated_scene")
+        self.save_measurement("measurement")
+        self.save_panchromatic_image("panchro")
+        self.save_filtering_cube("filtering_cube")
+        self.save_mask("mask")
+        self.save_wavelengths("wavelengths")
 
         print("Acquisition saved in " + self.result_directory)
 
