@@ -4,6 +4,7 @@ from utils.functions_masks_generation import *
 from utils.scenes_helper import *
 
 from scipy.interpolate import griddata
+from scipy.interpolate import interpn
 import multiprocessing as mp
 from multiprocessing import Pool
 
@@ -139,7 +140,6 @@ class CassiSystem():
             slit_position = int(self.system_config["SLM"]["sampling across X"] / 2) + slit_position
 
             mask[:,slit_position-slit_width//2:slit_position+slit_width] = 1
-
         elif mask_type == "blue":
             size = (self.system_config["SLM"]["sampling across Y"], self.system_config["SLM"]["sampling across X"])
             mask = generate_blue_noise(size)
@@ -201,6 +201,12 @@ class CassiSystem():
                                         self.system_config["spectral range"]["number of spectral samples"]))
 
         with Pool(mp.cpu_count()) as p:
+
+            if self.system_config["system architecture"]["propagation type"]  == "simca":
+                worker = worker_unstructured
+            elif self.system_config["system architecture"]["propagation type"]  == "higher-order":
+                worker = worker_regulargrid
+
             tasks = [(self.list_X_propagated_mask, self.list_Y_propagated_mask, self.mask, self.X_detector_coordinates_grid, self.Y_detector_coordinates_grid, i)
                      for i in range(len(self.system_wavelengths))]
             for index, zi in tqdm(enumerate(p.imap(worker, tasks)), total=len(self.system_wavelengths), desc='Processing tasks'):
@@ -296,6 +302,14 @@ class CassiSystem():
         wavelengths = np.linspace(self.system_config["spectral range"]["wavelength min"],
                                   self.system_config["spectral range"]["wavelength max"],
                                   self.system_config['spectral range']["number of spectral samples"])
+
+        if self.system_config["system architecture"]["propagation type"] == "simca":
+            worker = worker_unstructured
+        elif self.system_config["system architecture"]["propagation type"] == "higher-order":
+            worker = worker_regulargrid
+        else:
+            return None
+
         with Pool(mp.cpu_count()) as p:
             tasks = [(list_X_propagated_masks, list_Y_propagated_masks, scene[:,:,i], X_detector_coordinates_grid, Y_detector_coordinates_grid, i)
                      for i in range(len(wavelengths))]
@@ -365,7 +379,33 @@ class CassiSystem():
             self.alpha_c_transmis = self.alpha_c
 
         return self.alpha_c
+
     def propagate_mask_grid(self,X_input_grid=None,Y_input_grid=None):
+        """
+        Propagate the SLM mask through one CASSI system
+        Args:
+            X_input_grid (numpy array): x coordinates grid
+            Y_input_grid (numpy array): y coordinates grid
+
+        Returns:
+            list_X_propagated_mask (list): list of the X coordinates of the propagated masks
+            list_Y_propagated_mask (list): list of the Y coordinates of the propagated masks
+        """
+
+        propagation_type = self.system_config["system architecture"]["propagation type"]
+
+
+        if propagation_type == "simca":
+            print("propagation_type: ", propagation_type)
+            self.propagate_mask_grid_simca(X_input_grid,Y_input_grid)
+
+        if propagation_type == "higher-order":
+            print("propagation_type: ", propagation_type)
+            self.propagate_mask_grid_simca(X_input_grid, Y_input_grid)
+            self.propagated_mask_grid_with_simple_model(X_input_grid, Y_input_grid)
+
+        return self.list_X_propagated_mask, self.list_Y_propagated_mask, self.system_wavelengths
+    def propagate_mask_grid_simca(self,X_input_grid=None,Y_input_grid=None):
         """
         Propagate the SLM mask through one CASSI system
         Args:
@@ -390,6 +430,7 @@ class CassiSystem():
         wavelengths = np.linspace(wavelength_min,
                                   wavelength_max,
                                   spectral_samples)
+
         self.system_wavelengths = wavelengths
 
         self.n_array_center = np.full(X_input_grid.shape,
@@ -429,10 +470,32 @@ class CassiSystem():
             self.list_Y_propagated_mask.append(Y_propagated_mask.reshape(Y_input_grid.shape))
 
 
+    def propagated_mask_grid_with_simple_model(self,X_input_grid=None,Y_input_grid=None):
+
+        try:
+            self.list_X_propagated_mask
+        except :
+            pass
+
+        if X_input_grid is None:
+            X_input_grid = self.X_dmd_coordinates_grid
+        if Y_input_grid is None:
+            Y_input_grid = self.Y_dmd_coordinates_grid
 
 
-        return self.list_X_propagated_mask, self.list_Y_propagated_mask, self.system_wavelengths
+        for idx, wav in enumerate(self.system_wavelengths):
 
+            X_detector = self.list_X_propagated_mask[idx]
+            Y_detector = self.list_Y_propagated_mask[idx]
+
+            X_ref = -1 * X_input_grid + X_detector[X_detector.shape[0] // 2 , X_detector.shape[1] // 2  ]
+            Y_ref = -1 * Y_input_grid + Y_detector[Y_detector.shape[0] // 2 , Y_detector.shape[1] // 2 ]
+
+            dist = np.sqrt((X_detector - X_ref) ** 2 + (Y_detector - Y_ref) ** 2)
+
+
+            self.list_X_propagated_mask[idx] = X_ref
+            self.list_Y_propagated_mask[idx] = Y_ref
     def generate_psf(self,type,radius):
         """
         Generate a PSF
@@ -516,6 +579,25 @@ class CassiSystem():
             f.create_dataset('wavelengths', data=self.system_wavelengths)
         print(f"Wavelengths saved in {self.result_directory}")
 
+    def save_config_system(self,config_system_name):
+
+        with open(self.result_directory + f"/{config_system_name}.yml", 'w') as file:
+            yaml.safe_dump(self.system_config, file)
+        print(f"System configuration saved in {self.result_directory}")
+
+    def save_config_mask_and_filtering(self,config_mask_and_filtering,config_mask_and_filtering_name):
+
+        with open(self.result_directory + f"/{config_mask_and_filtering_name}.yml", 'w') as file:
+            yaml.safe_dump(config_mask_and_filtering, file)
+        print(f"Mask and filtering configuration saved in {self.result_directory}")
+
+    def save_config_acquisition(self,config_acquisition,config_acquisition_name):
+
+        with open(self.result_directory + f"/{config_acquisition_name}.yml", 'w') as file:
+            yaml.safe_dump(config_acquisition, file)
+        print(f"Acquisition configuration saved in {self.result_directory}")
+
+
     def save_acquisition(self, config_mask_and_filtering,config_acquisition):
         """
         Save the all data related to an acquisition
@@ -527,15 +609,10 @@ class CassiSystem():
 
         self.result_directory = initialize_directory(config_acquisition)
 
-        with open(self.result_directory + "/config_system.yml", 'w') as file:
-            yaml.safe_dump(self.system_config, file)
 
-        with open(self.result_directory + "/config_mask_and_filtering.yml", 'w') as file:
-            yaml.safe_dump(config_mask_and_filtering, file)
-
-        with open(self.result_directory + "/config_acquisition.yml", 'w') as file:
-            yaml.safe_dump(config_acquisition, file)
-
+        self.save_config_system("config_system")
+        self.save_config_mask_and_filtering(config_mask_and_filtering,"config_mask_and_filtering")
+        self.save_config_acquisition(config_acquisition,"config_acquisition")
         self.save_interpolated_scene("interpolated_scene")
         self.save_filtered_interpolated_scene("filtered_interpolated_scene")
         self.save_measurement("measurement")
@@ -546,7 +623,7 @@ class CassiSystem():
 
         print("Acquisition saved in " + self.result_directory)
 
-def worker(args):
+def worker_unstructured(args):
     """
     Process to parallellize
     :param args:
@@ -555,6 +632,25 @@ def worker(args):
     list_X_propagated_masks, list_Y_propagated_masks, mask, X_detector_coordinates_grid, Y_detector_coordinates_grid, wavelength_index = args
 
     list_X_propagated_masks = np.nan_to_num(list_X_propagated_masks)
+    interpolated_mask = griddata((list_X_propagated_masks[wavelength_index][:, :].flatten(),
+                                  list_Y_propagated_masks[wavelength_index][:, :].flatten()),
+                                 mask.flatten(),
+                                 (X_detector_coordinates_grid, Y_detector_coordinates_grid),
+                                 method='linear')
+    return interpolated_mask
+
+def worker_regulargrid(args):
+    """
+    Process to parallellize
+    :param args:
+    :return:
+    """
+    list_X_propagated_masks, list_Y_propagated_masks, mask, X_detector_coordinates_grid, Y_detector_coordinates_grid, wavelength_index = args
+
+
+    list_X_propagated_masks = np.nan_to_num(list_X_propagated_masks)
+
+
     interpolated_mask = griddata((list_X_propagated_masks[wavelength_index][:, :].flatten(),
                                   list_Y_propagated_masks[wavelength_index][:, :].flatten()),
                                  mask.flatten(),

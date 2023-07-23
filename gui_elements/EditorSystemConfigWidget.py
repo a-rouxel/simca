@@ -142,6 +142,20 @@ class EditorSystemConfigWidget(QWidget):
                     self.input_labels[full_key] = label
                     form_layout.addRow(label, input_field)
 
+                elif sub_key == 'propagation type':
+                    sub_group_box_2 = QGroupBox(sub_key)
+                    sub_form_layout_2 = QFormLayout()
+                    sub_group_box_2.setLayout(sub_form_layout_2)
+
+                    propagation_type = QComboBox(self)
+                    propagation_type.addItems(['higher-order', 'simca'])
+                    propagation_type.setCurrentText(value)
+                    label = QLabel(sub_key)
+                    self.input_groups[full_key] = sub_group_box_2
+                    self.input_fields[full_key] = propagation_type
+                    self.input_labels[full_key] = label
+                    form_layout.addRow(label, propagation_type)
+
 
                 elif sub_key in ['dispersive element', 'dispersive element 2']:
                     sub_group_box = QGroupBox(sub_key)
