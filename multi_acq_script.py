@@ -9,9 +9,9 @@ config_system = load_yaml_config("config/cassi_system.yml")
 config_masks = load_yaml_config("config/filtering.yml")
 config_acquisition = load_yaml_config("config/acquisition.yml")
 
-dataset_name = "A_fluocompact"
+dataset_name = "F_fluocompact"
 results_directory = "./data/results/slit_scanning_high_res"
-nb_of_acq = 200
+nb_of_acq = 240
 
 if __name__ == '__main__':
 
