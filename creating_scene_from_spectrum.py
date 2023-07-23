@@ -32,9 +32,9 @@ def generate_letter_shape(text="A",size=(100,100)):
     draw = ImageDraw.Draw(image)
     factor = size[0]/100
     # Choose a font (this will depend on what you have installed on your system)
-    font = ImageFont.truetype("arialbd.ttf", 80*int(factor))  # Adjust path and size as needed
+    font = ImageFont.truetype("arialbd.ttf", 110*int(factor))  # Adjust path and size as needed
     text_width, text_height = draw.textsize(text, font=font)
-    position = ((size[0] - text_width) / 2 , (size[1] - text_height) / 2 - 8*factor )
+    position = ((size[0] - text_width) / 2 , (size[1] - text_height) / 2 - 10*factor )
     # Draw the text
     draw.text(position, text, fill=1, font=font)
     # Convert to numpy array
@@ -50,7 +50,7 @@ wavelengths = np.load("./wavelengths.npy")
 sun_spectrum = planck(wavelengths * 1e-9, 5778)
 sun_spectrum = sun_spectrum * ( 0.1/ np.max(sun_spectrum))
 
-letter = generate_letter_shape(text="A",size=(201,201))
+letter = generate_letter_shape(text="F",size=(201,201))
 
 plt.imshow(letter)
 plt.show()
@@ -62,11 +62,12 @@ spectrum_image = np.zeros((letter.shape[0], letter.shape[1], len(wavelengths)))
 for i in range(letter.shape[0]):
     for j in range(letter.shape[1]):
         if letter[i, j] == 0:
-            spectrum_image[i, j, :] = np.zeros(len(wavelengths))
+            # spectrum_image[i, j, :] = np.zeros(len(wavelengths))
+            spectrum_image[i,j,:] = sun_spectrum
         else:
             spectrum_image[i, j, :] = fluo_spectrum
 
-file = h5py.File("A_fluocompact.h5", "w")
+file = h5py.File("F_fluocompact.h5", "w")
 
 # Create datasets for your arrays
 file.create_dataset("scene", data=spectrum_image)
