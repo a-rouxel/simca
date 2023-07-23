@@ -33,6 +33,10 @@ DATASETS_CONFIG = {
     "A_fluocompact": {
         "img": "A_fluo.h5",
         "gt": "A_fluo.h5"
+    },
+    "F_fluocompact": {
+        "img": "F_fluocompact.h5",
+        "gt": "F_fluocompact.h5"
     }
 }
 
@@ -111,6 +115,21 @@ def get_dataset(dataset_name, target_folder="./", datasets=DATASETS_CONFIG):
         rgb_bands = (55, 300, 680)
 
         label_values = ['dark', 'fluo']
+        ignored_labels = []
+
+    elif dataset_name == "F_fluocompact":
+        # Open the HDF5 file
+        print(folder + dataset_name + ".h5")
+        file = h5py.File(folder + dataset_name + ".h5", "r")
+
+        # Load the datasets into numpy arrays
+        img = np.array(file["scene"])
+        list_wavelengths = list(np.array(file["wavelengths"]))
+        gt = np.array(file["gt"])
+
+        rgb_bands = (55, 300, 680)
+
+        label_values = ['sun', 'fluo']
         ignored_labels = []
 
 
