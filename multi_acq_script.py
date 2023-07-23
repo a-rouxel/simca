@@ -1,3 +1,5 @@
+import matplotlib.pyplot as plt
+
 from CassiSystem import CassiSystem
 from utils.helpers import load_yaml_config
 import os
@@ -7,9 +9,9 @@ config_system = load_yaml_config("config/cassi_system.yml")
 config_masks = load_yaml_config("config/filtering.yml")
 config_acquisition = load_yaml_config("config/acquisition.yml")
 
-dataset_name = "PaviaU"
-results_directory = "./data/results/testing_stuff_2"
-nb_of_acq = 10
+dataset_name = "A_fluocompact"
+results_directory = "./data/results/slit_scanning_high_res"
+nb_of_acq = 200
 
 if __name__ == '__main__':
 
@@ -21,6 +23,8 @@ if __name__ == '__main__':
 
     for i in range (nb_of_acq):
         # MASK : Generate the dmd mask
+        new_slit_position = config_masks["mask"]["slit position"] + 1
+        config_masks["mask"]["slit position"] = new_slit_position
         cassi_system.generate_2D_mask(config_masks)
 
         # PROPAGATION : Propagate the mask grid to the detector plane
@@ -37,6 +41,9 @@ if __name__ == '__main__':
         os.makedirs(results_directory, exist_ok=True)
 
         if i == 0:
+            cassi_system.save_config_system("config_system")
+            cassi_system.save_config_mask_and_filtering(config_masks,"config_mask_and_filtering")
+
             cassi_system.save_interpolated_scene("interpolated_scene")
             cassi_system.save_panchromatic_image("panchro")
             cassi_system.save_wavelengths("wavelengths")

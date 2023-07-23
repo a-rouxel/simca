@@ -5,29 +5,29 @@ infos:
 
 system architecture:
     system type: DD-CASSI
-    focal lens: 165000
+    propagation type: simca
+    focal lens: 200000
     dispersive element:
     # dispersive element caracteristics
         type: grating        # name of the dispersive element
         A: 60              # apex angle of the prism in degrees      (only used if type == 'prism')   -- in degrees
         m: 1               # grating order to consider         (only used if type == 'grating')       -- no units
-        G: 10             # grating density                   (only used if type == 'grating')       -- in lines/mm
+        G: 150             # grating density                   (only used if type == 'grating')       -- in lines/mm
         delta alpha c: 0
         delta beta c: 0
         wavelength center: 550  # central wavelength -- in nm
-
 detector:
-    sampling across X: 301                  # sampling across X axis -- no units
-    sampling across Y: 421                  # sampling across Y axis -- no units
+    sampling across X: 201                  # sampling across X axis -- no units
+    sampling across Y: 201                  # sampling across Y axis -- no units
     delta X: 30                             # delta X       -- in um
     delta Y: 30                              # delta Y       -- in um
 SLM:
-    sampling across X: 251                  # sampling across X axis -- no units
-    sampling across Y: 401                  # sampling across Y axis -- no units
-    delta X: 45                              # delta X       -- in um
-    delta Y: 45                              # delta Y       -- in um
+    sampling across X: 253                  # sampling across X axis -- no units
+    sampling across Y: 201                  # sampling across Y axis -- no units
+    delta X: 41                              # delta X       -- in um
+    delta Y: 41                              # delta Y       -- in um
 
 spectral range:
-    wavelength min: 450     # minimum wavelength -- in nm
-    wavelength max: 750      # maximum wavelength -- in nm
-    number of spectral samples: 103
+    wavelength min: 401     # minimum wavelength -- in nm
+    wavelength max: 649      # maximum wavelength -- in nm
+    number of spectral samples: 200

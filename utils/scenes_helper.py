@@ -29,6 +29,10 @@ DATASETS_CONFIG = {
     "Chikusei": {
         "img":"HyperspecVNIR_Chikusei_20140729.mat",
         "gt":"HyperspecVNIR_Chikusei_20140729_Ground_Truth.mat"
+    },
+    "A_fluocompact": {
+        "img": "A_fluo.h5",
+        "gt": "A_fluo.h5"
     }
 }
 
@@ -93,6 +97,22 @@ def get_dataset(dataset_name, target_folder="./", datasets=DATASETS_CONFIG):
         ignored_labels = [0]
         rgb_bands = (0, 25, 40)
         delta_lambda = 1050 - 380
+
+    elif dataset_name == "A_fluocompact":
+        # Open the HDF5 file
+        print(folder + dataset_name + ".h5")
+        file = h5py.File(folder + dataset_name + ".h5", "r")
+
+        # Load the datasets into numpy arrays
+        img = np.array(file["scene"])
+        list_wavelengths = list(np.array(file["wavelengths"]))
+        gt = np.array(file["gt"])
+
+        rgb_bands = (55, 300, 680)
+
+        label_values = ['dark', 'fluo']
+        ignored_labels = []
+
 
     elif dataset_name == "PaviaU":
         # Load the image
