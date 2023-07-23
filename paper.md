@@ -41,71 +41,43 @@ aas-doi: 10.3847/xxxxx <- update this with the DOI from AAS once you know it.
 aas-journal: Astrophysical Journal <- The name of the AAS journal.
 ---
 
-# Introduction
+# Summary
 
 The image formation in coded aperture spectral imagers is a key information to process the acquired compress data, and the optical system design and calibration of these instruments require great care. 
-We propose a python-based tool built upon ray-tracing equations of each optical component.
-The underlying model takes into account optical distortions, sampling effects and optical misalignments to produce realist measurements of various CASSI systems.
-
+`SIMCA` is a python-based tool built upon ray-tracing equations of each optical component to produce realist measurements of various CASSI systems.
+The underlying model takes into account spatial filtering, spectral dispersion, optical distortions, sampling effects and optical misalignments.
+The performances of the instrument can then be evaluated by analyzing raw optical data or the reconstruction of the hyperspectral scene.
 
 # Statement of need
 
-Imaging has been considerably renewed by the advent of coded aperture imagers, known as CASSI systems ("Coded-aperture Spectral Snapshot Imager" \cite{Wagadarikar2008}). 
-Unlike traditional spectral imagers where spectral bands are measured one at a time, CASSI systems measure linear combinations of spectral bands.
-This combination results from spatio-spectral filtering of the scene by an optical system containing one or more dispersive elements and a spatial light modulator that defines a coded aperture.
+* Imaging has been considerably renewed by the advent of coded aperture imagers, known as CASSI systems ("Coded-aperture Spectral Snapshot Imager" \cite{Wagadarikar2008}). 
+* Advantages of CASSI systems in general : 
+    * optical processing : exploring how to acquire spectral information in regard of a given task (classification, unmixing, ttarget detection, reconstruction, etc.)
+    * lower number of acquisitions (factor 10) required 
+    * lower amount of data to store (factor 10)
+    * snapshot imaging : no need for mechanical scanning
+    * adaptive perception in some systems
+* No open-source tool to simulate CASSI systems precisely
+* Lack of knowledge on the optical caracteristics and the coded aperture needed to reconstruct and/or classify scenes.
 
 
+# Proposal
 
-`Gala` is an Astropy-affiliated Python package for galactic dynamics. Python
-enables wrapping low-level languages (e.g., C) for speed without losing
-flexibility or ease-of-use in the user-interface. The API for `Gala` was
-designed to provide a class-based and user-friendly interface to fast (C or
-Cython-optimized) implementations of common operations such as gravitational
-potential and force evaluation, orbit integration, dynamical transformations,
-and chaos indicators for nonlinear dynamics. `Gala` also relies heavily on and
-interfaces well with the implementations of physical units and astronomical
-coordinate systems in the `Astropy` package [@astropy] (`astropy.units` and
-`astropy.coordinates`).
+An end-to-end simulation tool to evaluate CASSI system performances based on optical analysis and reconstruction accuracy.
+Tutorials are available [here](https://arouxel.gitlab.io/simca-documentation/)  
+  
+## Optical model
+First, the core of the tool is a ray-tracing model of the optical system allowing for precise simulation of light propagation depending on the caracteristics and types of optical components.
+  
+## Compressed image formation
+  
+Second, we provide a way of harnessing this propagation data to generate realistic measurements of the scene, including spatial filtering, spectral dispersion, optical distortions and sampling effects.
+  
+## Performances analysis
 
-`Gala` was designed to be used by both astronomical researchers and by
-students in courses on gravitational dynamics or astronomy. It has already been
-used in a number of scientific publications [@Pearson:2017] and has also been
-used in graduate courses on Galactic dynamics to, e.g., provide interactive
-visualizations of textbook material [@Binney:2008]. The combination of speed,
-design, and support for Astropy functionality in `Gala` will enable exciting
-scientific explorations of forthcoming data releases from the *Gaia* mission
-[@gaia] by students and experts alike.
+Third, a draft of a CASSI system evaluation tool to analyze optical and task-specific performances. 
 
-# Mathematics
 
-Single dollars ($) are required for inline mathematics e.g. $f(x) = e^{\pi/x}$
-
-Double dollars make self-standing equations:
-
-$$\Theta(x) = \left\{\begin{array}{l}
-0\textrm{ if } x < 0\cr
-1\textrm{ else}
-\end{array}\right.$$
-
-You can also use plain \LaTeX for equations
-\begin{equation}\label{eq:fourier}
-\hat f(\omega) = \int_{-\infty}^{\infty} f(x) e^{i\omega x} dx
-\end{equation}
-and refer to \autoref{eq:fourier} from text.
-
-# Citations
-
-Citations to entries in paper.bib should be in
-[rMarkdown](http://rmarkdown.rstudio.com/authoring_bibliographies_and_citations.html)
-format.
-
-If you want to cite a software repository URL (e.g. something on GitHub without a preferred
-citation) then you can do it with the example BibTeX entry below for @fidgit.
-
-For a quick reference, the following citation commands can be used:
-- `@author:2001`  ->  "Author et al. (2001)"
-- `[@author:2001]` -> "(Author et al., 2001)"
-- `[@author1:2001; @author2:2001]` -> "(Author1 et al., 2001; Author2 et al., 2002)"
 
 # Figures
 
@@ -118,7 +90,6 @@ Figure sizes can be customized by adding an optional second parameter:
 
 # Acknowledgements
 
-We acknowledge contributions from Brigitta Sipocz, Syrtis Major, and Semyeong
-Oh, and support from Kathryn Johnston during the genesis of this project.
+
 
 # References
