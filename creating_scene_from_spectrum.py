@@ -50,13 +50,16 @@ wavelengths = np.load("./wavelengths.npy")
 sun_spectrum = planck(wavelengths * 1e-9, 5778)
 sun_spectrum = sun_spectrum * ( 0.1/ np.max(sun_spectrum))
 
-letter = generate_letter_shape(text="F",size=(201,201))
+letter = generate_letter_shape(text="F.",size=(201,201))
 
 plt.imshow(letter)
 plt.show()
 
 # Initialize 3D array
 spectrum_image = np.zeros((letter.shape[0], letter.shape[1], len(wavelengths)))
+
+np.save("sun_spectrum.npy",sun_spectrum)
+np.save("wavelengths_sun.npy",wavelengths)
 
 # Fill in spectrum values based on mask
 for i in range(letter.shape[0]):
