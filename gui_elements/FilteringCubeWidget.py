@@ -225,11 +225,12 @@ class FilteringCubeWidgetEditor(QWidget):
         self.mask_type.setCurrentText(self.config['mask']['type'])
 
 
-        if 'slit position' in self.config['mask']:
+        if self.config['mask']['type'] == 'slit':
             self.slit_position_slider.setValue(self.config['mask']['slit position'])
-
-        if 'slit width' in self.config['mask']:
             self.slit_width_slider.setValue(self.config['mask']['slit width'])
+        elif self.config['mask']['type'] == 'random':
+            self.random_ROM.setText(str(self.config['mask']['ROM']))
+
 
 
     def on_mask_type_changed(self, mask_type):
