@@ -238,7 +238,7 @@ class OpticsConfigEditor(QWidget):
         general_group = QGroupBox("General settings")
         general_group.setLayout(general_layout)
 
-        # Load config button
+        # Load configs button
         self.load_config_button = QPushButton("Load Config")
         self.load_config_button.clicked.connect(self.on_load_config_clicked)
 
@@ -272,11 +272,11 @@ class OpticsConfigEditor(QWidget):
     def load_config(self, file_name):
         with open(file_name, 'r') as file:
             self.config = yaml.safe_load(file)
-        # Call a method to update the GUI with the loaded config
+        # Call a method to update the GUI with the loaded configs
         self.update_config()
 
     def update_config(self):
-        # This method should update your QLineEdit and QSpinBox widgets with the loaded config.
+        # This method should update your QLineEdit and QSpinBox widgets with the loaded configs.
         self.results_directory.setText(self.config['infos']['results directory'])
 
         self.wavelength_min.setValue(self.config['spectral range']['wavelength min'])

@@ -20,9 +20,9 @@ class EditorSystemConfigWidget(QWidget):
 
 
     def init_ui(self):
-        # self.setWindowTitle('Editor for system config')
+        # self.setWindowTitle('Editor for system configs')
 
-        # Load config button
+        # Load configs button
         self.load_config_button = QPushButton("Load Config")
         self.load_config_button.clicked.connect(self.on_load_config_clicked)
 
@@ -99,17 +99,17 @@ class EditorSystemConfigWidget(QWidget):
         # Load the new configuration
         with open(file_name, 'r') as file:
             self.config = yaml.safe_load(file)
-        # Call a method to update the GUI with the loaded config
+        # Call a method to update the GUI with the loaded configs
         self.show_config()
 
 
     def save_config(self):
-        if hasattr(self, 'config'):
+        if hasattr(self, 'configs'):
             options = QFileDialog.Options()
             file_name, _ = QFileDialog.getSaveFileName(self, "Save Config", "",
                                                        "YAML Files (*.yml *.yaml);;All Files (*)", options=options)
             if file_name:
-                # Update the config from the current input fields
+                # Update the configs from the current input fields
                 self.config = self.get_config()
                 with open(file_name, 'w') as file:
                     yaml.safe_dump(self.config, file, default_flow_style=False)
@@ -216,23 +216,23 @@ class EditorSystemConfigWidget(QWidget):
             self.toggle_fields(grating_keys, True, self.input_fields, self.input_labels)
     def get_config(self):
         config = {}  # Create an empty dictionary
-        # Loop over all input fields and add their values to the config
+        # Loop over all input fields and add their values to the configs
         for key, input_field in self.input_fields.items():
             # Split the key into parts
             key_parts = key.split("_")
 
             if len(key_parts) == 3:
                 section, sub_section, sub_key = key_parts
-                # Ensure the section exists in the config
+                # Ensure the section exists in the configs
                 if section not in config:
                     config[section] = {}
-                # Ensure the sub_section exists in the config
+                # Ensure the sub_section exists in the configs
                 if sub_section not in config[section]:
                     config[section][sub_section] = {}
                 target_dict = config[section][sub_section]
             elif len(key_parts) == 2:
                 section, sub_key = key_parts
-                # Ensure the section exists in the config
+                # Ensure the section exists in the configs
                 if section not in config:
                     config[section] = {}
                 target_dict = config[section]
@@ -256,7 +256,7 @@ class EditorSystemConfigWidget(QWidget):
                 except ValueError:
                     pass
 
-            # Add the value to the config
+            # Add the value to the configs
             target_dict[sub_key] = value
 
             self.config = config

@@ -160,11 +160,11 @@ class AcquisitionEditorWidget(QWidget):
     def load_config(self, file_name):
         with open(file_name, 'r') as file:
             self.config = yaml.safe_load(file)
-        # Call a method to update the GUI with the loaded config
+        # Call a method to update the GUI with the loaded configs
         self.update_config()
     def update_config(self):
-        # This method should update your QLineEdit and QSpinBox widgets with the loaded config.
-        # self.acquisitions_directory.setText(self.config['acquisition directory'])
+        # This method should update your QLineEdit and QSpinBox widgets with the loaded configs.
+        # self.acquisitions_directory.setText(self.configs['acquisition directory'])
         self.directories_combo.setCurrentText(self.config['acquisition type'])
         self.results_directory.setText(self.config['results directory'])
         self.acquisition_name.setText(self.config['acquisition name'])
@@ -215,7 +215,7 @@ class Worker(QThread):
         print("Acquisition finished")
 
 class AcquisitionWidget(QWidget):
-    def __init__(self,cassi_system,system_editor,dataset_widget, filtering_widget,acquisition_config_path="config/acquisition.yml"):
+    def __init__(self,cassi_system,system_editor,dataset_widget, filtering_widget,acquisition_config_path="configs/acquisition.yml"):
         super().__init__()
 
         self.cassi_system = cassi_system

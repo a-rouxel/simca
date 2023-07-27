@@ -399,10 +399,10 @@ class datasetConfigEditor(QWidget):
     def load_config(self, file_name):
         with open(file_name, 'r') as file:
             self.config = yaml.safe_load(file)
-        # Call a method to update the GUI with the loaded config
+        # Call a method to update the GUI with the loaded configs
         self.update_config()
     def update_config(self):
-        # This method should update your QLineEdit and QSpinBox widgets with the loaded config.
+        # This method should update your QLineEdit and QSpinBox widgets with the loaded configs.
         self.datasets_directory.setText(self.config['datasets directory'])
 
     @pyqtSlot(int,int,int,float,float)
@@ -444,7 +444,7 @@ class Worker(QThread):
         self.finished_dataset_labelisation.emit(self.cassi_system.dataset_gt,self.cassi_system.dataset_label_values,self.cassi_system.dataset_palette)# Emit a tuple of arrays
         self.finished_dataset_label_histogram.emit(self.cassi_system.dataset_gt,self.cassi_system.dataset_label_values,self.cassi_system.dataset_ignored_labels,self.cassi_system.dataset_palette)
 class DatasetWidget(QWidget):
-    def __init__(self,cassi_system=None,dataset_config_path="config/dataset.yml"):
+    def __init__(self,cassi_system=None,dataset_config_path="configs/dataset.yml"):
         super().__init__()
 
         self.cassi_system = cassi_system

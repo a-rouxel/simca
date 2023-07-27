@@ -2,9 +2,20 @@ import numpy as np
 from tqdm import tqdm
 
 def generate_dd_measurement(scene, filtering_cube,chunk_size):
+    """
+    Generate DD-CASSI type system measurement from a scene and a filtering cube. ref : "Single-shot compressive spectral imaging with a dual-disperser architecture", M.Gehm et al., Optics Express, 2007
+
+    Args:
+        scene (numpy array): 3D array of the scene to be measured
+        filtering_cube (numpy array): 3D array corresponding to the spatio-spectral filtering cube of the instrument
+        chunk_size (int) : size of the spatial chunks in which the Hadamard product is performed
+
+    Returns:
+        filtered_scene (numpy array): 3D array of the filtered scene
+    """
 
     # Initialize an empty array for the result
-    measurement_in_3D = np.empty_like(filtering_cube)
+    filtered_scene = np.empty_like(filtering_cube)
 
     # Calculate total iterations for tqdm
     total_iterations = (filtering_cube.shape[0] // chunk_size + 1) * (filtering_cube.shape[1] // chunk_size + 1)
@@ -13,19 +24,29 @@ def generate_dd_measurement(scene, filtering_cube,chunk_size):
         # Perform the multiplication in chunks
         for i in range(0, filtering_cube.shape[0], chunk_size):
             for j in range(0, filtering_cube.shape[1], chunk_size):
-                measurement_in_3D[i:i + chunk_size, j:j + chunk_size, :] = filtering_cube[i:i + chunk_size,
+                filtered_scene[i:i + chunk_size, j:j + chunk_size, :] = filtering_cube[i:i + chunk_size,
                                                                            j:j + chunk_size, :] * scene[
                                                                                                   i:i + chunk_size,
                                                                                                   j:j + chunk_size,
                                                                                                   :]
                 pbar.update()
 
-    measurement_in_3D = np.nan_to_num(measurement_in_3D)
+    filtered_scene = np.nan_to_num(filtered_scene)
 
-    return measurement_in_3D
+    return filtered_scene
 
 
 def match_scene_to_instrument(scene, filtering_cube):
+    """
+    Match the size of the scene to the size of the filtering cube. Either by padding or by cropping
+    Args:
+        scene (numpy array): 3D array of the scene to be measured
+        filtering_cube (numpy array): 3D array corresponding to the spatio-spectral filtering cube of the instrument
+
+    Returns:
+        scene (numpy array): 3D array of the scene to be measured, matched to the size of the filtering cube
+    """
+
     if filtering_cube.shape[0] != scene.shape[0] or filtering_cube.shape[1] != scene.shape[1]:
         if scene.shape[0] < filtering_cube.shape[0]:
             scene = np.pad(scene, ((0, filtering_cube.shape[0] - scene.shape[0]), (0, 0), (0, 0)), mode="constant")
@@ -42,6 +63,8 @@ def match_scene_to_instrument(scene, filtering_cube):
     return scene
 
 def crop_center(array_x, array_y, nb_of_samples_along_x, nb_of_samples_along_y):
+    
+
     y_len, x_len = array_x.shape
 
     x_start = x_len//2 - nb_of_samples_along_x//2
@@ -57,7 +80,6 @@ def crop_center(array_x, array_y, nb_of_samples_along_x, nb_of_samples_along_y):
     if nb_of_samples_along_y>=array_x.shape[0] and nb_of_samples_along_x>=array_x.shape[1]:
         array_x_crop = array_x
         array_y_crop = array_y
-
 
     return array_x_crop, array_y_crop
 

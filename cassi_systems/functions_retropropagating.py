@@ -163,17 +163,17 @@ def sellmeier(lambda_):
 
     """
 
-    B1 = 1.03961212;
-    B2 = 0.231792344;
-    B3 = 1.01046945;
-    C1 = 6.00069867 * (10 ** -3);
-    C2 = 2.00179144 * (10 ** -2);
-    C3 = 1.03560653 * (10 ** 2);
+    B1 = 1.03961212
+    B2 = 0.231792344
+    B3 = 1.01046945
+    C1 = 6.00069867 * (10 ** -3)
+    C2 = 2.00179144 * (10 ** -2)
+    C3 = 1.03560653 * (10 ** 2)
 
     lambda_in_mm = lambda_ / 1000
 
-    n = math.sqrt(1 + B1 * lambda_in_mm ** 2 / (lambda_in_mm ** 2 - C1) + B2 * lambda_in_mm ** 2 / (
-                lambda_in_mm ** 2 - C2) + B3 * lambda_in_mm ** 2 / (lambda_in_mm ** 2 - C3));
+    n = np.sqrt(1 + B1 * lambda_in_mm ** 2 / (lambda_in_mm ** 2 - C1) + B2 * lambda_in_mm ** 2 / (
+                lambda_in_mm ** 2 - C2) + B3 * lambda_in_mm ** 2 / (lambda_in_mm ** 2 - C3))
 
     return n
 

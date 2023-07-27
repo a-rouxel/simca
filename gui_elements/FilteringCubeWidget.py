@@ -117,7 +117,7 @@ class Worker(QThread):
         # Put your analysis here
         self.cassi_system.update_config(self.system_config)
         self.cassi_system.propagate_mask_grid()
-        self.cassi_system.generate_filtering_cube()
+        self.cassi_system.generate_filtering_cubes()
         self.finished_propagate_mask_grid.emit(self.cassi_system.filtering_cube,self.cassi_system.system_wavelengths)  # Emit a tuple of arrays
 
 
@@ -169,7 +169,7 @@ class FilteringCubeWidgetEditor(QWidget):
         general_group.setLayout(self.general_layout)
 
 
-        # Load config button
+        # Load configs button
         self.load_config_button = QPushButton("Load Config")
         self.load_config_button.clicked.connect(self.on_load_config_clicked)
         self.save_config_button = QPushButton("Save Config")
@@ -196,12 +196,12 @@ class FilteringCubeWidgetEditor(QWidget):
             self.load_config(initial_config_file)
 
     def save_config(self):
-        if hasattr(self, 'config'):
+        if hasattr(self, 'configs'):
             options = QFileDialog.Options()
             file_name, _ = QFileDialog.getSaveFileName(self, "Save Config", "",
                                                        "YAML Files (*.yml *.yaml);;All Files (*)", options=options)
             if file_name:
-                # Update the config from the current input fields
+                # Update the configs from the current input fields
                 self.config = self.get_config()
                 with open(file_name, 'w') as file:
                     yaml.safe_dump(self.config, file, default_flow_style=False)
@@ -215,11 +215,11 @@ class FilteringCubeWidgetEditor(QWidget):
     def load_config(self, file_name):
         with open(file_name, 'r') as file:
             self.config = yaml.safe_load(file)
-        # Call a method to update the GUI with the loaded config
+        # Call a method to update the GUI with the loaded configs
         self.update_config()
 
     def update_config(self):
-        # This method should update your QLineEdit and QSpinBox widgets with the loaded config.
+        # This method should update your QLineEdit and QSpinBox widgets with the loaded configs.
 
         self.results_directory.setText(self.config['infos']['results directory'])
         self.mask_type.setCurrentText(self.config['mask']['type'])
@@ -282,11 +282,11 @@ class FilteringCubeWidgetEditor(QWidget):
         if file_path:
             self.file_path.setText(file_path)
     def on_slit_position_changed(self, position):
-        # Update the slit position in your config
+        # Update the slit position in your configs
         self.config['mask']['slit position'] = position
 
     def on_slit_width_changed(self, width):
-        # Update the slit width in your config
+        # Update the slit width in your configs
         self.config['mask']['slit width'] = width
 
     def get_config(self):
@@ -396,7 +396,7 @@ class FilteringCubeWidget(QWidget):
         self.maskGenerated.connect(self.display_mask_grid)
 
         self.cassi_system.update_config(system_config)
-        self.cassi_system.generate_2D_mask(config_filtering)
+        self.cassi_system.generate_2D_masks(config_filtering)
 
         self.generate_mask_button.setDisabled(True)
         self.maskGenerated.emit(self.cassi_system.mask)

@@ -28,6 +28,6 @@ SLM:
     delta Y: 55                              # delta Y       -- in um
 
 spectral range:
-    wavelength min: 401     # minimum wavelength -- in nm
-    wavelength max: 649      # maximum wavelength -- in nm
-    number of spectral samples: 200
+    wavelength min: 450     # minimum wavelength -- in nm
+    wavelength max: 850      # maximum wavelength -- in nm
+    number of spectral samples: 30

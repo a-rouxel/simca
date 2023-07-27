@@ -1,10 +1,9 @@
-from cassi_systems import CassiSystem
-from utils.helpers import load_yaml_config
+from cassi_systems import CassiSystem, load_yaml_config
 
-config_dataset = load_yaml_config("config/dataset.yml")
-config_system = load_yaml_config("config/cassi_system.yml")
-config_masks = load_yaml_config("config/filtering.yml")
-config_acquisition = load_yaml_config("config/acquisition.yml")
+config_dataset = load_yaml_config("cassi_systems/configs/dataset.yml")
+config_system = load_yaml_config("cassi_systems/configs/cassi_system.yml")
+config_masks = load_yaml_config("cassi_systems/configs/filtering.yml")
+config_acquisition = load_yaml_config("cassi_systems/configs/acquisition.yml")
 
 dataset_name = "PaviaU"
 

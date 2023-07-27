@@ -18,15 +18,15 @@ class MainWindow(QMainWindow):
         # self.setWindowIcon(QIcon('Figure_1.ico'))
         self.setWindowTitle('SIMCA')
 
-        self.cassi_system = CassiSystem(system_config_path="config/cassi_system.yml")
+        self.cassi_system = CassiSystem(system_config_path="cassi_systems/configs/cassi_system.yml")
 
-        self.scene_widget = DatasetWidget(cassi_system=self.cassi_system, dataset_config_path="config/dataset.yml")
+        self.scene_widget = DatasetWidget(cassi_system=self.cassi_system, dataset_config_path="cassi_systems/configs/dataset.yml")
         self.scene_dock = QDockWidget("Scene")
         self.scene_dock.setWidget(self.scene_widget)
         self.addDockWidget(Qt.RightDockWidgetArea, self.scene_dock)
 
 
-        self.system_editor = EditorSystemConfigWidget(initial_system_config_path="config/cassi_system.yml")
+        self.system_editor = EditorSystemConfigWidget(initial_system_config_path="cassi_systems/configs/cassi_system.yml")
         self.system_config_dock = QDockWidget("Editor Optical Design")
         self.system_config_dock.setWidget(self.system_editor)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.system_config_dock)
@@ -37,17 +37,17 @@ class MainWindow(QMainWindow):
 
 
 
-        self.optics_widget = OpticsWidget(cassi_system=self.cassi_system,editor_system_config=self.system_editor,optics_config_path="config/optics.yml")
+        self.optics_widget = OpticsWidget(cassi_system=self.cassi_system, editor_system_config=self.system_editor, optics_config_path="cassi_systems/configs/optics.yml")
         self.optics_dock = QDockWidget("Optical Design")
         self.optics_dock.setWidget(self.optics_widget)
         self.addDockWidget(Qt.RightDockWidgetArea, self.optics_dock)
 
-        self.filtering_widget = FilteringCubeWidget(cassi_system=self.cassi_system,system_editor=self.system_editor,filtering_config_path="config/filtering.yml")
+        self.filtering_widget = FilteringCubeWidget(cassi_system=self.cassi_system, system_editor=self.system_editor, filtering_config_path="cassi_systems/configs/filtering.yml")
         self.filtering_dock = QDockWidget("Masks")
         self.filtering_dock.setWidget(self.filtering_widget)
         self.addDockWidget(Qt.RightDockWidgetArea, self.filtering_dock)
 
-        self.acquisition_widget = AcquisitionWidget(self.cassi_system,self.system_editor,self.scene_widget, self.filtering_widget,acquisition_config_path="config/acquisition.yml")
+        self.acquisition_widget = AcquisitionWidget(self.cassi_system, self.system_editor, self.scene_widget, self.filtering_widget, acquisition_config_path="cassi_systems/configs/acquisition.yml")
         self.acquisition_dock = QDockWidget("Acquisition")
         self.acquisition_dock.setWidget(self.acquisition_widget)
         self.addDockWidget(Qt.RightDockWidgetArea, self.acquisition_dock)
