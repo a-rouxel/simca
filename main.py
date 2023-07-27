@@ -8,7 +8,7 @@ from gui_elements import FilteringCubeWidget
 from gui_elements import DatasetWidget
 from gui_elements import AcquisitionWidget
 
-from CassiSystem import CassiSystem
+from cassi_systems import CassiSystem
 import os
 class MainWindow(QMainWindow):
     def __init__(self):

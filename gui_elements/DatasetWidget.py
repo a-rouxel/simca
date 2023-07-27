@@ -4,8 +4,8 @@ from PyQt5.QtWidgets import (QTabWidget,QHBoxLayout, QPushButton, QLineEdit,
 from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot
 from PyQt5.QtWidgets import  QSlider
 from PyQt5.QtCore import Qt
-from utils.scenes_helper import *
-from utils.toolbox import *
+from utils import *
+import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 import os
@@ -115,7 +115,7 @@ class datasetHistogram(QWidget):
         self.canvas.draw()
 
 from PyQt5.QtWidgets import QVBoxLayout, QWidget, QLabel, QScrollArea
-from PyQt5.QtGui import QColor, QPixmap, QPainter, QImage
+from PyQt5.QtGui import QColor, QPixmap
 import pyqtgraph as pg
 import numpy as np
 
@@ -184,9 +184,12 @@ class RGBdatasetDisplay(QWidget):
     def display_rgb_img(self, dataset, rgb_bands):
         rgb_array = np.zeros((dataset.shape[0], dataset.shape[1], 3))
 
-        rgb = spectral.get_rgb(dataset, rgb_bands)
-        rgb /= np.max(rgb)
-        rgb = np.asarray(255 * rgb, dtype='uint8')
+        rgb_array[:, :, 0] = dataset[:, :, rgb_bands[0]]
+        rgb_array[:, :, 1] = dataset[:, :, rgb_bands[1]]
+        rgb_array[:, :, 2] = dataset[:, :, rgb_bands[2]]
+
+        rgb_array /= np.max(rgb_array)
+        rgb_array = np.asarray(255 * rgb_array, dtype='uint8')
 
         # rgb_array[:, :, 0] = dataset[:, :, rgb_bands[0]]
         # rgb_array[:, :, 1] = dataset[:, :, rgb_bands[1]]
@@ -194,7 +197,7 @@ class RGBdatasetDisplay(QWidget):
 
         self.figure.clear()
         ax1 = self.figure.add_subplot(111)
-        im = ax1.imshow(rgb)
+        im = ax1.imshow(rgb_array)
         ax1.set_title('RGB image of the dataset')
         self.canvas.draw()
 
@@ -433,9 +436,7 @@ class Worker(QThread):
         self.dataset_config_editor.dataset_loaded.emit(self.cassi_system.dataset.shape[1],self.cassi_system.dataset.shape[0],self.cassi_system.dataset.shape[2],
                                                    self.cassi_system.list_dataset_wavelengths[0],self.cassi_system.list_dataset_wavelengths[-1])
 
-        self.stats_per_class = explore_spectrums(self.cassi_system.dataset, self.cassi_system.dataset_gt, self.cassi_system.dataset_label_values,
-                          ignored_labels=self.cassi_system.dataset_ignored_labels, delta_lambda=None)
-
+        self.stats_per_class = explore_spectrums(self.cassi_system.dataset, self.cassi_system.dataset_gt, self.cassi_system.dataset_label_values,self.cassi_system.dataset_ignored_labels)
 
         self.finished_load_dataset.emit(self.cassi_system.dataset,self.cassi_system.list_dataset_wavelengths)  # Emit a tuple of arrays
         self.finished_rgb_dataset.emit(self.cassi_system.dataset,self.cassi_system.dataset_rgb_bands)  # Emit a tuple of arrays

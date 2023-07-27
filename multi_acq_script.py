@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 
-from CassiSystem import CassiSystem
+from cassi_systems import CassiSystem
 from utils.helpers import load_yaml_config
 import os
 
