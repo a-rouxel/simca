@@ -59,21 +59,19 @@ class CassiSystem():
             list_dataset_data (list) : a list containing the dataset, the ground truth, the list of wavelengths, the label values, the ignored labels, the rgb bands, the palette and the delta lambda
         """
 
-        img, gt, list_wavelengths, label_values, ignored_labels, rgb_bands, palette, delta_lambda = get_dataset(
+        img, gt, list_wavelengths, label_values, ignored_labels, palette = get_dataset(
             directory, dataset_name)
         self.dataset = img
         self.dataset_gt = gt
         self.list_dataset_wavelengths = list_wavelengths
         self.dataset_label_values = label_values
         self.dataset_ignored_labels = ignored_labels
-        self.dataset_rgb_bands = rgb_bands
         self.dataset_palette = palette
-        self.dataset_delta_lambda = delta_lambda
 
         self.dataset_palette = palette_init(label_values, palette)
         list_dataset_data = [self.dataset, self.dataset_gt, self.list_dataset_wavelengths, self.dataset_label_values,
-                             self.dataset_ignored_labels, self.dataset_rgb_bands, self.dataset_palette,
-                             self.dataset_delta_lambda, self.dataset_palette]
+                             self.dataset_ignored_labels,  self.dataset_palette,
+                             self.dataset_palette]
 
         return list_dataset_data
 

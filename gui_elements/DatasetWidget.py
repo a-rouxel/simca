@@ -181,15 +181,22 @@ class RGBdatasetDisplay(QWidget):
         self.layout.addWidget(self.toolbar)
         self.layout.addWidget(self.canvas)
 
-    def display_rgb_img(self, dataset, rgb_bands):
-        rgb_array = np.zeros((dataset.shape[0], dataset.shape[1], 3))
+    def display_rgb_img(self, dataset):
 
-        rgb_array[:, :, 0] = dataset[:, :, rgb_bands[0]]
-        rgb_array[:, :, 1] = dataset[:, :, rgb_bands[1]]
-        rgb_array[:, :, 2] = dataset[:, :, rgb_bands[2]]
+        W = dataset.shape[2]
+        while W % 3 != 0:
+            W += 1
+        W_new = W //3
 
-        rgb_array /= np.max(rgb_array)
-        rgb_array = np.asarray(255 * rgb_array, dtype='uint8')
+        # Calculate mean of each part along the third axis
+        part1 = np.mean(dataset[:, :, :W_new], axis=2, keepdims=True)
+        part2 = np.mean(dataset[:, :, W_new:2 * W_new], axis=2, keepdims=True)
+        part3 = np.mean(dataset[:, :, 2 * W_new:], axis=2, keepdims=True)
+
+        # Stack means along the third axis
+        rgb = np.concatenate([part1, part2, part3], axis=2)
+        rgb /= np.max(rgb)
+        rgb = np.asarray(255 * rgb, dtype='uint8')
 
         # rgb_array[:, :, 0] = dataset[:, :, rgb_bands[0]]
         # rgb_array[:, :, 1] = dataset[:, :, rgb_bands[1]]
@@ -197,9 +204,10 @@ class RGBdatasetDisplay(QWidget):
 
         self.figure.clear()
         ax1 = self.figure.add_subplot(111)
-        im = ax1.imshow(rgb_array)
+        im = ax1.imshow(rgb)
         ax1.set_title('RGB image of the dataset')
         self.canvas.draw()
+
 
 class LegendWidget(QWidget):
     def __init__(self, label_values, palette, ground_truth):
@@ -418,7 +426,7 @@ class datasetConfigEditor(QWidget):
 class Worker(QThread):
 
     finished_load_dataset = pyqtSignal(np.ndarray,list)
-    finished_rgb_dataset = pyqtSignal(np.ndarray,tuple)
+    finished_rgb_dataset = pyqtSignal(np.ndarray)
     finished_explore_dataset = pyqtSignal(dict,dict,list)
     finished_dataset_labelisation = pyqtSignal(np.ndarray, list, dict)
     finished_dataset_label_histogram = pyqtSignal(np.ndarray, list, list,dict)
@@ -439,7 +447,7 @@ class Worker(QThread):
         self.stats_per_class = explore_spectrums(self.cassi_system.dataset, self.cassi_system.dataset_gt, self.cassi_system.dataset_label_values,self.cassi_system.dataset_ignored_labels)
 
         self.finished_load_dataset.emit(self.cassi_system.dataset,self.cassi_system.list_dataset_wavelengths)  # Emit a tuple of arrays
-        self.finished_rgb_dataset.emit(self.cassi_system.dataset,self.cassi_system.dataset_rgb_bands)  # Emit a tuple of arrays
+        self.finished_rgb_dataset.emit(self.cassi_system.dataset)  # Emit a tuple of arrays
         self.finished_explore_dataset.emit(self.stats_per_class,self.cassi_system.dataset_palette,self.cassi_system.dataset_label_values)
         self.finished_dataset_labelisation.emit(self.cassi_system.dataset_gt,self.cassi_system.dataset_label_values,self.cassi_system.dataset_palette)# Emit a tuple of arrays
         self.finished_dataset_label_histogram.emit(self.cassi_system.dataset_gt,self.cassi_system.dataset_label_values,self.cassi_system.dataset_ignored_labels,self.cassi_system.dataset_palette)
@@ -507,10 +515,9 @@ class DatasetWidget(QWidget):
         self.dataset = dataset
         self.dataset_content_display.diplay_dataset_content(dataset,list_wavelengths)
 
-    @pyqtSlot(np.ndarray,tuple)
-    def display_rgb_dataset(self, dataset,rgb_bands):
-        print(rgb_bands)
-        self.rgb_dataset_display.display_rgb_img(dataset,rgb_bands)
+    @pyqtSlot(np.ndarray)
+    def display_rgb_dataset(self, dataset):
+        self.rgb_dataset_display.display_rgb_img(dataset)
 
     @pyqtSlot(dict,dict,list)
     def display_spectral_data(self,stats_class,palette,label_values):
