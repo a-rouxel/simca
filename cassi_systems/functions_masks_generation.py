@@ -1,7 +1,7 @@
 import numpy as np
 from scipy import fftpack
-
-def generate_blue_noise(size):
+from scipy import ndimage
+def generate_blue_noise_type_1_mask(size):
     """
     Generate blue noise (high frequency pseudo-random) type mask
     Args:
@@ -78,7 +78,7 @@ def generate_ln_orthogonal_mask(size, W, N):
         - mask (numpy array of shape size[0] x (size[1]+W-1) x N): length-N orthogonal mask
     """
 
-    C, R = size[0], size[1] # Number of columns, number of rows
+    C, R = size[1], size[0] # Number of columns, number of rows
 
     K = C + W - 1 # Number of columns in H
     M = int(np.floor(W/N)) # Number of open mirrors
@@ -97,7 +97,12 @@ def generate_ln_orthogonal_mask(size, W, N):
             available.pop(ind)
     mask = np.tile(H_model, [1, int(np.ceil(K/W)), 1])[:, :K, :]
 
-    return mask
+    list_of_masks = []
+    for i in range(mask.shape[2]):
+        m = mask[:, :-(W-1), i]
+        list_of_masks.append(m)
+
+    return list_of_masks
 
 # Source of blue noise codes: https://momentsingraphics.de/BlueNoise.html
 def FindLargestVoid(BinaryPattern,StandardDeviation):
@@ -192,7 +197,7 @@ def GetVoidAndClusterBlueNoise(OutputShape,StandardDeviation=1.5,InitialSeedFrac
         DitherArray.flat[iTightestCluster]=Rank
     return DitherArray
 
-def generate_blue_noise_mask(size, std=1.5, initial_seed_fraction=0.1):
+def generate_blue_noise_type_2_mask(size, std=1.5, initial_seed_fraction=0.1):
     """
     Generate blue noise mask
 
@@ -205,6 +210,7 @@ def generate_blue_noise_mask(size, std=1.5, initial_seed_fraction=0.1):
         - mask (numpy array of shape size): float blue noise mask
     """
     shape = (size[0], size[1])
+
 
     texture=GetVoidAndClusterBlueNoise(shape,std, initial_seed_fraction)
     mask = (texture/np.max(texture)) # Float value between 0 and 1

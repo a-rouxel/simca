@@ -43,6 +43,12 @@ def save_measurement(measurement_name,measurement,result_directory):
         f.create_dataset('measurement', data=measurement)
     print(f"Measurement saved in {result_directory}")
 
+def save_list_of_measurements(measurements_name,list_of_measurements,result_directory):
+
+    with h5py.File(result_directory + f'/{measurements_name}.h5', 'w') as f:
+        f.create_dataset('list_of_measurements', data=list_of_measurements)
+    print(f"list of measurements saved in {result_directory}")
+
 def save_panchromatic_image(panchromatic_image_name,panchro,result_directory):
 
     with h5py.File(result_directory + f'/{panchromatic_image_name}.h5', 'w') as f:
@@ -55,12 +61,23 @@ def save_filtering_cube(filtering_cube_name,filtering_cube,result_directory):
         f.create_dataset('filtering_cube', data=filtering_cube)
     print(f"Filtering cube saved in {result_directory}")
 
+def save_list_of_filtering_cubes(list_of_filtering_cubes_name,list_of_filtering_cubes,result_directory):
+
+    with h5py.File(result_directory + f'/{list_of_filtering_cubes_name}.h5', 'w') as f:
+        f.create_dataset('list_of_filtering_cubes', data=list_of_filtering_cubes)
+    print(f"list of filtering cubes saved in {result_directory}")
+
 def save_mask(mask_name,mask,result_directory):
 
     with h5py.File(result_directory + f'/{mask_name}.h5', 'w') as f:
         f.create_dataset('mask', data=mask)
     print(f"Mask saved in {result_directory}")
 
+def save_list_of_masks(list_of_masks_name,list_of_masks,result_directory):
+
+    with h5py.File(result_directory + f'/{list_of_masks_name}.h5', 'w') as f:
+        f.create_dataset('list_of_masks', data=list_of_masks)
+    print(f"list of masks saved in {result_directory}")
 def save_wavelengths(wavelengths_name,system_wavelengths,result_directory):
 
     with h5py.File(result_directory + f'/{wavelengths_name}.h5', 'w') as f:

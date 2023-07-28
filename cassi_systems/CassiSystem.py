@@ -145,9 +145,14 @@ class CassiSystem():
 
             mask[:, slit_position - slit_width // 2:slit_position + slit_width] = 1
 
-        elif mask_type == "blue":
+        elif mask_type == "blue-noise type 1":
             size = (self.system_config["SLM"]["sampling across Y"], self.system_config["SLM"]["sampling across X"])
-            mask = generate_blue_noise(size)
+            mask = generate_blue_noise_type_1_mask(size)
+
+        elif mask_type == "blue-noise type 2":
+
+            size = [self.system_config["SLM"]["sampling across Y"], self.system_config["SLM"]["sampling across X"]]
+            mask = generate_blue_noise_type_2_mask(list(size))
 
 
         elif mask_type == "custom h5 mask":
@@ -186,6 +191,95 @@ class CassiSystem():
         self.mask = mask
         return mask
 
+    def generate_multiple_SLM_masks(self, config_mask_and_filtering, number_of_masks):
+        """
+        Args:
+            config_mask_and_filtering (dict): masks and filtering configuration
+            number_of_masks (int): number of masks to generate
+
+        Returns:
+            list_of_SLM_masks (list): list of SLM mask (numpy arrays) generated according to the configuration file
+        """
+
+        list_of_SLM_masks = list()
+        mask_type = config_mask_and_filtering['mask']['type']
+
+        if mask_type == "random":
+            for i in range(number_of_masks):
+                ROM = config_mask_and_filtering['mask']['ROM']
+                mask = np.random.choice([0, 1], size=(self.system_config["SLM"]["sampling across Y"],
+                                                      self.system_config["SLM"]["sampling across X"]),
+                                                       p=[1 - ROM, ROM])
+                list_of_SLM_masks.append(mask)
+
+        elif mask_type == "slit":
+
+            print("mmmmh you are weird, why would you want to do that ?")
+
+        elif mask_type == "LN-random":
+            list_of_SLM_masks = generate_ln_orthogonal_mask(size=(self.system_config["SLM"]["sampling across Y"],
+                                                      self.system_config["SLM"]["sampling across X"]),
+                                        W=self.system_config["spectral range"]["number of spectral samples"],
+                                        N=number_of_masks)
+
+            print(len(list_of_SLM_masks))
+            print(list_of_SLM_masks[0].shape)
+
+        elif mask_type == "blue-noise type 1":
+
+            for i in range(number_of_masks):
+                size = [self.system_config["SLM"]["sampling across Y"], self.system_config["SLM"]["sampling across X"]]
+                mask = generate_blue_noise_type_1_mask(size)
+                list_of_SLM_masks.append(mask)
+
+        elif mask_type == "blue-noise type 2":
+
+            for i in range(number_of_masks):
+                size = [self.system_config["SLM"]["sampling across Y"], self.system_config["SLM"]["sampling across X"]]
+                mask = generate_blue_noise_type_2_mask(size)
+                list_of_SLM_masks.append(mask)
+
+
+        elif mask_type == "custom h5":
+            mask_path = config_mask_and_filtering['mask']['file path']
+
+            if mask_path is None:
+                raise ValueError("Please provide h5 file path for custom mask.")
+            else:
+                with h5py.File(mask_path, 'r') as f:
+                    list_of_masks = f['list_of_masks'][:]
+
+                for mask in list_of_masks:
+                    slm_sampling_y = self.system_config["SLM"]["sampling across Y"]
+                    slm_sampling_x = self.system_config["SLM"]["sampling across X"]
+
+                    if mask.shape[0] != slm_sampling_y or mask.shape[1] != slm_sampling_x:
+                        # Find center point of the mask
+                        center_y, center_x = mask.shape[0] // 2, mask.shape[1] // 2
+
+                        # Determine starting and ending indices for the crop
+                        start_y = center_y - slm_sampling_y // 2
+                        end_y = start_y + slm_sampling_y
+                        start_x = center_x - slm_sampling_x // 2
+                        end_x = start_x + slm_sampling_x
+
+                        # Crop the mask
+                        mask = mask[start_y:end_y, start_x:end_x]
+
+                        # Confirm the mask is the correct shape
+                        if mask.shape[0] != slm_sampling_y or mask.shape[1] != slm_sampling_x:
+                            raise ValueError("Error cropping the mask, its shape does not match the SLM sampling.")
+                    list_of_SLM_masks.append(mask)
+
+        else:
+            print("Mask type is not supported")
+            mask = None
+
+        self.list_of_SLM_masks = list_of_SLM_masks
+
+
+        return self.list_of_SLM_masks
+
     def generate_filtering_cube(self):
         """
         Generate filtering cube, each slice is a propagated mask interpolated on the detector grid
@@ -214,6 +308,42 @@ class CassiSystem():
                 self.filtering_cube[:, :, index] = zi
 
         return self.filtering_cube
+
+    def generate_multiple_filtering_cubes(self, number_of_masks):
+        """
+        Generate multiple filtering cubes, each cube corresponds to a mask, and for each mask, each slice is a propagated mask interpolated on the detector grid
+
+        Returns:
+            filtering_cube (numpy array): 3D filtering cube generated according to the system configuration
+
+        """
+        self.list_of_filtering_cubes = []
+
+        for idx in range(number_of_masks):
+
+
+            self.filtering_cube = np.zeros((self.system_config["detector"]["sampling across Y"],
+                                            self.system_config["detector"]["sampling across X"],
+                                            self.system_config["spectral range"]["number of spectral samples"]))
+
+            with Pool(mp.cpu_count()) as p:
+
+                if self.system_config["system architecture"]["propagation type"] == "simca":
+                    worker = worker_unstructured
+                elif self.system_config["system architecture"]["propagation type"] == "higher-order":
+                    worker = worker_regulargrid
+
+
+                tasks = [(self.list_X_propagated_mask, self.list_Y_propagated_mask, self.list_of_SLM_masks[idx],
+                          self.X_detector_coordinates_grid, self.Y_detector_coordinates_grid, i)
+                         for i in range(len(self.system_wavelengths))]
+                for index, zi in tqdm(enumerate(p.imap(worker, tasks)), total=len(self.system_wavelengths),
+                                      desc='Processing tasks'):
+                    self.filtering_cube[:, :, index] = zi
+
+                self.list_of_filtering_cubes.append(self.filtering_cube)
+
+        return self.list_of_filtering_cubes
 
     def image_acquisition(self, use_psf=False, chunck_size=50):
         """
@@ -272,6 +402,68 @@ class CassiSystem():
 
         return self.last_filtered_interpolated_scene, self.interpolated_scene
 
+    def multiple_image_acquisitions(self, use_psf=False, nb_of_filtering_cubes=1,chunck_size=50):
+        """
+        Run the acquisition process depending on the cassi system type
+        Args:
+            chunck_size (int): default block size for the dataset
+
+        Returns:
+            last_filtered_interpolated_scene (numpy array): filtered scene cube
+            interpolated_scene (numpy array): interpolated scene cube
+        """
+
+        dataset = self.interpolate_dataset_along_wavelengths(self.system_wavelengths, chunck_size)
+        self.list_of_filtered_scenes = []
+
+        if self.system_config["system architecture"]["system type"] == "DD-CASSI":
+            try:
+                self.list_of_filtering_cubes
+            except:
+                return print("Please generate list of filtering cubes first")
+
+            scene = match_scene_to_instrument(dataset, self.list_of_filtering_cubes[0])
+            self.interpolated_scene = scene
+
+            for i in range(nb_of_filtering_cubes):
+
+                filtered_scene = generate_dd_measurement(scene, self.list_of_filtering_cubes[i], chunck_size)
+                self.list_of_filtered_scenes.append(filtered_scene)
+
+
+        elif self.system_config["system architecture"]["system type"] == "SD-CASSI":
+
+            X_dmd_coordinates_grid_crop, Y_dmd_coordinates_grid_crop = crop_center(self.X_dmd_coordinates_grid,
+                                                                                   self.Y_dmd_coordinates_grid,
+                                                                                   dataset.shape[1], dataset.shape[0])
+
+            scene = match_scene_to_instrument(dataset, X_dmd_coordinates_grid_crop)
+            self.interpolated_scene = scene
+            for i in self.list_of_filtering_cubes:
+
+                mask_crop, mask_crop = crop_center(self.list_of_filtering_cubes[i], self.list_of_filtering_cubes[i], scene.shape[1], scene.shape[0])
+
+                filtered_scene = scene * np.tile(mask_crop[..., np.newaxis], (1, 1, scene.shape[2]))
+
+                self.propagate_mask_grid(X_input_grid=X_dmd_coordinates_grid_crop, Y_input_grid=Y_dmd_coordinates_grid_crop)
+
+                filtered_and_propagated_scene = self.generate_sd_measurement_cube(filtered_scene)
+                self.list_of_filtered_scenes.append(filtered_and_propagated_scene)
+
+
+        if use_psf:
+            self.apply_psf()
+        else:
+            print("No PSF was applied")
+
+        # Calculate the other two arrays
+        self.list_of_measurements = []
+        for i in range(nb_of_filtering_cubes):
+            self.list_of_measurements.append(np.sum(self.list_of_filtered_scenes[i], axis=2))
+
+        self.panchro = np.sum(self.interpolated_scene, axis=2)
+
+        return self.list_of_filtered_scenes, self.interpolated_scene
     def generate_sd_measurement_cube(self, scene):
         """
         Generate SD measurement cube from the scene cube and the filtering cube

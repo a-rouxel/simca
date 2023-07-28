@@ -2,7 +2,6 @@ import matplotlib.pyplot as plt
 
 from cassi_systems import CassiSystem
 from cassi_systems.functions_general_purpose import *
-from utils.helpers import load_yaml_config
 import os
 
 config_dataset = load_yaml_config("cassi_systems/configs/dataset.yml")
@@ -10,9 +9,9 @@ config_system = load_yaml_config("cassi_systems/configs/cassi_system.yml")
 config_masks = load_yaml_config("cassi_systems/configs/filtering.yml")
 config_acquisition = load_yaml_config("cassi_systems/configs/acquisition.yml")
 
-dataset_name = "F_fluocompact"
-results_directory = "./data/results/slit_scanning_high_res"
-nb_of_acq = 1
+dataset_name = "lego"
+results_directory = "./data/results/lego_test_1"
+nb_of_acq = 10
 
 if __name__ == '__main__':
 
@@ -22,36 +21,45 @@ if __name__ == '__main__':
     # DATASET : Load the hyperspectral dataset
     cassi_system.load_dataset(dataset_name, config_dataset["datasets directory"])
 
-    for i in range (nb_of_acq):
-        # MASK : Generate the dmd mask
-        new_slit_position = config_masks["mask"]["slit position"] + 1
-        config_masks["mask"]["slit position"] = new_slit_position
-        cassi_system.generate_2D_masks(config_masks)
 
-        # PROPAGATION : Propagate the mask grid to the detector plane
-        cassi_system.propagate_mask_grid()
+    cassi_system.generate_multiple_SLM_masks(config_masks,nb_of_acq)
 
-        # FILTERING CUBE : Generate the filtering cube
-        cassi_system.generate_filtering_cubes()
+    # PROPAGATION : Propagate the mask grid to the detector plane
+    cassi_system.propagate_mask_grid()
 
-        # ACQUISITION : Simulate the acquisition with psf (use_psf is optional)
-        cassi_system.image_acquisition(use_psf=False,chunck_size=50)
+    for i in range(nb_of_acq):
+        plt.imshow(cassi_system.list_of_SLM_masks[i])
+        plt.show()
 
-        # Save the acquisition
-        cassi_system.result_directory =results_directory
-        os.makedirs(results_directory, exist_ok=True)
+    # FILTERING CUBE : Generate the filtering cubes
+    cassi_system.generate_multiple_filtering_cubes(nb_of_acq)
 
-        if i == 0:
-            save_config_system("config_system", cassi_system.system_config, cassi_system.result_directory)
-            save_config_mask_and_filtering("config_mask_and_filtering", config_masks,cassi_system.result_directory)
+    # ACQUISITION : Simulate the acquisition with psf (use_psf is optional)
+    cassi_system.multiple_image_acquisitions(use_psf=False,nb_of_filtering_cubes=nb_of_acq,chunck_size=50)
 
-            save_interpolated_scene("interpolated_scene", cassi_system.interpolated_scene, cassi_system.result_directory)
-            save_panchromatic_image("panchro", cassi_system.panchro, cassi_system.result_directory)
-            save_wavelengths("wavelengths", cassi_system.system_wavelengths, cassi_system.result_directory)
+    # Save the acquisition
+    cassi_system.result_directory =results_directory
+    os.makedirs(results_directory, exist_ok=True)
 
-        save_measurement(f"measurement_{i}",cassi_system.measurement,cassi_system.result_directory)
-        save_filtering_cube(f"filtering_cube_{i}",cassi_system.filtering_cube,cassi_system.result_directory)
-        save_mask(f"mask_{i}",cassi_system.mask,cassi_system.result_directory)
+    save_config_system("config_system", cassi_system.system_config, cassi_system.result_directory)
+    save_config_mask_and_filtering("config_mask_and_filtering", config_masks,cassi_system.result_directory)
+    save_config_acquisition("config_acquisition", config_acquisition, cassi_system.result_directory)
+
+    save_interpolated_scene("interpolated_scene",cassi_system.interpolated_scene, cassi_system.result_directory)
+    save_panchromatic_image("panchro",cassi_system.panchro,cassi_system.result_directory)
+
+    save_wavelengths("wavelengths",cassi_system.system_wavelengths,cassi_system.result_directory)
+    save_list_of_measurements("list_of_compressed_measurements",cassi_system.list_of_measurements,cassi_system.result_directory)
+    save_list_of_filtering_cubes("list_of_filtering_cubes",cassi_system.list_of_filtering_cubes,cassi_system.result_directory)
+    save_list_of_masks("list_of_SLM_masks",cassi_system.list_of_SLM_masks,cassi_system.result_directory)
+
+
+
+
+
+
+
+
 
 
 
