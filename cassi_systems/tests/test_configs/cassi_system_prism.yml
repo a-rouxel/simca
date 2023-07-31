@@ -1,0 +1,33 @@
+#####  Configuration file for the chosen optical system
+
+infos:
+    system name: HYACAMEO
+
+system architecture:
+    system type: DD-CASSI
+    propagation type: simca
+    focal lens: 200000
+    dispersive element:
+    # dispersive element caracteristics
+        type: prism        # name of the dispersive element
+        A: 60              # apex angle of the prism in degrees      (only used if type == 'prism')   -- in degrees
+        m: 1               # grating order to consider         (only used if type == 'grating')       -- no units
+        G: 150             # grating density                   (only used if type == 'grating')       -- in lines/mm
+        delta alpha c: 0
+        delta beta c: 0
+        wavelength center: 550  # central wavelength -- in nm
+detector:
+    sampling across X: 23                  # sampling across X axis -- no units
+    sampling across Y: 21                  # sampling across Y axis -- no units
+    delta X: 400                            # delta X       -- in um
+    delta Y: 400                              # delta Y       -- in um
+SLM:
+    sampling across X: 31                  # sampling across X axis -- no units
+    sampling across Y: 22                  # sampling across Y axis -- no units
+    delta X: 550                              # delta X       -- in um
+    delta Y: 550                              # delta Y       -- in um
+
+spectral range:
+    wavelength min: 450     # minimum wavelength -- in nm
+    wavelength max: 610      # maximum wavelength -- in nm
+    number of spectral samples: 11

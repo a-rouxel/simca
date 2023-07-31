@@ -1,0 +1,11 @@
+#####  Configuration file for the chosen optical system
+
+infos:
+    results directory: ./data/masks/
+
+mask:
+    type: blue-noise type 1
+    slit position: -120
+    slit width: 1
+    ROM : 0.5
+
