@@ -48,6 +48,7 @@ class CassiSystem():
             self.system_config["detector"]["delta X"],
             self.system_config["detector"]["delta Y"])
 
+
     def load_dataset(self, directory, dataset_name):
         """Loading the dataset
 
@@ -59,19 +60,21 @@ class CassiSystem():
             list_dataset_data (list) : a list containing the dataset, the ground truth, the list of wavelengths, the label values, the ignored labels, the rgb bands, the palette and the delta lambda
         """
 
-        img, gt, list_wavelengths, label_values, ignored_labels, palette = get_dataset(
+        dataset, list_wavelengths, dataset_labels, label_names, ignored_labels = get_dataset(
             directory, dataset_name)
-        self.dataset = img
-        self.dataset_gt = gt
-        self.list_dataset_wavelengths = list_wavelengths
-        self.dataset_label_values = label_values
-        self.dataset_ignored_labels = ignored_labels
-        self.dataset_palette = palette
 
-        self.dataset_palette = palette_init(label_values, palette)
-        list_dataset_data = [self.dataset, self.dataset_gt, self.list_dataset_wavelengths, self.dataset_label_values,
-                             self.dataset_ignored_labels,  self.dataset_palette,
-                             self.dataset_palette]
+        self.dataset = dataset
+        self.dataset_labels = dataset_labels
+        self.dataset_wavelengths = list_wavelengths
+
+        # additional attributes
+        self.dataset_label_names = label_names
+        self.dataset_ignored_labels = ignored_labels
+        self.dataset_palette = palette_init(label_names)
+
+
+        list_dataset_data = [self.dataset, self.dataset_labels, self.dataset_wavelengths, self.dataset_label_names,
+                             self.dataset_ignored_labels, self.dataset_palette]
 
         return list_dataset_data
 
@@ -112,7 +115,7 @@ class CassiSystem():
 
         """
         self.dataset_interpolated = interpolate_dataset_cube_along_wavelength(self.dataset,
-                                                                              self.list_dataset_wavelengths,
+                                                                              self.dataset_wavelengths,
                                                                               new_wavelengths_sampling, chunk_size)
         return self.dataset_interpolated
 
@@ -213,7 +216,14 @@ class CassiSystem():
                 list_of_SLM_masks.append(mask)
 
         elif mask_type == "slit":
-
+            for i in range(number_of_masks):
+                slit_position = config_mask_and_filtering['mask']['slit position']
+                slit_width = config_mask_and_filtering['mask']['slit width']
+                mask = np.zeros((self.system_config["SLM"]["sampling across Y"],
+                                 self.system_config["SLM"]["sampling across X"]))
+                slit_position = self.system_config["SLM"]["sampling across X"] // 2 + slit_position
+                mask[:, slit_position - slit_width // 2:slit_position + slit_width] = 1
+                list_of_SLM_masks.append(mask)
             print("mmmmh you are weird, why would you want to do that ?")
 
         elif mask_type == "LN-random":
@@ -222,8 +232,6 @@ class CassiSystem():
                                         W=self.system_config["spectral range"]["number of spectral samples"],
                                         N=number_of_masks)
 
-            print(len(list_of_SLM_masks))
-            print(list_of_SLM_masks[0].shape)
 
         elif mask_type == "blue-noise type 1":
 
@@ -285,7 +293,7 @@ class CassiSystem():
         Generate filtering cube, each slice is a propagated mask interpolated on the detector grid
 
         Returns:
-            filtering_cube (numpy array): 3D filtering cube generated according to the system configuration
+            filtering_cube (numpy array): 3D filtering cube generated according to the filtering configuration
 
         """
 
@@ -314,7 +322,7 @@ class CassiSystem():
         Generate multiple filtering cubes, each cube corresponds to a mask, and for each mask, each slice is a propagated mask interpolated on the detector grid
 
         Returns:
-            filtering_cube (numpy array): 3D filtering cube generated according to the system configuration
+            list_of_filtering_cubes (list): list of 3D filtering cubes generated according to the filtering configuration and
 
         """
         self.list_of_filtering_cubes = []
@@ -526,6 +534,7 @@ class CassiSystem():
         """
         x = np.arange(-(nb_of_samples_along_x-1) * delta_x / 2, (nb_of_samples_along_x+1) * delta_x / 2,delta_x)
         y = np.arange(-(nb_of_samples_along_y-1) * delta_y / 2, (nb_of_samples_along_y+1) * delta_y / 2, delta_y)
+
 
         # Create a two-dimensional grid of coordinates
         X_input_grid, Y_input_grid = np.meshgrid(x, y)

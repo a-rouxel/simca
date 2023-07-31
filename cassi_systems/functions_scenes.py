@@ -26,8 +26,12 @@ def get_dataset(dataset_name, folder="./datasets/"):
     h5_file = h5py.File(folder + dataset_name + ".h5", "r")
 
     scene = np.array(h5_file["scene"],dtype=np.float32)
+
+    # For matlab generated h5
     list_wavelengths = np.array(h5_file["wavelengths"]).tolist()[0]
-    palette = None
+    # for python generated h5
+    if type(list_wavelengths) == float:
+        list_wavelengths = np.array(h5_file["wavelengths"]).tolist()
 
     # No NaN accepted
     nan_mask = np.isnan(scene.sum(axis=-1))
@@ -35,27 +39,26 @@ def get_dataset(dataset_name, folder="./datasets/"):
 
     try:
         labels = np.array(h5_file["labels"], dtype=np.int8)
-        label_values = [l[0] for l in h5_file['label_names'].asstr()[...]]
+        label_names = [l[0] for l in h5_file['label_names'].asstr()[...]]
         ignored_labels = list(h5_file['ignored_labels'][...][0])
         labels[nan_mask] = 0
     except:
         labels = None
-        label_values = None
+        label_names = None
         ignored_labels = None
 
-    print(f"Dataset {dataset_name} loaded")
-    print(f"Shape of the scene: {scene.shape}")
-    print(f"Number of classes: {len(label_values)}")
-    print(f"Labels: {label_values}")
-    print(f"Ignored labels: {ignored_labels}")
-    print(f"Number of wavelengths: {len(list_wavelengths)}")
-
-    return scene, labels, list_wavelengths,label_values, ignored_labels, palette
 
 
-def palette_init(label_values, palette):
-    if palette is None:
-        palette = {0: (0, 0, 0)}
+    return scene, list_wavelengths, labels, label_names, ignored_labels
+
+
+def palette_init(label_values):
+    """Creates a palette for the classes
+    """
+    palette = {0: (0, 0, 0)}
+    if label_values is None:
+        return None
+    else:
         for k, color in enumerate(sns.color_palette("hls", len(label_values) - 1)):
             palette[k + 1] = tuple(np.asarray(255 * np.array(color), dtype="uint8"))
     return palette

@@ -441,16 +441,22 @@ class Worker(QThread):
         self.dataset_config_editor.update_config()
         self.cassi_system.load_dataset(self.dataset_config_editor.directories_combo.currentText(),self.dataset_config_editor.datasets_directory.text())
 
-        self.dataset_config_editor.dataset_loaded.emit(self.cassi_system.dataset.shape[1],self.cassi_system.dataset.shape[0],self.cassi_system.dataset.shape[2],
-                                                   self.cassi_system.list_dataset_wavelengths[0],self.cassi_system.list_dataset_wavelengths[-1])
+        self.dataset_config_editor.dataset_loaded.emit(self.cassi_system.dataset.shape[1], self.cassi_system.dataset.shape[0], self.cassi_system.dataset.shape[2],
+                                                       self.cassi_system.dataset_wavelengths[0], self.cassi_system.dataset_wavelengths[-1])
 
-        self.stats_per_class = explore_spectrums(self.cassi_system.dataset, self.cassi_system.dataset_gt, self.cassi_system.dataset_label_values,self.cassi_system.dataset_ignored_labels)
-
-        self.finished_load_dataset.emit(self.cassi_system.dataset,self.cassi_system.list_dataset_wavelengths)  # Emit a tuple of arrays
+        self.finished_load_dataset.emit(self.cassi_system.dataset, self.cassi_system.dataset_wavelengths)  # Emit a tuple of arrays
         self.finished_rgb_dataset.emit(self.cassi_system.dataset)  # Emit a tuple of arrays
-        self.finished_explore_dataset.emit(self.stats_per_class,self.cassi_system.dataset_palette,self.cassi_system.dataset_label_values)
-        self.finished_dataset_labelisation.emit(self.cassi_system.dataset_gt,self.cassi_system.dataset_label_values,self.cassi_system.dataset_palette)# Emit a tuple of arrays
-        self.finished_dataset_label_histogram.emit(self.cassi_system.dataset_gt,self.cassi_system.dataset_label_values,self.cassi_system.dataset_ignored_labels,self.cassi_system.dataset_palette)
+
+
+        # If the dataset is labelled, compute and display the stats
+        if self.cassi_system.dataset_labels is not None:
+            self.stats_per_class = explore_spectrums(self.cassi_system.dataset, self.cassi_system.dataset_labels,
+                                                     self.cassi_system.dataset_label_names,
+                                                     self.cassi_system.dataset_ignored_labels)
+
+            self.finished_explore_dataset.emit(self.stats_per_class, self.cassi_system.dataset_palette, self.cassi_system.dataset_label_names)
+            self.finished_dataset_labelisation.emit(self.cassi_system.dataset_labels, self.cassi_system.dataset_label_names, self.cassi_system.dataset_palette)# Emit a tuple of arrays
+            self.finished_dataset_label_histogram.emit(self.cassi_system.dataset_labels, self.cassi_system.dataset_label_names, self.cassi_system.dataset_ignored_labels, self.cassi_system.dataset_palette)
 class DatasetWidget(QWidget):
     def __init__(self,cassi_system=None,dataset_config_path="configs/dataset.yml"):
         super().__init__()
