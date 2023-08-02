@@ -40,8 +40,16 @@ def get_dataset(dataset_name, folder="./datasets/"):
     try:
         labels = np.array(h5_file["labels"], dtype=np.int8)
         label_names = [l[0] for l in h5_file['label_names'].asstr()[...]]
-        ignored_labels = list(h5_file['ignored_labels'][...][0])
+
+        try :
+            ignored_labels = list(h5_file['ignored_labels'][...][0])
+        except:
+            ignored_labels = list(h5_file['ignored_labels'][...])
+
+
         labels[nan_mask] = 0
+
+
     except:
         labels = None
         label_names = None
