@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image, ImageDraw, ImageFont
 import h5py
-
+from scipy.stats import norm
 def planck(wavelength, T):
     """
     Returns the spectral radiance of a black body at temperature T.
@@ -47,8 +47,15 @@ fluo_spectrum = np.load("./fluo_intensity_val.npy")
 wavelengths = np.load("./wavelengths.npy")
 
 
-sun_spectrum = planck(wavelengths * 1e-9, 5778)
-sun_spectrum = sun_spectrum * ( 0.1/ np.max(sun_spectrum))
+# Mean and standard deviation for the Gaussian
+mean = np.mean([520, 570])
+std_dev = 20
+
+# Generate Gaussian distribution
+led_spectrum = norm.pdf(wavelengths, mean, std_dev)
+
+# Normalize the spectrum so that the maximum value is 1
+led_spectrum = (led_spectrum / np.max(led_spectrum))*0.3
 
 letter = generate_letter_shape(text="F.",size=(201,201))
 
@@ -58,7 +65,7 @@ plt.show()
 # Initialize 3D array
 spectrum_image = np.zeros((letter.shape[0], letter.shape[1], len(wavelengths)))
 
-np.save("sun_spectrum.npy",sun_spectrum)
+np.save("led_spectrum.npy",led_spectrum)
 np.save("wavelengths_sun.npy",wavelengths)
 
 # Fill in spectrum values based on mask
@@ -66,16 +73,22 @@ for i in range(letter.shape[0]):
     for j in range(letter.shape[1]):
         if letter[i, j] == 0:
             # spectrum_image[i, j, :] = np.zeros(len(wavelengths))
-            spectrum_image[i,j,:] = sun_spectrum
+            spectrum_image[i,j,:] = led_spectrum
         else:
             spectrum_image[i, j, :] = fluo_spectrum
+
+letter_names = ["green led","fluo"]
+ignored_labels = []
 
 file = h5py.File("F_fluocompact.h5", "w")
 
 # Create datasets for your arrays
 file.create_dataset("scene", data=spectrum_image)
 file.create_dataset("wavelengths", data=wavelengths)
-file.create_dataset("gt", data=letter)
+file.create_dataset("labels", data=letter)
+file.create_dataset("label_names", data=letter_names)
+file.create_dataset("ignored_labels", data=ignored_labels)
+
 # Close the file
 file.close()
 
