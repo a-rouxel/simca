@@ -114,10 +114,16 @@ class CassiSystem():
             dataset_interpolated (numpy array): interpolated dataset cube along the wavelength axis
 
         """
-        self.dataset_interpolated = interpolate_dataset_cube_along_wavelength(self.dataset,
-                                                                              self.dataset_wavelengths,
-                                                                              new_wavelengths_sampling, chunk_size)
-        return self.dataset_interpolated
+        if self.dataset_wavelengths[0] <= new_wavelengths_sampling[0] and self.dataset_wavelengths[-1] >= new_wavelengths_sampling[-1]:
+
+            self.dataset_interpolated = interpolate_dataset_cube_along_wavelength(self.dataset,
+                                                                                  self.dataset_wavelengths,
+                                                                                  new_wavelengths_sampling, chunk_size)
+            return self.dataset_interpolated
+        else:
+            raise ValueError("The new wavelengths sampling must be inside the dataset wavelengths range")
+
+
 
     def generate_2D_mask(self, config_mask_and_filtering):
         """
@@ -365,6 +371,9 @@ class CassiSystem():
         """
 
         dataset = self.interpolate_dataset_along_wavelengths(self.system_wavelengths, chunck_size)
+
+        if dataset is None:
+            return None
         dataset_labels = self.dataset_labels
 
         if self.system_config["system architecture"]["system type"] == "DD-CASSI":
@@ -409,7 +418,7 @@ class CassiSystem():
             self.interpolated_scene = scene
 
             if dataset_labels is not None:
-                scene_labels = match_scene_labels_to_instrument(dataset_labels, self.filtering_cube)
+                scene_labels = match_scene_labels_to_instrument(dataset_labels, self.last_filtered_interpolated_scene)
                 self.scene_labels = scene_labels
 
         if use_psf:
@@ -435,6 +444,8 @@ class CassiSystem():
         """
 
         dataset = self.interpolate_dataset_along_wavelengths(self.system_wavelengths, chunck_size)
+        if dataset is None:
+            return None
         dataset_labels = self.dataset_labels
 
         self.list_of_filtered_scenes = []
@@ -461,6 +472,7 @@ class CassiSystem():
 
         elif self.system_config["system architecture"]["system type"] == "SD-CASSI":
 
+
             X_dmd_coordinates_grid_crop, Y_dmd_coordinates_grid_crop = crop_center(self.X_dmd_coordinates_grid,
                                                                                    self.Y_dmd_coordinates_grid,
                                                                                    dataset.shape[1], dataset.shape[0])
@@ -472,9 +484,10 @@ class CassiSystem():
                 self.scene_labels = scene_labels
 
             self.interpolated_scene = scene
-            for i in self.list_of_filtering_cubes:
 
-                mask_crop, mask_crop = crop_center(self.list_of_filtering_cubes[i], self.list_of_filtering_cubes[i], scene.shape[1], scene.shape[0])
+            for i in range(nb_of_filtering_cubes):
+
+                mask_crop, mask_crop = crop_center(self.list_of_SLM_masks[i], self.list_of_SLM_masks[i], scene.shape[1], scene.shape[0])
 
                 filtered_scene = scene * np.tile(mask_crop[..., np.newaxis], (1, 1, scene.shape[2]))
 
@@ -493,6 +506,8 @@ class CassiSystem():
         self.list_of_measurements = []
         for i in range(nb_of_filtering_cubes):
             self.list_of_measurements.append(np.sum(self.list_of_filtered_scenes[i], axis=2))
+
+
 
         self.panchro = np.sum(self.interpolated_scene, axis=2)
 
