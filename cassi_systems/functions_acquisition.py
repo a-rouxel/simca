@@ -62,6 +62,27 @@ def match_scene_to_instrument(scene, filtering_cube):
 
     return scene
 
+def match_scene_labels_to_instrument(dataset_labels, filtering_cube):
+    """
+    Match the size of the dataset labels to the size of the filtering cube. Either by padding or by cropping
+    Args:
+        dataset_labels (numpy array): 2D array of the scene to be measured
+        filtering_cube (numpy array): 3D array corresponding to the spatio-spectral filtering cube of the instrument
+
+    Returns:
+        cropped dataset_labels (numpy array): 2D array of the scene labels, matched to the size of the filtering cube
+    """
+
+    if filtering_cube.shape[0] != dataset_labels.shape[0] or filtering_cube.shape[1] != dataset_labels.shape[1]:
+        if dataset_labels.shape[0] < filtering_cube.shape[0]:
+            dataset_labels = np.pad(dataset_labels, ((0, filtering_cube.shape[0] - dataset_labels.shape[0])), mode="constant")
+        if dataset_labels.shape[1] < filtering_cube.shape[1]:
+            dataset_labels = np.pad(dataset_labels, ((0, 0), (0, filtering_cube.shape[1] - dataset_labels.shape[1])), mode="constant")
+        dataset_labels = dataset_labels[0:filtering_cube.shape[0], 0:filtering_cube.shape[1]]
+        print("Filtering cube and scene must have the same lines and columns")
+
+    return dataset_labels
+
 def crop_center(array_x, array_y, nb_of_samples_along_x, nb_of_samples_along_y):
     
 

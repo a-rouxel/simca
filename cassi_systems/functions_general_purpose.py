@@ -31,6 +31,13 @@ def save_interpolated_scene(scene_name,interpolated_scene,result_directory):
         f.create_dataset('interpolated_scene', data=interpolated_scene)
     print(f"Interpolated scene saved in {result_directory}")
 
+def save_interpolated_scene_labels(scene_name,scene_labels,result_directory):
+
+    with h5py.File(result_directory + f'/{scene_name}.h5', 'w') as f:
+        f.create_dataset('labels', data=scene_labels)
+    print(f"scene labels saved in {result_directory}")
+
+
 def save_filtered_interpolated_scene(filtered_scene_name,last_filtered_interpolated_scene,result_directory):
 
     with h5py.File(result_directory + f'/{filtered_scene_name}.h5', 'w') as f:

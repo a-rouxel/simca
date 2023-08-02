@@ -365,6 +365,7 @@ class CassiSystem():
         """
 
         dataset = self.interpolate_dataset_along_wavelengths(self.system_wavelengths, chunck_size)
+        dataset_labels = self.dataset_labels
 
         if self.system_config["system architecture"]["system type"] == "DD-CASSI":
 
@@ -374,10 +375,17 @@ class CassiSystem():
                 return print("Please generate filtering cube first")
 
             scene = match_scene_to_instrument(dataset, self.filtering_cube)
+
+
+
             measurement_in_3D = generate_dd_measurement(scene, self.filtering_cube, chunck_size)
 
             self.last_filtered_interpolated_scene = measurement_in_3D
             self.interpolated_scene = scene
+
+            if dataset_labels is not None:
+                scene_labels = match_scene_labels_to_instrument(dataset_labels, self.filtering_cube)
+                self.scene_labels = scene_labels
 
 
         elif self.system_config["system architecture"]["system type"] == "SD-CASSI":
@@ -387,6 +395,7 @@ class CassiSystem():
                                                                                    dataset.shape[1], dataset.shape[0])
 
             scene = match_scene_to_instrument(dataset, X_dmd_coordinates_grid_crop)
+
 
             mask_crop, mask_crop = crop_center(self.mask, self.mask, scene.shape[1], scene.shape[0])
 
@@ -398,6 +407,10 @@ class CassiSystem():
 
             self.last_filtered_interpolated_scene = sd_measurement
             self.interpolated_scene = scene
+
+            if dataset_labels is not None:
+                scene_labels = match_scene_labels_to_instrument(dataset_labels, self.filtering_cube)
+                self.scene_labels = scene_labels
 
         if use_psf:
             self.apply_psf()
@@ -422,6 +435,8 @@ class CassiSystem():
         """
 
         dataset = self.interpolate_dataset_along_wavelengths(self.system_wavelengths, chunck_size)
+        dataset_labels = self.dataset_labels
+
         self.list_of_filtered_scenes = []
 
         if self.system_config["system architecture"]["system type"] == "DD-CASSI":
@@ -431,6 +446,11 @@ class CassiSystem():
                 return print("Please generate list of filtering cubes first")
 
             scene = match_scene_to_instrument(dataset, self.list_of_filtering_cubes[0])
+
+            if dataset_labels is not None:
+                scene_labels = match_scene_labels_to_instrument(dataset_labels, self.filtering_cube)
+                self.scene_labels = scene_labels
+
             self.interpolated_scene = scene
 
             for i in range(nb_of_filtering_cubes):
@@ -446,6 +466,11 @@ class CassiSystem():
                                                                                    dataset.shape[1], dataset.shape[0])
 
             scene = match_scene_to_instrument(dataset, X_dmd_coordinates_grid_crop)
+
+            if dataset_labels is not None:
+                scene_labels = match_scene_labels_to_instrument(dataset_labels, self.filtering_cube)
+                self.scene_labels = scene_labels
+
             self.interpolated_scene = scene
             for i in self.list_of_filtering_cubes:
 
@@ -769,6 +794,7 @@ class CassiSystem():
         save_config_mask_and_filtering("config_mask_and_filtering",config_mask_and_filtering,self.result_directory)
         save_config_acquisition("config_acquisition",config_acquisition,self.result_directory)
         save_interpolated_scene("interpolated_scene",self.interpolated_scene, self.result_directory)
+        save_interpolated_scene_labels("scene_labels",self.scene_labels,self.result_directory)
         save_filtered_interpolated_scene("filtered_interpolated_scene",self.last_filtered_interpolated_scene, self.result_directory)
         save_measurement("measurement",self.measurement,self.result_directory)
         save_panchromatic_image("panchro",self.panchro,self.result_directory)
