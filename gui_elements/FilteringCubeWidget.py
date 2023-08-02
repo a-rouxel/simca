@@ -117,7 +117,7 @@ class Worker(QThread):
         # Put your analysis here
         self.cassi_system.update_config(self.system_config)
         self.cassi_system.propagate_mask_grid()
-        self.cassi_system.generate_filtering_cubes()
+        self.cassi_system.generate_filtering_cube()
         self.finished_propagate_mask_grid.emit(self.cassi_system.filtering_cube,self.cassi_system.system_wavelengths)  # Emit a tuple of arrays
 
 
@@ -140,7 +140,7 @@ class FilteringCubeWidgetEditor(QWidget):
         self.results_directory = QLineEdit()
 
         self.mask_type = QComboBox()
-        self.mask_type.addItems(["slit","random","blue","custom h5 mask"])
+        self.mask_type.addItems(["slit","random","blue-noise type 1","custom h5 mask"])
         self.mask_type.currentTextChanged.connect(self.on_mask_type_changed)
 
         self.slit_position_slider = QSlider(Qt.Horizontal)
@@ -235,7 +235,7 @@ class FilteringCubeWidgetEditor(QWidget):
 
     def on_mask_type_changed(self, mask_type):
 
-        self.filtering_widget.enable_generate_mask_button()
+
 
         for i in range(self.general_layout.rowCount() - 1, 0, -1):  # start from last row, stop at 2 (exclusive), step backwards
             # Remove row at index i from the layout
@@ -277,6 +277,7 @@ class FilteringCubeWidgetEditor(QWidget):
             self.general_layout.addRow("File Path", self.file_path)
             self.general_layout.addRow("", self.browse_button)
 
+        self.filtering_widget.enable_generate_mask_button()
     def browse_file(self):
         file_path, _ = QFileDialog.getOpenFileName(self, "Select h5 file", "", "H5 Files (*.h5)")
         if file_path:
@@ -396,7 +397,7 @@ class FilteringCubeWidget(QWidget):
         self.maskGenerated.connect(self.display_mask_grid)
 
         self.cassi_system.update_config(system_config)
-        self.cassi_system.generate_2D_masks(config_filtering)
+        self.cassi_system.generate_2D_mask(config_filtering)
 
         self.generate_mask_button.setDisabled(True)
         self.maskGenerated.emit(self.cassi_system.mask)
