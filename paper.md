@@ -45,12 +45,18 @@ aas-journal: Astrophysical Journal <- The name of the AAS journal.
 
 The image formation in coded aperture spectral imagers is a key information to process the acquired compress data, and the optical system design and calibration of these instruments require great care. 
 `SIMCA` is a python-based tool built upon ray-tracing equations of each optical component to produce realist measurements of various CASSI systems.
-The underlying model takes into account spatial filtering, spectral dispersion, optical distortions, sampling effects and optical misalignments.
-The performances of the instrument can then be evaluated by analyzing raw optical data or the reconstruction of the hyperspectral scene.
+The underlying model takes into account spatial filtering, spectral dispersion, optical distortions, PSF, sampling effects and optical misalignments.
 
 # Statement of need
+![Working principle of a Double-Disperser CASSI.\label{fig:DD-CASSI}](DD-CASSI.png){width="70%"}
 
-* Imaging has been considerably renewed by the advent of coded aperture imagers, known as CASSI systems ("Coded-aperture Spectral Snapshot Imager" \cite{Wagadarikar2008}). 
+
+Spectral imaging has been considerably renewed by the advent of coded aperture imagers, known as CASSI ("Coded-aperture Spectral Snapshot Imager" \cite{Wagadarikar2008}). 
+These systems are designed to acquire combinations of spatio-spectral voxels (elements of the hyperspectral cube) on each pixel of the detector.
+To interpret these multiplexed measurements, various reconstruction \cite{GAP-TV, Twist, SA, lambda-net, PnP} and classification (\cite{adaptive baysian approach, CSSNET}) algorithms have been developed.
+These computational imaging systems are used to reduce the number of acquisitions required to interpret High-Dimensional Data such as hyperspectral images.
+
+ 
 * Advantages of CASSI systems in general : 
     * optical processing : exploring how to acquire spectral information in regard of a given task (classification, unmixing, ttarget detection, reconstruction, etc.)
     * lower number of acquisitions (factor 10) required 
@@ -58,24 +64,51 @@ The performances of the instrument can then be evaluated by analyzing raw optica
     * snapshot imaging : no need for mechanical scanning
     * adaptive perception in some systems
 * No open-source tool to simulate CASSI systems precisely
+* Virtual prototyping for testing and training
 * Lack of knowledge on the optical caracteristics and the coded aperture needed to reconstruct and/or classify scenes.
 
 
-# Proposal
+# Brief software description
 
-An end-to-end simulation tool to evaluate CASSI system performances based on optical analysis and reconstruction accuracy.
-Tutorials are available [here](https://arouxel.gitlab.io/simca-documentation/)  
-  
+`SIMCA` is a simulation tool to generate realistic Coded-Aperture Spectral Snapshot Imagers measurements.
+The repository contains an application programming interface (API) and a graphical user interface (GUI) built in PyQt5 to analyze hyperspectral scenes and interact with the API.
+Tutorials for using the GUI are available [here](https://arouxel.gitlab.io/simca-documentation/).
+
+
 ## Optical model
-First, the core of the tool is a ray-tracing model of the optical system allowing for precise simulation of light propagation depending on the caracteristics and types of optical components.
-  
+The core of the code is a ray-tracing model of the optical system allowing for precise simulation of light propagation depending on the caracteristics and types of optical components.
+It includes various optical that are often neglected in the literature, such as optical distortions, optical misalignments, etc...
+
+Available propagation models are:
+* Higher-Order from \cite{Arguello2013}
+* Ray-tracing (first implementation in \cite{Hemsley2020})
+
+Available system architectures are:
+* Single-Disperser CASSI
+* Double-Disperser CASSI
+
+Available optical components and related caracteristics are:
+* Lens (params: focal length)
+* Prism (params : apex angle, glass type, orientation misalignments)
+* Grating (params : groove density, orientation misalignments)
+
+## Coded-Aperture generation
+
+The generation of coded-apertures is a key step in the design of CASSI systems.
+We provide a sample of coded-aperture generation methods, including:
+* Random with various ratios of open/closed coded aperture pixels
+* two types of blue-noise
+* LN-Random (\cite{Ibrahim, Hemsley2022})
+
+None of these methods require prior-knowledge of the scene.
+
+
 ## Compressed image formation
   
-Second, we provide a way of harnessing this propagation data to generate realistic measurements of the scene, including spatial filtering, spectral dispersion, optical distortions and sampling effects.
-  
-## Performances analysis
-
-Third, a draft of a CASSI system evaluation tool to analyze optical and task-specific performances. 
+We provide a way of harnessing this optics-related data to generate realistic measurements of the scene.
+Depending on the system architecture, the compressed image formation varies.
+However for each cases it requires multiple projections of the coded-aperture pattern onto the detector after propagation through the optical system, each projection correponds to a specific wavelength.
+Interpolation between these multiple projections (none-structured) and the detector pixels grid (structured) is performed, then all these projections are summed to obtain the compressed measurement.
 
 
 
