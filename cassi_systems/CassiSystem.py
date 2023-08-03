@@ -4,12 +4,11 @@ from cassi_systems.functions_masks_generation import *
 from cassi_systems.functions_scenes import *
 from cassi_systems.functions_general_purpose import *
 from scipy.interpolate import griddata
+
 import multiprocessing as mp
 from multiprocessing import Pool
-
-
 from scipy.signal import convolve
-import yaml
+
 
 
 class CassiSystem():
@@ -125,6 +124,7 @@ class CassiSystem():
 
 
 
+
     def generate_2D_mask(self, config_mask_and_filtering):
         """
         Args:
@@ -136,23 +136,18 @@ class CassiSystem():
 
         mask_type = config_mask_and_filtering['mask']['type']
 
-
         if mask_type == "random":
-            ROM = config_mask_and_filtering['mask']['ROM']
-            mask = np.random.choice([0, 1], size=(
-            self.system_config["SLM"]["sampling across Y"], self.system_config["SLM"]["sampling across X"]),
-                                    p=[1 - ROM, ROM])
+
+            mask = generate_random_mask(self.system_config["SLM"]["sampling across Y"],
+                                        self.system_config["SLM"]["sampling across X"],
+                                        config_mask_and_filtering['mask']['ROM'])
 
         elif mask_type == "slit":
-            slit_position = config_mask_and_filtering['mask']['slit position']
-            slit_width = config_mask_and_filtering['mask']['slit width']
 
-            mask = np.zeros((self.system_config["SLM"]["sampling across Y"],
-                             self.system_config["SLM"]["sampling across X"]))
-
-            slit_position = self.system_config["SLM"]["sampling across X"] // 2 + slit_position
-
-            mask[:, slit_position - slit_width // 2:slit_position + slit_width] = 1
+            mask = generate_slit_mask(self.system_config["SLM"]["sampling across Y"],
+                                      self.system_config["SLM"]["sampling across X"],
+                                      config_mask_and_filtering['mask']['slit position'],
+                                      config_mask_and_filtering['mask']['slit width'])
 
         elif mask_type == "blue-noise type 1":
             size = (self.system_config["SLM"]["sampling across Y"], self.system_config["SLM"]["sampling across X"])
