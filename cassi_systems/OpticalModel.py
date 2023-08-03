@@ -433,10 +433,10 @@ class OpticalModel:
         nb_of_system_wavelengths = self.system_wavelengths.shape[0]
 
         nb_of_sample_points_per_pix =  pix_size / (self.central_distorsion_in_X / nb_of_system_wavelengths )
-        print("number of sample points per pixel =",nb_of_sample_points_per_pix)
+        print("number of spectral sample points per pixel =",nb_of_sample_points_per_pix)
 
         if nb_of_sample_points_per_pix < 2:
 
-            print("The sampling is not sufficiant to avoid weird sampling effect( aliasing ?)")
+            print("The 'number of spectral samples' (cf. system config) is not sufficiant to avoid weird sampling effect( aliasing ?). RAISE IT !")
 
         return nb_of_sample_points_per_pix

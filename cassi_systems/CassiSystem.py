@@ -169,10 +169,10 @@ class CassiSystem():
             mask = load_custom_mask((self.system_config["SLM"]["number of pixels along Y"], self.system_config["SLM"]["number of pixels along X"]),
                                     config_mask_and_filtering['mask']['file path'])
         else:
-            print("Mask type is not supported")
-            mask = None
+            raise ValueError("Mask type is not supported for single mask generation, change it in the 'filtering.yml' config file")
 
         self.mask = mask
+
         return mask
 
     def generate_multiple_SLM_masks(self, config_mask_and_filtering, number_of_masks):
@@ -543,6 +543,7 @@ class CassiSystem():
             self.list_X_propagated_mask, self.list_Y_propagated_mask = self.optical_model.propagation_with_no_distorsions(X_input_grid, Y_input_grid)
 
         self.optical_model.check_if_sampling_is_sufficiant()
+
 
         return self.list_X_propagated_mask, self.list_Y_propagated_mask, self.optical_model.system_wavelengths
 

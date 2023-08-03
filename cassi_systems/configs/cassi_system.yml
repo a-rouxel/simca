@@ -10,9 +10,9 @@ system architecture:
     dispersive element:
     # dispersive element caracteristics
         type: grating        # name of the dispersive element
-        A: 60              # apex angle of the prism in degrees      (only used if type == 'prism')   -- in degrees
+        A: 15              # apex angle of the prism in degrees      (only used if type == 'prism')   -- in degrees
         m: 1               # grating order to consider         (only used if type == 'grating')       -- no units
-        G: 150             # grating density                   (only used if type == 'grating')       -- in lines/mm
+        G: 30             # grating density                   (only used if type == 'grating')       -- in lines/mm
         delta alpha c: 0
         delta beta c: 0
         wavelength center: 550  # central wavelength -- in nm
@@ -29,5 +29,5 @@ SLM:
 
 spectral range:
     wavelength min: 450     # minimum wavelength -- in nm
-    wavelength max: 850      # maximum wavelength -- in nm
-    number of spectral samples: 30
+    wavelength max: 640      # maximum wavelength -- in nm
+    number of spectral samples: 50
