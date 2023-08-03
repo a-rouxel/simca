@@ -49,7 +49,7 @@ class CassiSystem():
 
 
     def load_dataset(self, directory, dataset_name):
-        """Loading the dataset
+        """Loading the dataset and related attributes
 
         Args:
             directory (str): name of the directory containing the dataset
@@ -80,6 +80,7 @@ class CassiSystem():
     def update_config(self, new_config):
         """
         Update the system configuration and recalculate the DMD and detector grids coordinates
+
         Args:
             new_config (dict): new system configuration
 
@@ -105,6 +106,7 @@ class CassiSystem():
     def interpolate_dataset_along_wavelengths(self, new_wavelengths_sampling, chunk_size):
         """
         Interpolate the dataset cube along the wavelength axis to match the system sampling
+
         Args:
             new_wavelengths_sampling (numpy array): system wavelengths sampling
             chunk_size (int): chunk size for the multiprocessing
@@ -124,6 +126,8 @@ class CassiSystem():
 
     def generate_2D_mask(self, config_mask_and_filtering):
         """
+        Generate the 2D DMD mask based on the "filtering" configuration file
+
         Args:
             config_mask_and_filtering (dict): masks and filtering configuration
 
@@ -160,6 +164,8 @@ class CassiSystem():
 
     def generate_multiple_SLM_masks(self, config_mask_and_filtering, number_of_masks):
         """
+        Generate a list of SLM masks based on the "filtering" configuration file
+
         Args:
             config_mask_and_filtering (dict): masks and filtering configuration
             number_of_masks (int): number of masks to generate
@@ -247,6 +253,8 @@ class CassiSystem():
         """
         Generate multiple filtering cubes, each cube corresponds to a mask, and for each mask, each slice is a propagated mask interpolated on the detector grid
 
+        Args:
+            number_of_masks (int): number of masks to generate
         Returns:
             list_of_filtering_cubes (list): list of 3D filtering cubes generated according to the filtering configuration and
 
@@ -284,6 +292,7 @@ class CassiSystem():
     def image_acquisition(self, use_psf=False, chunck_size=50):
         """
         Run the acquisition process depending on the cassi system type
+
         Args:
             chunck_size (int): default block size for the dataset
 
@@ -319,14 +328,12 @@ class CassiSystem():
 
         elif self.system_config["system architecture"]["system type"] == "SD-CASSI":
 
-            X_dmd_coordinates_grid_crop, Y_dmd_coordinates_grid_crop = crop_center(self.X_dmd_coordinates_grid,
-                                                                                   self.Y_dmd_coordinates_grid,
-                                                                                   dataset.shape[1], dataset.shape[0])
+            X_dmd_coordinates_grid_crop = crop_center(self.X_dmd_coordinates_grid,dataset.shape[1], dataset.shape[0])
+            Y_dmd_coordinates_grid_crop = crop_center(self.Y_dmd_coordinates_grid,dataset.shape[1], dataset.shape[0])
 
             scene = match_scene_to_instrument(dataset, X_dmd_coordinates_grid_crop)
 
-
-            mask_crop, mask_crop = crop_center(self.mask, self.mask, scene.shape[1], scene.shape[0])
+            mask_crop = crop_center(self.mask, scene.shape[1], scene.shape[0])
 
             filtered_scene = scene * np.tile(mask_crop[..., np.newaxis], (1, 1, scene.shape[2]))
 
@@ -355,6 +362,7 @@ class CassiSystem():
     def multiple_image_acquisitions(self, use_psf=False, nb_of_filtering_cubes=1,chunck_size=50):
         """
         Run the acquisition process depending on the cassi system type
+
         Args:
             chunck_size (int): default block size for the dataset
 
@@ -392,10 +400,9 @@ class CassiSystem():
 
         elif self.system_config["system architecture"]["system type"] == "SD-CASSI":
 
+            X_dmd_coordinates_grid_crop = crop_center(self.X_dmd_coordinates_grid,dataset.shape[1], dataset.shape[0])
+            Y_dmd_coordinates_grid_crop = crop_center(self.Y_dmd_coordinates_grid,dataset.shape[1], dataset.shape[0])
 
-            X_dmd_coordinates_grid_crop, Y_dmd_coordinates_grid_crop = crop_center(self.X_dmd_coordinates_grid,
-                                                                                   self.Y_dmd_coordinates_grid,
-                                                                                   dataset.shape[1], dataset.shape[0])
 
             scene = match_scene_to_instrument(dataset, X_dmd_coordinates_grid_crop)
 
@@ -407,7 +414,7 @@ class CassiSystem():
 
             for i in range(nb_of_filtering_cubes):
 
-                mask_crop, mask_crop = crop_center(self.list_of_SLM_masks[i], self.list_of_SLM_masks[i], scene.shape[1], scene.shape[0])
+                mask_crop = crop_center(self.list_of_SLM_masks[i], scene.shape[1], scene.shape[0])
 
                 filtered_scene = scene * np.tile(mask_crop[..., np.newaxis], (1, 1, scene.shape[2]))
 
@@ -427,15 +434,15 @@ class CassiSystem():
         for i in range(nb_of_filtering_cubes):
             self.list_of_measurements.append(np.sum(self.list_of_filtered_scenes[i], axis=2))
 
-
-
         self.panchro = np.sum(self.interpolated_scene, axis=2)
 
         return self.list_of_filtered_scenes, self.interpolated_scene
 
     def generate_sd_measurement_cube(self, scene):
         """
-        Generate SD measurement cube from the scene cube and the filtering cube
+        Generate SD measurement cube from the mask and the scene.
+        For Single Disperser CASSI systems, the scene is filtered then propagated in the detector plane.
+
         Args:
             scene (numpy array): scene cube
 
@@ -476,6 +483,7 @@ class CassiSystem():
     def create_coordinates_grid(self, nb_of_samples_along_x, nb_of_samples_along_y, delta_x, delta_y):
         """
         Create a coordinates grid for a given number of samples along x and y axis and a given pixel size
+
         Args:
             nb_of_samples_along_x (int): number of samples along x axis
             nb_of_samples_along_y (int): number of samples along y axis
@@ -498,6 +506,7 @@ class CassiSystem():
     def calculate_alpha_c(self):
         """
         Calculate the relative angle of incidence between the lenses and the dispersive element
+
         Returns:
             alpha_c (float): angle of incidence
         """
@@ -525,6 +534,7 @@ class CassiSystem():
     def propagate_mask_grid(self, X_input_grid=None, Y_input_grid=None):
         """
         Propagate the SLM mask through one CASSI system
+
         Args:
             X_input_grid (numpy array): x coordinates grid
             Y_input_grid (numpy array): y coordinates grid
@@ -545,6 +555,14 @@ class CassiSystem():
         return self.list_X_propagated_mask, self.list_Y_propagated_mask, self.system_wavelengths
 
     def calculate_central_dispersion(self):
+        """
+        Calculate the dispersion related to the central pixel of the SLM
+
+        Returns:
+            X0_propagated (numpy array): x coordinates of the central pixel of the SLM, each coordinate is associated to a system wavelength
+            Y0_propagated (numpy array): y coordinates of the central pixel of the SLM, each coordinate is associated to a system wavelength
+
+        """
 
         wavelength_min = self.system_config["spectral range"]["wavelength min"]
         wavelength_max = self.system_config["spectral range"]["wavelength max"]
@@ -585,6 +603,7 @@ class CassiSystem():
     def model_propagation_with_distorsions(self, X_input_grid=None, Y_input_grid=None):
         """
         Propagate the SLM mask through one CASSI system
+
         Args:
             X_input_grid (numpy array): x coordinates grid
             Y_input_grid (numpy array): y coordinates grid
@@ -639,12 +658,14 @@ class CassiSystem():
     def model_propagation_with_no_distorsions(self, X_input_grid=None, Y_input_grid=None):
         """
         Vanilla Propagation model used in most cassi acquisitions simulation.
+
         Args:
-            X_input_grid:
-            Y_input_grid:
+            X_input_grid (numpy array): x coordinates of the grid to be propagated
+            Y_input_grid (numpy array): y coordinates of the grid to be propagated
 
         Returns:
-
+            list_X_propagated_mask (list): list of the X coordinates grids of the propagated masks
+            list_Y_propagated_mask (list): list of the Y coordinates grids of the propagated masks
         """
 
         if X_input_grid is None:
@@ -669,6 +690,7 @@ class CassiSystem():
     def generate_psf(self, type, radius):
         """
         Generate a PSF
+
         Args:
             type (str): type of PSF to generate
             radius (float): radius of the PSF
@@ -687,7 +709,7 @@ class CassiSystem():
     def apply_psf(self):
         """
         Apply the PSF to the last measurement
-        Args:
+
         Returns:
             last_filtered_interpolated_scene (numpy array): last measurement convolved with by PSF. Each slice of the 3D filtered scene is convolved with the PSF
         """
@@ -711,9 +733,11 @@ class CassiSystem():
     def save_acquisition(self, config_mask_and_filtering, config_acquisition):
         """
         Save the all data related to an acquisition
+
         Args:
             config_mask_and_filtering (dict): configuration dictionary for the mask and filtering parameters
             config_acquisition (dict): configuration dictionary for the acquisition parameters
+
         Returns:
         """
 
@@ -740,8 +764,17 @@ class CassiSystem():
 def worker_unstructured(args):
     """
     Process to parallellize the unstructured griddata interpolation between the propagated grid (mask and the detector grid
-    :param args:
-    :return:
+
+    Args:
+        list_X_propagated_masks (list): list of arrays, each element is a 2D array of X coordinates corresponding to a system wavelength
+        list_Y_propagated_masks (list): list of arrays, each element is a 2D array of Y coordinates corresponding to a system wavelength
+        mask (numpy array): 2D array of the mask values to be interpolated
+        X_detector_coordinates_grid (numpy array): 2D array of the X coordinates of the detector grid
+        Y_detector_coordinates_grid (numpy array): 2D array of the Y coordinates of the detector grid
+        wavelength_index (int): index of the system wavelength to be processed
+
+    Returns:
+        interpolated_mask (numpy array): 2D array of the interpolated mask
     """
     list_X_propagated_masks, list_Y_propagated_masks, mask, X_detector_coordinates_grid, Y_detector_coordinates_grid, wavelength_index = args
 
@@ -756,9 +789,19 @@ def worker_unstructured(args):
 # Currently,  regulargrid method == unstructured method, However we could do faster for regular grid interpolation
 def worker_regulargrid(args):
     """
-    Process to parallellize
-    :param args:
-    :return:
+    Process to parallellize the structured griddata interpolation between the propagated grid (mask and the detector grid
+    For now it is identical to the unstructured method but it could be faster ...
+
+    Args:
+        list_X_propagated_masks (list): list of arrays, each element is a 2D array of X coordinates corresponding to a system wavelength
+        list_Y_propagated_masks (list): list of arrays, each element is a 2D array of Y coordinates corresponding to a system wavelength
+        mask (numpy array): 2D array of the mask values to be interpolated
+        X_detector_coordinates_grid (numpy array): 2D array of the X coordinates of the detector grid
+        Y_detector_coordinates_grid (numpy array): 2D array of the Y coordinates of the detector grid
+        wavelength_index (int): index of the system wavelength to be processed
+
+    Returns:
+        interpolated_mask (numpy array): 2D array of the interpolated mask
     """
     list_X_propagated_masks, list_Y_propagated_masks, mask, X_detector_coordinates_grid, Y_detector_coordinates_grid, wavelength_index = args
 
