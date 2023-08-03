@@ -217,10 +217,10 @@ class OpticsConfigEditor(QWidget):
 
         # Create form layout for sampling and deltas and add widgets
         sampling_layout = QFormLayout()
-        sampling_layout.addRow("Sampling across X", self.sampling_across_X)
-        sampling_layout.addRow("Sampling across Y", self.sampling_across_Y)
-        sampling_layout.addRow("Delta X", self.delta_X)
-        sampling_layout.addRow("Delta Y", self.delta_Y)
+        sampling_layout.addRow("number of pixels along X", self.sampling_across_X)
+        sampling_layout.addRow("number of pixels along Y", self.sampling_across_Y)
+        sampling_layout.addRow("pixel size along X", self.delta_X)
+        sampling_layout.addRow("pixel size along Y", self.delta_Y)
 
         general_layout = QFormLayout()
         general_layout.addRow("results directory", self.results_directory)
@@ -282,10 +282,10 @@ class OpticsConfigEditor(QWidget):
         self.wavelength_min.setValue(self.config['spectral range']['wavelength min'])
         self.wavelength_max.setValue(self.config['spectral range']['wavelength max'])
 
-        self.sampling_across_X.setValue(self.config['input grid sampling']['sampling across X'])
-        self.sampling_across_Y.setValue(self.config['input grid sampling']['sampling across Y'])
-        self.delta_X.setText(str(self.config['input grid sampling']['delta X']))
-        self.delta_Y.setText(str(self.config['input grid sampling']['delta Y']))
+        self.sampling_across_X.setValue(self.config['input grid sampling']['number of pixels along X'])
+        self.sampling_across_Y.setValue(self.config['input grid sampling']['number of pixels along Y'])
+        self.delta_X.setText(str(self.config['input grid sampling']['pixel size along X']))
+        self.delta_Y.setText(str(self.config['input grid sampling']['pixel size along Y']))
 
         self.spectral_samples.setValue(self.config['number of spectral samples'])
 
@@ -299,10 +299,10 @@ class OpticsConfigEditor(QWidget):
                 "wavelength max": self.wavelength_max.value()
             },
             "input grid sampling": {
-                "sampling across X": self.sampling_across_X.value(),
-                "sampling across Y": self.sampling_across_Y.value(),
-                "delta X": int(self.delta_X.text()),
-                "delta Y": int(self.delta_Y.text())
+                "number of pixels along X": self.sampling_across_X.value(),
+                "number of pixels along Y": self.sampling_across_Y.value(),
+                "pixel size along X": int(self.delta_X.text()),
+                "pixel size along Y": int(self.delta_Y.text())
             },
             "number of spectral samples": self.spectral_samples.value()
         }

@@ -118,7 +118,7 @@ class Worker(QThread):
         self.cassi_system.update_config(self.system_config)
         self.cassi_system.propagate_mask_grid()
         self.cassi_system.generate_filtering_cube()
-        self.finished_propagate_mask_grid.emit(self.cassi_system.filtering_cube,self.cassi_system.system_wavelengths)  # Emit a tuple of arrays
+        self.finished_propagate_mask_grid.emit(self.cassi_system.filtering_cube,self.cassi_system.optical_model.system_wavelengths)  # Emit a tuple of arrays
 
 
 class FilteringCubeWidgetEditor(QWidget):
@@ -387,6 +387,7 @@ class FilteringCubeWidget(QWidget):
         self.cassi_system.update_config(system_config)
         self.cassi_system.generate_2D_mask(config_filtering)
 
+        self.run_button.setEnabled(True)
         self.maskGenerated.emit(self.cassi_system.mask)
 
     @pyqtSlot(np.ndarray)
@@ -396,5 +397,5 @@ class FilteringCubeWidget(QWidget):
     @pyqtSlot(np.ndarray,np.ndarray)
     def display_propagated_masks(self, filtering_cube,np_of_wavelengths):
         self.cassi_system.filtering_cube = filtering_cube
-        self.cassi_system.system_wavelengths = np_of_wavelengths
+        self.cassi_system.optical_model.system_wavelengths = np_of_wavelengths
         self.propagated_mask_display.display_propagated_mask_grid(filtering_cube,np_of_wavelengths)

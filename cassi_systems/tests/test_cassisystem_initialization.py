@@ -29,8 +29,8 @@ class TestCassiSystemInitialization(unittest.TestCase):
 
             cassi_system = CassiSystem(system_config=config_system)
 
-            self.assertEqual(cassi_system.X_dmd_coordinates_grid.shape, (config_system["SLM"]["sampling across Y"], config_system["SLM"]["sampling across X"]))
-            self.assertEqual(cassi_system.Y_dmd_coordinates_grid.shape, (config_system["SLM"]["sampling across Y"], config_system["SLM"]["sampling across X"]))
+            self.assertEqual(cassi_system.X_dmd_coordinates_grid.shape, (config_system["SLM"]["number of pixels along Y"], config_system["SLM"]["number of pixels along X"]))
+            self.assertEqual(cassi_system.Y_dmd_coordinates_grid.shape, (config_system["SLM"]["number of pixels along Y"], config_system["SLM"]["number of pixels along X"]))
 
     def test_loading_dataset(self):
 
@@ -77,7 +77,7 @@ class TestCassiSystemInitialization(unittest.TestCase):
             mask = cassi_system.generate_2D_mask(config_mask_and_filtering)
 
             self.assertIsInstance(mask, np.ndarray)
-            self.assertEqual(mask.shape, (self.config_system["SLM"]["sampling across Y"], self.config_system["SLM"]["sampling across X"]))
+            self.assertEqual(mask.shape, (self.config_system["SLM"]["number of pixels along Y"], self.config_system["SLM"]["number of pixels along X"]))
 
     import random
 

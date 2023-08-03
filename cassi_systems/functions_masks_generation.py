@@ -131,7 +131,7 @@ def generate_slit_mask(shape, slit_position,slit_width):
     Generate a slit mask that starts at the center of the image and goes to the right as slit position increases.
 
     Args:
-        shape (tuple of int): shape of the mask
+        shape (tuple): shape of the mask
         slit_position (int): position of the slit in relation to the central column
         slit_width (int): width of the slit in pixels
     """
@@ -242,7 +242,7 @@ def generate_blue_noise_type_2_mask(shape, std=1.5, initial_seed_fraction=0.1):
     Generate blue noise mask according to the void-and-cluster method proposed by Ulichney [1993] in "The void-and-cluster method for dither array generation" published in Proc. SPIE 1913.
 
     Args:
-        shape (list of int): size of the mask
+        shape (tuple): size of the mask
         std (float): standard deviation in pixels used for the Gaussian filter
         initial_seed_fraction (float): Initial fraction of marked pixels in the grid. Has to be less than 0.5.
                                          Very small values lead to ordered patterns
@@ -259,7 +259,7 @@ def load_custom_mask(shape,mask_path):
     Load custom mask from h5 file. If the mask is not the same size as the SLM, crop from the center of the loaded mask.
 
     Args:
-        shape (list of int): size of the mask
+        shape (tuple): size of the mask
         mask_path (str): path to the h5 file containing the mask
 
     Returns:
@@ -299,7 +299,7 @@ def load_custom_list_of_masks(shape,masks_path):
     Load custom list of masks from h5 file. If the masks are not the same size as the SLM, crop from the center of the loaded masks.
 
     Args:
-        shape (list of int): size of the mask
+        shape (tuple): size of the mask
         masks_path (str): path to the h5 file containing the masks
 
     Returns:

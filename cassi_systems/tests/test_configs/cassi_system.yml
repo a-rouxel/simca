@@ -17,15 +17,15 @@ system architecture:
         delta beta c: 0
         wavelength center: 550  # central wavelength -- in nm
 detector:
-    sampling across X: 23                  # sampling across X axis -- no units
-    sampling across Y: 21                  # sampling across Y axis -- no units
-    delta X: 400                            # delta X       -- in um
-    delta Y: 400                              # delta Y       -- in um
+    number of pixels along X: 23                  # number of pixels along X axis -- no units
+    number of pixels along Y: 21                  # number of pixels along Y axis -- no units
+    pixel size along X: 400                            # pixel size along X       -- in um
+    pixel size along Y: 400                              # pixel size along Y       -- in um
 SLM:
-    sampling across X: 31                  # sampling across X axis -- no units
-    sampling across Y: 22                  # sampling across Y axis -- no units
-    delta X: 550                              # delta X       -- in um
-    delta Y: 550                              # delta Y       -- in um
+    number of pixels along X: 31                  # number of pixels along X axis -- no units
+    number of pixels along Y: 22                  # number of pixels along Y axis -- no units
+    pixel size along X: 550                              # pixel size along X       -- in um
+    pixel size along Y: 550                              # pixel size along Y       -- in um
 
 spectral range:
     wavelength min: 450     # minimum wavelength -- in nm

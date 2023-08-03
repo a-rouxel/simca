@@ -115,33 +115,7 @@ def crop_center(array, nb_of_samples_along_x, nb_of_samples_along_y):
     return array
 
 
-def generate_2D_gaussian(radius, sample_size_x,sample_size_y, nb_of_samples):
-    """
-    Generate a 2D Gaussian of a given radius
 
-    Args:
-        radius (float): radius of the Gaussian
-        sample_size_x (float): size of each sample along the x axis
-        sample_size_y (float): size of each sample along the y axis
-        nb_of_samples (int): number of samples along each axis
-
-    Returns:
-        X (numpy array): 2D array of the x coordinates of the grid
-        Y (numpy array): 2D array of the y coordinates of the grid
-        gaussian_2d (numpy array): array of the 2D Gaussian
-    """
-
-    # Define the grid
-    grid_size_x = sample_size_x * (nb_of_samples - 1)
-    grid_size_y = sample_size_y * (nb_of_samples - 1)
-    x = np.linspace(-grid_size_x / 2, grid_size_x / 2, nb_of_samples)
-    y = np.linspace(-grid_size_y / 2, grid_size_y / 2, nb_of_samples)
-    X, Y = np.meshgrid(x, y)
-
-    # Compute the 2D Gaussian function
-    gaussian_2d = np.exp(-(X**2 + Y**2) / (2 * radius**2))
-
-    return X, Y, gaussian_2d
 
 
 
