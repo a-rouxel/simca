@@ -2,17 +2,18 @@ import numpy as np
 from scipy import fftpack
 from scipy import ndimage
 import h5py
-def generate_blue_noise_type_1_mask(size):
+def generate_blue_noise_type_1_mask(shape):
     """
     Generate blue noise (high frequency pseudo-random) type mask
+
     Args:
-        size:
+        shape (tuple of int): shape of the mask
 
     Returns:
         binary mask (numpy array): binary blue noise type mask
 
     """
-    shape = (size[0], size[1])
+
     N = shape[0] * shape[1]
     rng = np.random.default_rng()
     noise = rng.standard_normal(N)
@@ -37,10 +38,12 @@ def generate_blue_noise_type_1_mask(size):
 def generate_orthogonal_mask(size, W, N):
     """
     Generate an orthogonal mask according to https://hal.laas.fr/hal-02993037
+
     Args:
         - size (list of int): size of the mask
         - W (int): number of wavelengths in the scene
         - N (int): number of acquisitions
+
     Returns:
         - mask (numpy array of shape size[0] x (size[1]+W-1) x N): orthogonal mask
     """
@@ -71,10 +74,12 @@ def generate_orthogonal_mask(size, W, N):
 def generate_ln_orthogonal_mask(size, W, N):
     """
     Generate a Length-N orthogonal mask according to https://hal.laas.fr/hal-02993037
+
     Args:
         - size (list of int): size of the mask
         - W (int): number of wavelengths in the scene
         - N (int): number of acquisitions
+
     Returns:
         - mask (numpy array of shape size[0] x (size[1]+W-1) x N): length-N orthogonal mask
     """
@@ -105,15 +110,32 @@ def generate_ln_orthogonal_mask(size, W, N):
 
     return list_of_masks
 
-def generate_random_mask(size, ROM):
+def generate_random_mask(shape, ROM):
+    """
+    Generate a random mask with a given rate of open/close mirrors
 
-    mask = np.random.choice([0, 1], size=size, p=[1 - ROM, ROM])
+    Args:
+        shape (tuple of int): shape of the mask
+        ROM (float): ratio of open mirrors
+
+    Returns:
+        mask (numpy array): random mask
+    """
+
+    mask = np.random.choice([0, 1], size=shape, p=[1 - ROM, ROM])
 
     return mask
 
-def generate_slit_mask(size, slit_position,slit_width):
+def generate_slit_mask(shape, slit_position,slit_width):
+    """
+    Generate a slit mask that starts at the center of the image and goes to the right as slit position increases.
 
-    size_y, size_x = size[0], size[1]
+    Args:
+        shape (tuple of int): shape of the mask
+        slit_position (int): position of the slit in relation to the central column
+        slit_width (int): width of the slit in pixels
+    """
+    size_y, size_x = shape[0], shape[1]
     slit_position = size_x // 2 + slit_position
     slit_width = slit_width
     mask = np.zeros((size_y,size_x))
@@ -121,6 +143,7 @@ def generate_slit_mask(size, slit_position,slit_width):
     mask[:, slit_position - slit_width // 2:slit_position + slit_width] = 1
 
     return mask
+
 # Source of blue noise codes: https://momentsingraphics.de/BlueNoise.html
 def FindLargestVoid(BinaryPattern,StandardDeviation):
     """This function returns the indices of the largest void in the given binary
@@ -214,29 +237,36 @@ def GetVoidAndClusterBlueNoise(OutputShape,StandardDeviation=1.5,InitialSeedFrac
         DitherArray.flat[iTightestCluster]=Rank
     return DitherArray
 
-def generate_blue_noise_type_2_mask(size, std=1.5, initial_seed_fraction=0.1):
+def generate_blue_noise_type_2_mask(shape, std=1.5, initial_seed_fraction=0.1):
     """
-    Generate blue noise mask
+    Generate blue noise mask according to the void-and-cluster method proposed by Ulichney [1993] in "The void-and-cluster method for dither array generation" published in Proc. SPIE 1913.
 
     Args:
-        - size (list of int): size of the mask
-        - std (float): standard deviation in pixels used for the Gaussian filter
-        - initial_seed_fraction (float): Initial fraction of marked pixels in the grid. Has to be less than 0.5.
+        shape (list of int): size of the mask
+        std (float): standard deviation in pixels used for the Gaussian filter
+        initial_seed_fraction (float): Initial fraction of marked pixels in the grid. Has to be less than 0.5.
                                          Very small values lead to ordered patterns
     Returns:
-        - mask (numpy array of shape size): float blue noise mask
+        mask (numpy array of shape size): float blue noise mask
     """
-    shape = (size[0], size[1])
-
-
     texture=GetVoidAndClusterBlueNoise(shape,std, initial_seed_fraction)
     mask = (texture/np.max(texture)) # Float value between 0 and 1
 
     return mask
 
-def load_custom_mask(size,mask_path):
+def load_custom_mask(shape,mask_path):
+    """
+    Load custom mask from h5 file. If the mask is not the same size as the SLM, crop from the center of the loaded mask.
 
-    size_y, size_x = size[0], size[1]
+    Args:
+        shape (list of int): size of the mask
+        mask_path (str): path to the h5 file containing the mask
+
+    Returns:
+        mask (numpy array): float blue noise mask
+
+    """
+    size_y, size_x = shape[0], shape[1]
 
     if mask_path is None:
         raise ValueError("Please provide h5 file path for custom mask.")
@@ -264,10 +294,21 @@ def load_custom_mask(size,mask_path):
             if mask.shape[0] != slm_sampling_y or mask.shape[1] != slm_sampling_x:
                 raise ValueError("Error cropping the mask, its shape does not match the SLM sampling.")
         return mask
-def load_custom_list_of_masks(size,masks_path):
+def load_custom_list_of_masks(shape,masks_path):
+    """
+    Load custom list of masks from h5 file. If the masks are not the same size as the SLM, crop from the center of the loaded masks.
+
+    Args:
+        shape (list of int): size of the mask
+        masks_path (str): path to the h5 file containing the masks
+
+    Returns:
+        list_of_SLM_masks (list): list of masks
+    """
+
 
     list_of_SLM_masks = []
-    size_y, size_x = size[0], size[1]
+    size_y, size_x = shape[0], shape[1]
 
     if masks_path is None:
         raise ValueError("Please provide h5 file path for custom mask.")
