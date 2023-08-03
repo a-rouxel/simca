@@ -87,7 +87,15 @@ def match_scene_labels_to_instrument(dataset_labels, filtering_cube):
 
 def crop_center(array, nb_of_samples_along_x, nb_of_samples_along_y):
     """
-    Crop the center array
+    Crop the given array to the given size, centered on the array
+
+    Args:
+        array (numpy array): 2D array to be cropped
+        nb_of_samples_along_x (int): number of samples to keep along the x axis
+        nb_of_samples_along_y (int): number of samples to keep along the y axis
+
+    Returns:
+        array (numpy array): 2D array cropped
     """
 
     y_len, x_len = array.shape
@@ -108,6 +116,21 @@ def crop_center(array, nb_of_samples_along_x, nb_of_samples_along_y):
 
 
 def generate_2D_gaussian(radius, sample_size_x,sample_size_y, nb_of_samples):
+    """
+    Generate a 2D Gaussian of a given radius
+
+    Args:
+        radius (float): radius of the Gaussian
+        sample_size_x (float): size of each sample along the x axis
+        sample_size_y (float): size of each sample along the y axis
+        nb_of_samples (int): number of samples along each axis
+
+    Returns:
+        X (numpy array): 2D array of the x coordinates of the grid
+        Y (numpy array): 2D array of the y coordinates of the grid
+        gaussian_2d (numpy array): array of the 2D Gaussian
+    """
+
     # Define the grid
     grid_size_x = sample_size_x * (nb_of_samples - 1)
     grid_size_y = sample_size_y * (nb_of_samples - 1)
