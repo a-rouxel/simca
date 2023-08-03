@@ -104,6 +104,21 @@ def generate_ln_orthogonal_mask(size, W, N):
 
     return list_of_masks
 
+def generate_random_mask(size_y, size_x, ROM):
+
+    mask = np.random.choice([0, 1], size=(size_y, size_x), p=[1 - ROM, ROM])
+
+    return mask
+
+def generate_slit_mask(size_y, size_x, slit_position,slit_width):
+
+    slit_position = size_x // 2 + slit_position
+    slit_width = slit_width
+    mask = np.zeros((size_y,size_x))
+
+    mask[:, slit_position - slit_width // 2:slit_position + slit_width] = 1
+
+    return mask
 # Source of blue noise codes: https://momentsingraphics.de/BlueNoise.html
 def FindLargestVoid(BinaryPattern,StandardDeviation):
     """This function returns the indices of the largest void in the given binary
