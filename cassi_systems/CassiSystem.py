@@ -743,20 +743,20 @@ class CassiSystem():
 
         self.result_directory = initialize_acquisitions_directory(config_acquisition)
 
-        save_config_system("config_system",self.system_config,self.result_directory)
-        save_config_mask_and_filtering("config_mask_and_filtering",config_mask_and_filtering,self.result_directory)
-        save_config_acquisition("config_acquisition",config_acquisition,self.result_directory)
-        save_interpolated_scene("interpolated_scene",self.interpolated_scene, self.result_directory)
+        save_config_file("config_system",self.system_config,self.result_directory)
+        save_config_file("config_mask_and_filtering",config_mask_and_filtering,self.result_directory)
+        save_config_file("config_acquisition",config_acquisition,self.result_directory)
+        save_data_in_hdf5("interpolated_scene",self.interpolated_scene, self.result_directory)
         try:
-            save_interpolated_scene_labels("scene_labels",self.scene_labels,self.result_directory)
+            save_data_in_hdf5("scene_labels",self.scene_labels,self.result_directory)
         except :
             pass
-        save_filtered_interpolated_scene("filtered_interpolated_scene",self.last_filtered_interpolated_scene, self.result_directory)
-        save_measurement("measurement",self.measurement,self.result_directory)
-        save_panchromatic_image("panchro",self.panchro,self.result_directory)
-        save_filtering_cube("filtering_cube",self.filtering_cube,self.result_directory)
-        save_mask("mask",self.mask,self.result_directory)
-        save_wavelengths("wavelengths",self.system_wavelengths,self.result_directory)
+        save_data_in_hdf5("filtered_interpolated_scene",self.last_filtered_interpolated_scene, self.result_directory)
+        save_data_in_hdf5("measurement",self.measurement,self.result_directory)
+        save_data_in_hdf5("panchro",self.panchro,self.result_directory)
+        save_data_in_hdf5("filtering_cube",self.filtering_cube,self.result_directory)
+        save_data_in_hdf5("mask",self.mask,self.result_directory)
+        save_data_in_hdf5("wavelengths",self.system_wavelengths,self.result_directory)
 
         print("Acquisition saved in " + self.result_directory)
 

@@ -41,17 +41,17 @@ if __name__ == '__main__':
     cassi_system.result_directory =results_directory
     os.makedirs(results_directory, exist_ok=True)
 
-    save_config_system("config_system", cassi_system.system_config, cassi_system.result_directory)
-    save_config_mask_and_filtering("config_mask_and_filtering", config_masks,cassi_system.result_directory)
-    save_config_acquisition("config_acquisition", config_acquisition, cassi_system.result_directory)
+    save_config_file("config_system", cassi_system.system_config, cassi_system.result_directory)
+    save_config_file("config_mask_and_filtering", config_masks,cassi_system.result_directory)
+    save_config_file("config_acquisition", config_acquisition, cassi_system.result_directory)
 
-    save_interpolated_scene("interpolated_scene",cassi_system.interpolated_scene, cassi_system.result_directory)
-    save_panchromatic_image("panchro",cassi_system.panchro,cassi_system.result_directory)
+    save_data_in_hdf5("interpolated_scene",cassi_system.interpolated_scene, cassi_system.result_directory)
+    save_data_in_hdf5("panchro",cassi_system.panchro,cassi_system.result_directory)
 
-    save_wavelengths("wavelengths",cassi_system.system_wavelengths,cassi_system.result_directory)
-    save_list_of_measurements("list_of_compressed_measurements",cassi_system.list_of_measurements,cassi_system.result_directory)
-    save_list_of_filtering_cubes("list_of_filtering_cubes",cassi_system.list_of_filtering_cubes,cassi_system.result_directory)
-    save_list_of_masks("list_of_SLM_masks",cassi_system.list_of_SLM_masks,cassi_system.result_directory)
+    save_data_in_hdf5("wavelengths",cassi_system.system_wavelengths,cassi_system.result_directory)
+    save_data_in_hdf5("list_of_compressed_measurements",cassi_system.list_of_measurements,cassi_system.result_directory)
+    save_data_in_hdf5("list_of_filtering_cubes",cassi_system.list_of_filtering_cubes,cassi_system.result_directory)
+    save_data_in_hdf5("list_of_SLM_masks",cassi_system.list_of_SLM_masks,cassi_system.result_directory)
 
 
 

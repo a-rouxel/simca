@@ -8,10 +8,13 @@ import h5py
 
 def load_yaml_config(file_path):
     """
-    Load a YAML configuration file.
+    Load a YAML configuration file as a dictionary
 
-    :param file_path: Path to the YAML file
-    :return: A dictionary containing the configuration data
+    Args:
+        file_path (str): The path to the YAML configuration file
+
+    Returns:
+        config (dict): The configuration dictionary
     """
     with open(file_path, "r") as file:
         config = yaml.safe_load(file)
@@ -19,111 +22,61 @@ def load_yaml_config(file_path):
 
 
 def initialize_acquisitions_directory(config):
+    """
+    Initialize the directory where the results of the acquisition will be stored
+
+    Args:
+        config (dict): a configuration dictionary containing storing information
+
+    Returns:
+        result_directory (str): the path to the directory where the results will be stored
+    """
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     result_directory = os.path.join(config["results directory"], config["acquisition name"], timestamp)
     os.makedirs(result_directory, exist_ok=True)
     return result_directory
 
+def save_data_in_hdf5(file_name, data,result_directory):
+    """
+    Save a dataset in a HDF5 file
 
-def save_interpolated_scene(scene_name,interpolated_scene,result_directory):
+    Args:
+        file_name (str): the name of the file
+        data (any type): the data to save
+        result_directory (str): the path to the directory where the results will be stored
 
-    with h5py.File(result_directory + f'/{scene_name}.h5', 'w') as f:
-        f.create_dataset('interpolated_scene', data=interpolated_scene)
-    print(f"Interpolated scene saved in {result_directory}")
+    Returns:
 
-def save_interpolated_scene_labels(scene_name,scene_labels,result_directory):
+    """
 
-    with h5py.File(result_directory + f'/{scene_name}.h5', 'w') as f:
-        f.create_dataset('labels', data=scene_labels)
-    print(f"scene labels saved in {result_directory}")
+    with h5py.File(result_directory + f'/{file_name}.h5', 'w') as f:
+        f.create_dataset(f'{file_name}', data=data)
+    print(f"'{file_name}' dataset saved in '{file_name}' file, stored in {result_directory} directory")
 
+def save_config_file(config_file_name,config_file,result_directory):
+    """
+    Save a configuration file in a YAML file
 
-def save_filtered_interpolated_scene(filtered_scene_name,last_filtered_interpolated_scene,result_directory):
+    Args:
+        config_file_name (str): the name of the file
+        config_file (dict): the configuration file to save
+        result_directory (str): the path to the directory where the results will be stored
 
-    with h5py.File(result_directory + f'/{filtered_scene_name}.h5', 'w') as f:
-        f.create_dataset('filtered_image', data=last_filtered_interpolated_scene)
-    print(f"Filtered interpolated scene saved in {result_directory}")
+    Returns:
 
-def save_measurement(measurement_name,measurement,result_directory):
-
-    with h5py.File(result_directory + f'/{measurement_name}.h5', 'w') as f:
-        f.create_dataset('measurement', data=measurement)
-    print(f"Measurement saved in {result_directory}")
-
-def save_list_of_measurements(measurements_name,list_of_measurements,result_directory):
-
-    with h5py.File(result_directory + f'/{measurements_name}.h5', 'w') as f:
-        f.create_dataset('list_of_measurements', data=list_of_measurements)
-    print(f"list of measurements saved in {result_directory}")
-
-def save_panchromatic_image(panchromatic_image_name,panchro,result_directory):
-
-    with h5py.File(result_directory + f'/{panchromatic_image_name}.h5', 'w') as f:
-        f.create_dataset('panchromatic_image', data=panchro)
-    print(f"Panchromatic image saved in {result_directory}")
-
-def save_filtering_cube(filtering_cube_name,filtering_cube,result_directory):
-
-    with h5py.File(result_directory + f'/{filtering_cube_name}.h5', 'w') as f:
-        f.create_dataset('filtering_cube', data=filtering_cube)
-    print(f"Filtering cube saved in {result_directory}")
-
-def save_list_of_filtering_cubes(list_of_filtering_cubes_name,list_of_filtering_cubes,result_directory):
-
-    with h5py.File(result_directory + f'/{list_of_filtering_cubes_name}.h5', 'w') as f:
-        f.create_dataset('list_of_filtering_cubes', data=list_of_filtering_cubes)
-    print(f"list of filtering cubes saved in {result_directory}")
-
-def save_mask(mask_name,mask,result_directory):
-
-    with h5py.File(result_directory + f'/{mask_name}.h5', 'w') as f:
-        f.create_dataset('mask', data=mask)
-    print(f"Mask saved in {result_directory}")
-
-def save_list_of_masks(list_of_masks_name,list_of_masks,result_directory):
-
-    with h5py.File(result_directory + f'/{list_of_masks_name}.h5', 'w') as f:
-        f.create_dataset('list_of_masks', data=list_of_masks)
-    print(f"list of masks saved in {result_directory}")
-def save_wavelengths(wavelengths_name,system_wavelengths,result_directory):
-
-    with h5py.File(result_directory + f'/{wavelengths_name}.h5', 'w') as f:
-        f.create_dataset('wavelengths', data=system_wavelengths)
-    print(f"Wavelengths saved in {result_directory}")
-
-def save_config_system(config_system_name,system_config,result_directory):
-
-    with open(result_directory + f"/{config_system_name}.yml", 'w') as file:
-        yaml.safe_dump(system_config, file)
-    print(f"System configuration saved in {result_directory}")
-
-def save_config_mask_and_filtering(config_mask_and_filtering_name,
-                                   config_mask_and_filtering,
-                                   result_directory):
-
-    with open(result_directory + f"/{config_mask_and_filtering_name}.yml", 'w') as file:
-        yaml.safe_dump(config_mask_and_filtering, file)
-    print(f"Mask and filtering configuration saved in {result_directory}")
-
-def save_config_acquisition(config_acquisition_name,config_acquisition,result_directory):
-
-    with open(result_directory + f"/{config_acquisition_name}.yml", 'w') as file:
-        yaml.safe_dump(config_acquisition, file)
-    print(f"Acquisition configuration saved in {result_directory}")
+    """
+    with open(result_directory + f"/{config_file_name}.yml", 'w') as file:
+        yaml.safe_dump(config_file, file)
 
 def rotation_z(theta):
     """
     Rotate 3D matrix around the z axis
 
-    Parameters
-    ----------
-    theta : float -- in rad
-        Input angle.
+    Args:
+        theta (float): Input angle (in rad)
 
-    Returns
-    -------
-    r : 2D numpy array
-        The rotation matrix.
+    Returns:
+        r (numpy array) : 2D rotation matrix
 
     """
 
@@ -138,15 +91,12 @@ def rotation_y(theta):
     """
     Rotate 3D matrix around the y axis
 
-    Parameters
-    ----------
-    theta : float -- in rad
-        Input angle.
+    Args:
+        theta (float): Input angle (in rad)
 
-    Returns
-    -------
-    r : 2D numpy array
-        The rotation matrix.
+    Returns:
+        r (numpy array) : 2D rotation matrix
+
     """
 
     r = np.array(((np.cos(theta), 0, np.sin(theta)),
@@ -160,15 +110,12 @@ def rotation_x(theta):
     """
     Rotate 3D matrix around the x axis
 
-    Parameters
-    ----------
-    theta : float -- in rad
-        Input angle.
+    Args:
+        theta (float): Input angle (in rad)
 
-    Returns
-    -------
-    r : 2D numpy array
-        The rotation matrix.
+    Returns:
+        r (numpy array) : 2D rotation matrix
+
     """
 
     r = np.array(((1, 0, 0),
