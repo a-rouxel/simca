@@ -122,9 +122,6 @@ class CassiSystem():
         else:
             raise ValueError("The new wavelengths sampling must be inside the dataset wavelengths range")
 
-
-
-
     def generate_2D_mask(self, config_mask_and_filtering):
         """
         Args:
@@ -310,8 +307,6 @@ class CassiSystem():
 
             scene = match_scene_to_instrument(dataset, self.filtering_cube)
 
-
-
             measurement_in_3D = generate_dd_measurement(scene, self.filtering_cube, chunck_size)
 
             self.last_filtered_interpolated_scene = measurement_in_3D
@@ -437,6 +432,7 @@ class CassiSystem():
         self.panchro = np.sum(self.interpolated_scene, axis=2)
 
         return self.list_of_filtered_scenes, self.interpolated_scene
+
     def generate_sd_measurement_cube(self, scene):
         """
         Generate SD measurement cube from the scene cube and the filtering cube
@@ -453,14 +449,7 @@ class CassiSystem():
         list_Y_propagated_masks = self.list_Y_propagated_mask
         scene = scene
 
-
         print("--- Generating SD measurement cube ---- ")
-
-        wavelengths = np.linspace(self.system_config["spectral range"]["wavelength min"],
-                                  self.system_config["spectral range"]["wavelength max"],
-                                  self.system_config['spectral range']["number of spectral samples"])
-
-        self.system_wavelengths = wavelengths
 
         self.measurement_sd = np.zeros((self.system_config["detector"]["sampling across Y"],
                                         self.system_config["detector"]["sampling across X"],
@@ -477,11 +466,11 @@ class CassiSystem():
             tasks = [(list_X_propagated_masks, list_Y_propagated_masks, scene[:, :, i], X_detector_coordinates_grid,
                       Y_detector_coordinates_grid, i)
                      for i in range(len(self.system_wavelengths))]
-            for index, zi in tqdm(enumerate(p.imap(worker, tasks)), total=len(self.system_wavelengths), desc='Processing tasks'):
+            for index, zi in tqdm(enumerate(p.imap(worker, tasks)), total=len(self.system_wavelengths),
+                                  desc='Processing tasks'):
                 self.measurement_sd[:, :, index] = zi
 
-
-
+        self.measurement_sd = np.nan_to_num(self.measurement_sd)
         return self.measurement_sd
 
     def create_coordinates_grid(self, nb_of_samples_along_x, nb_of_samples_along_y, delta_x, delta_y):
