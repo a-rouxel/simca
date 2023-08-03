@@ -316,6 +316,8 @@ class CassiSystem():
                                   desc='Processing tasks'):
                 self.filtering_cube[:, :, index] = zi
 
+        self.filtering_cube = np.nan_to_num(self.filtering_cube)
+
         return self.filtering_cube
 
     def generate_multiple_filtering_cubes(self, number_of_masks):
@@ -349,6 +351,8 @@ class CassiSystem():
                 for index, zi in tqdm(enumerate(p.imap(worker, tasks)), total=len(self.system_wavelengths),
                                       desc='Processing tasks'):
                     self.filtering_cube[:, :, index] = zi
+
+                self.filtering_cube = np.nan_to_num(self.filtering_cube)
 
                 self.list_of_filtering_cubes.append(self.filtering_cube)
 
