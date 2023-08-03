@@ -723,7 +723,8 @@ class CassiSystem():
         save_config_mask_and_filtering("config_mask_and_filtering",config_mask_and_filtering,self.result_directory)
         save_config_acquisition("config_acquisition",config_acquisition,self.result_directory)
         save_interpolated_scene("interpolated_scene",self.interpolated_scene, self.result_directory)
-        save_interpolated_scene_labels("scene_labels",self.scene_labels,self.result_directory)
+        if self.scene_labels is not None:
+            save_interpolated_scene_labels("scene_labels",self.scene_labels,self.result_directory)
         save_filtered_interpolated_scene("filtered_interpolated_scene",self.last_filtered_interpolated_scene, self.result_directory)
         save_measurement("measurement",self.measurement,self.result_directory)
         save_panchromatic_image("panchro",self.panchro,self.result_directory)
@@ -736,7 +737,7 @@ class CassiSystem():
 
 def worker_unstructured(args):
     """
-    Process to parallellize
+    Process to parallellize the unstructured griddata interpolation between the propagated grid (mask and the detector grid
     :param args:
     :return:
     """
