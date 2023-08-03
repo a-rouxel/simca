@@ -96,8 +96,12 @@ def crop_center(array_x, array_y, nb_of_samples_along_x, nb_of_samples_along_y):
 
     if nb_of_samples_along_x<array_x.shape[1]:
         array_x_crop = array_x[:, x_start:x_end]
+        array_y_crop = array_y[:, x_start:x_end]
+
     if nb_of_samples_along_y<array_x.shape[0]:
-        array_y_crop = array_y[y_start:y_end, :]
+        array_x_crop = array_x_crop[y_start:y_end, :]
+        array_y_crop = array_y[:, x_start:x_end]
+
     if nb_of_samples_along_y>=array_x.shape[0] and nb_of_samples_along_x>=array_x.shape[1]:
         array_x_crop = array_x
         array_y_crop = array_y
