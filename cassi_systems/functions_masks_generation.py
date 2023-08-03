@@ -1,6 +1,7 @@
 import numpy as np
 from scipy import fftpack
 from scipy import ndimage
+import h5py
 def generate_blue_noise_type_1_mask(size):
     """
     Generate blue noise (high frequency pseudo-random) type mask
@@ -104,14 +105,15 @@ def generate_ln_orthogonal_mask(size, W, N):
 
     return list_of_masks
 
-def generate_random_mask(size_y, size_x, ROM):
+def generate_random_mask(size, ROM):
 
-    mask = np.random.choice([0, 1], size=(size_y, size_x), p=[1 - ROM, ROM])
+    mask = np.random.choice([0, 1], size=size, p=[1 - ROM, ROM])
 
     return mask
 
-def generate_slit_mask(size_y, size_x, slit_position,slit_width):
+def generate_slit_mask(size, slit_position,slit_width):
 
+    size_y, size_x = size[0], size[1]
     slit_position = size_x // 2 + slit_position
     slit_width = slit_width
     mask = np.zeros((size_y,size_x))
@@ -231,3 +233,67 @@ def generate_blue_noise_type_2_mask(size, std=1.5, initial_seed_fraction=0.1):
     mask = (texture/np.max(texture)) # Float value between 0 and 1
 
     return mask
+
+def load_custom_mask(size,mask_path):
+
+    size_y, size_x = size[0], size[1]
+
+    if mask_path is None:
+        raise ValueError("Please provide h5 file path for custom mask.")
+    else:
+        with h5py.File(mask_path, 'r') as f:
+            mask = f['mask'][:]
+
+        slm_sampling_y = size_y
+        slm_sampling_x = size_x
+
+        if mask.shape[0] != slm_sampling_y or mask.shape[1] != slm_sampling_x:
+            # Find center point of the mask
+            center_y, center_x = mask.shape[0] // 2, mask.shape[1] // 2
+
+            # Determine starting and ending indices for the crop
+            start_y = center_y - slm_sampling_y // 2
+            end_y = start_y + slm_sampling_y
+            start_x = center_x - slm_sampling_x // 2
+            end_x = start_x + slm_sampling_x
+
+            # Crop the mask
+            mask = mask[start_y:end_y, start_x:end_x]
+
+            # Confirm the mask is the correct shape
+            if mask.shape[0] != slm_sampling_y or mask.shape[1] != slm_sampling_x:
+                raise ValueError("Error cropping the mask, its shape does not match the SLM sampling.")
+        return mask
+def load_custom_list_of_masks(size,masks_path):
+
+    list_of_SLM_masks = []
+    size_y, size_x = size[0], size[1]
+
+    if masks_path is None:
+        raise ValueError("Please provide h5 file path for custom mask.")
+    else:
+        with h5py.File(masks_path, 'r') as f:
+            list_of_masks = f['list_of_masks'][:]
+
+        for mask in list_of_masks:
+
+
+            if mask.shape[0] != size_y or mask.shape[1] != size_x:
+                # Find center point of the mask
+                center_y, center_x = mask.shape[0] // 2, mask.shape[1] // 2
+
+                # Determine starting and ending indices for the crop
+                start_y = center_y - size_y // 2
+                end_y = start_y + size_y
+                start_x = center_x - size_x // 2
+                end_x = start_x + size_x
+
+                # Crop the mask
+                mask = mask[start_y:end_y, start_x:end_x]
+
+                # Confirm the mask is the correct shape
+                if mask.shape[0] != size_y or mask.shape[1] != size_x:
+                    raise ValueError("Error cropping the mask, its shape does not match the SLM sampling.")
+            list_of_SLM_masks.append(mask)
+
+        return list_of_SLM_masks

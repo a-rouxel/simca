@@ -137,57 +137,23 @@ class CassiSystem():
         mask_type = config_mask_and_filtering['mask']['type']
 
         if mask_type == "random":
-
-            mask = generate_random_mask(self.system_config["SLM"]["sampling across Y"],
-                                        self.system_config["SLM"]["sampling across X"],
+            mask = generate_random_mask((self.system_config["SLM"]["sampling across Y"],self.system_config["SLM"]["sampling across X"]),
                                         config_mask_and_filtering['mask']['ROM'])
 
         elif mask_type == "slit":
-
-            mask = generate_slit_mask(self.system_config["SLM"]["sampling across Y"],
-                                      self.system_config["SLM"]["sampling across X"],
+            mask = generate_slit_mask((self.system_config["SLM"]["sampling across Y"],self.system_config["SLM"]["sampling across X"]),
                                       config_mask_and_filtering['mask']['slit position'],
                                       config_mask_and_filtering['mask']['slit width'])
 
         elif mask_type == "blue-noise type 1":
-            size = (self.system_config["SLM"]["sampling across Y"], self.system_config["SLM"]["sampling across X"])
-            mask = generate_blue_noise_type_1_mask(size)
+            mask = generate_blue_noise_type_1_mask((self.system_config["SLM"]["sampling across Y"], self.system_config["SLM"]["sampling across X"]))
 
         elif mask_type == "blue-noise type 2":
-
-            size = [self.system_config["SLM"]["sampling across Y"], self.system_config["SLM"]["sampling across X"]]
-            mask = generate_blue_noise_type_2_mask(list(size))
-
+            mask = generate_blue_noise_type_2_mask((self.system_config["SLM"]["sampling across Y"], self.system_config["SLM"]["sampling across X"]))
 
         elif mask_type == "custom h5 mask":
-            mask_path = config_mask_and_filtering['mask']['file path']
-            if mask_path is None:
-                raise ValueError("Please provide h5 file path for custom mask.")
-            else:
-                with h5py.File(mask_path, 'r') as f:
-                    mask = f['mask'][:]
-
-                slm_sampling_y = self.system_config["SLM"]["sampling across Y"]
-                slm_sampling_x = self.system_config["SLM"]["sampling across X"]
-
-                if mask.shape[0] != slm_sampling_y or mask.shape[1] != slm_sampling_x:
-                    # Find center point of the mask
-                    center_y, center_x = mask.shape[0] // 2, mask.shape[1] // 2
-
-                    # Determine starting and ending indices for the crop
-                    start_y = center_y - slm_sampling_y // 2
-                    end_y = start_y + slm_sampling_y
-                    start_x = center_x - slm_sampling_x // 2
-                    end_x = start_x + slm_sampling_x
-
-                    # Crop the mask
-                    mask = mask[start_y:end_y, start_x:end_x]
-
-                    # Confirm the mask is the correct shape
-                    if mask.shape[0] != slm_sampling_y or mask.shape[1] != slm_sampling_x:
-                        raise ValueError("Error cropping the mask, its shape does not match the SLM sampling.")
-
-
+            mask = load_custom_mask((self.system_config["SLM"]["sampling across Y"], self.system_config["SLM"]["sampling across X"]),
+                                    config_mask_and_filtering['mask']['file path'])
         else:
             print("Mask type is not supported")
             mask = None
@@ -204,88 +170,48 @@ class CassiSystem():
         Returns:
             list_of_SLM_masks (list): list of SLM mask (numpy arrays) generated according to the configuration file
         """
-
         list_of_SLM_masks = list()
         mask_type = config_mask_and_filtering['mask']['type']
 
         if mask_type == "random":
             for i in range(number_of_masks):
-                ROM = config_mask_and_filtering['mask']['ROM']
-                mask = np.random.choice([0, 1], size=(self.system_config["SLM"]["sampling across Y"],
-                                                      self.system_config["SLM"]["sampling across X"]),
-                                                       p=[1 - ROM, ROM])
+                mask = generate_random_mask((self.system_config["SLM"]["sampling across Y"], self.system_config["SLM"]["sampling across X"]),config_mask_and_filtering['mask']['ROM'])
                 list_of_SLM_masks.append(mask)
 
         elif mask_type == "slit":
+            # mmmmh you are weird, why would you want to do that ?
             for i in range(number_of_masks):
-                slit_position = config_mask_and_filtering['mask']['slit position']
-                slit_width = config_mask_and_filtering['mask']['slit width']
-                mask = np.zeros((self.system_config["SLM"]["sampling across Y"],
-                                 self.system_config["SLM"]["sampling across X"]))
-                slit_position = self.system_config["SLM"]["sampling across X"] // 2 + slit_position
-                mask[:, slit_position - slit_width // 2:slit_position + slit_width] = 1
+                mask = generate_slit_mask((self.system_config["SLM"]["sampling across Y"], self.system_config["SLM"]["sampling across X"]),
+                    config_mask_and_filtering['mask']['slit position'],
+                    config_mask_and_filtering['mask']['slit width'])
                 list_of_SLM_masks.append(mask)
-            print("mmmmh you are weird, why would you want to do that ?")
 
         elif mask_type == "LN-random":
-            list_of_SLM_masks = generate_ln_orthogonal_mask(size=(self.system_config["SLM"]["sampling across Y"],
-                                                      self.system_config["SLM"]["sampling across X"]),
-                                        W=self.system_config["spectral range"]["number of spectral samples"],
-                                        N=number_of_masks)
-
+            list_of_SLM_masks = generate_ln_orthogonal_mask(size=(self.system_config["SLM"]["sampling across Y"],self.system_config["SLM"]["sampling across X"]),
+                                                            W=self.system_config["spectral range"]["number of spectral samples"],
+                                                            N=number_of_masks)
 
         elif mask_type == "blue-noise type 1":
 
             for i in range(number_of_masks):
-                size = [self.system_config["SLM"]["sampling across Y"], self.system_config["SLM"]["sampling across X"]]
-                mask = generate_blue_noise_type_1_mask(size)
+                mask = generate_blue_noise_type_1_mask((self.system_config["SLM"]["sampling across Y"], self.system_config["SLM"]["sampling across X"]))
                 list_of_SLM_masks.append(mask)
 
         elif mask_type == "blue-noise type 2":
 
             for i in range(number_of_masks):
-                size = [self.system_config["SLM"]["sampling across Y"], self.system_config["SLM"]["sampling across X"]]
-                mask = generate_blue_noise_type_2_mask(size)
+                mask = generate_blue_noise_type_2_mask((self.system_config["SLM"]["sampling across Y"], self.system_config["SLM"]["sampling across X"]))
                 list_of_SLM_masks.append(mask)
 
-
         elif mask_type == "custom h5":
-            mask_path = config_mask_and_filtering['mask']['file path']
-
-            if mask_path is None:
-                raise ValueError("Please provide h5 file path for custom mask.")
-            else:
-                with h5py.File(mask_path, 'r') as f:
-                    list_of_masks = f['list_of_masks'][:]
-
-                for mask in list_of_masks:
-                    slm_sampling_y = self.system_config["SLM"]["sampling across Y"]
-                    slm_sampling_x = self.system_config["SLM"]["sampling across X"]
-
-                    if mask.shape[0] != slm_sampling_y or mask.shape[1] != slm_sampling_x:
-                        # Find center point of the mask
-                        center_y, center_x = mask.shape[0] // 2, mask.shape[1] // 2
-
-                        # Determine starting and ending indices for the crop
-                        start_y = center_y - slm_sampling_y // 2
-                        end_y = start_y + slm_sampling_y
-                        start_x = center_x - slm_sampling_x // 2
-                        end_x = start_x + slm_sampling_x
-
-                        # Crop the mask
-                        mask = mask[start_y:end_y, start_x:end_x]
-
-                        # Confirm the mask is the correct shape
-                        if mask.shape[0] != slm_sampling_y or mask.shape[1] != slm_sampling_x:
-                            raise ValueError("Error cropping the mask, its shape does not match the SLM sampling.")
-                    list_of_SLM_masks.append(mask)
+            list_of_SLM_masks = load_custom_mask((self.system_config["SLM"]["sampling across Y"], self.system_config["SLM"]["sampling across X"]),
+                                                  config_mask_and_filtering['mask']['file path'])
 
         else:
             print("Mask type is not supported")
-            mask = None
+            list_of_SLM_masks = None
 
         self.list_of_SLM_masks = list_of_SLM_masks
-
 
         return self.list_of_SLM_masks
 
