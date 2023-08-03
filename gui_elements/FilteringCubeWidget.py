@@ -246,9 +246,6 @@ class FilteringCubeWidgetEditor(QWidget):
             self.random_ROM.setText("0.5")
             self.general_layout.addRow("ROM", self.random_ROM)
 
-            self.random_ROM.textChanged.connect(self.filtering_widget.enable_generate_mask_button)
-            self.random_ROM.textChanged.connect(self.filtering_widget.enable_generate_mask_button)
-
         if mask_type == "slit":
             self.slit_position_slider = QSlider(Qt.Horizontal)
             self.slit_position_slider.setMinimum(-200)
@@ -260,8 +257,6 @@ class FilteringCubeWidgetEditor(QWidget):
             self.slit_width_slider.setMaximum(30)  # Adjust as needed
             self.slit_width_slider.valueChanged.connect(self.on_slit_width_changed)
 
-            self.slit_position_slider.valueChanged.connect(self.filtering_widget.enable_generate_mask_button)
-            self.slit_width_slider.valueChanged.connect(self.filtering_widget.enable_generate_mask_button)
             self.general_layout.addRow("slit position", self.slit_position_slider)
             self.general_layout.addRow("slit width", self.slit_width_slider)
 
@@ -273,11 +268,10 @@ class FilteringCubeWidgetEditor(QWidget):
             self.browse_button = QPushButton("Browse")
             self.browse_button.clicked.connect(self.browse_file)
 
-            self.file_path.textChanged.connect(self.filtering_widget.enable_generate_mask_button)
             self.general_layout.addRow("File Path", self.file_path)
             self.general_layout.addRow("", self.browse_button)
 
-        self.filtering_widget.enable_generate_mask_button()
+
     def browse_file(self):
         file_path, _ = QFileDialog.getOpenFileName(self, "Select h5 file", "", "H5 Files (*.h5)")
         if file_path:
@@ -340,7 +334,6 @@ class FilteringCubeWidget(QWidget):
 
         # Create the generate mask button
         self.generate_mask_button = QPushButton('Generate mask')
-        # self.generate_mask_button.setStyleSheet('QPushButton {background-color: red; color: white;}')        # Connect the button to the run_dimensioning method
         self.generate_mask_button.clicked.connect(self.generate_mask)
 
 
@@ -372,11 +365,6 @@ class FilteringCubeWidget(QWidget):
         self.setLayout(self.layout)
 
 
-    def enable_generate_mask_button(self):
-        # Enable the "Generate Mask" button
-        self.generate_mask_button.setEnabled(True)
-        self.run_button.setEnabled(True)
-
 
     def run_dimensioning(self):
         # Get the configs from the editors
@@ -399,7 +387,6 @@ class FilteringCubeWidget(QWidget):
         self.cassi_system.update_config(system_config)
         self.cassi_system.generate_2D_mask(config_filtering)
 
-        self.generate_mask_button.setDisabled(True)
         self.maskGenerated.emit(self.cassi_system.mask)
 
     @pyqtSlot(np.ndarray)
