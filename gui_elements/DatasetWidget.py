@@ -425,7 +425,7 @@ class datasetConfigEditor(QWidget):
 
 class Worker(QThread):
 
-    finished_load_dataset = pyqtSignal(np.ndarray,list)
+    finished_load_dataset = pyqtSignal(np.ndarray,np.ndarray)
     finished_rgb_dataset = pyqtSignal(np.ndarray)
     finished_explore_dataset = pyqtSignal(dict,dict,list)
     finished_dataset_labelisation = pyqtSignal(np.ndarray, list, dict)
@@ -516,7 +516,7 @@ class DatasetWidget(QWidget):
         self.worker.finished_dataset_label_histogram.connect(self.dataset_label_histogram.plot_label_histogram)
         self.worker.start()
 
-    @pyqtSlot(np.ndarray,list)
+    @pyqtSlot(np.ndarray,np.ndarray)
     def display_dataset_content(self, dataset,list_wavelengths):
         self.dataset = dataset
         self.dataset_content_display.diplay_dataset_content(dataset,list_wavelengths)

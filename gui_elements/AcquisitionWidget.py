@@ -204,7 +204,7 @@ class Worker(QThread):
         print("Acquisition started")
 
         self.system_config = self.system_editor.get_config()
-        self.cassi_system.update_config(self.system_config)
+        self.cassi_system.update_config(system_config=self.system_config)
 
         if self.acquisition_config["psf"]["use_psf"] == True:
             self.cassi_system.generate_psf(self.acquisition_config["psf"]["type"],self.acquisition_config["psf"]["radius"])

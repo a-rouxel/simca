@@ -60,7 +60,7 @@ class InputGridPropagationDisplay(QWidget):
 
 
 
-    def display_mask_propagation(self, list_X_detector, list_Y_detector, list_wavelengths):
+    def display_mask_propagation(self, X_propagated_coded_aperture, Y_propagated_coded_aperture, wavelengths):
 
         self.figure_coded_aperture.clear()
 
@@ -69,24 +69,23 @@ class InputGridPropagationDisplay(QWidget):
         # Define a color palette with Seaborn
         colors = sns.color_palette("husl", 3)
 
-        for idx in range(len(list_X_detector)):
+        for idx in range(wavelengths.shape[0]):
 
             if idx == 0:
                 color = colors[2]  # light blue
-            elif idx == len(list_X_detector) // 2:
+            elif idx == wavelengths.shape[0] // 2:
                 color = colors[1]  # light green
             else:
                 color = colors[0]  # light red
 
-            if idx == 0 or idx == len(list_X_detector) // 2 or idx == len(list_X_detector) - 1:
+            if idx == 0 or idx == wavelengths.shape[0] // 2 or idx == wavelengths.shape[0] - 1:
 
-                wavelength = list_wavelengths[idx]
-                X_detector = undersample_grid(list_X_detector[idx])
-                Y_detector = undersample_grid(list_Y_detector[idx])
+                wavelength = wavelengths[idx]
+                X_detector = undersample_grid(X_propagated_coded_aperture[:,:,idx])
+                Y_detector = undersample_grid(Y_propagated_coded_aperture[:,:,idx])
 
                 X_detector = X_detector.reshape(-1, 1)
                 Y_detector = Y_detector.reshape(-1, 1)
-
 
                 ax.scatter(X_detector, Y_detector, alpha= 0.5,color=color, label=f'{int(wavelength)} nm')
 
@@ -111,24 +110,23 @@ class DistorsionResultDisplay(QWidget):
         self.layout.addWidget(self.toolbar_distorsion)
         self.layout.addWidget(self.canvas_distorsion)
 
-    def display_results_distorsion(self, X_input_grid, Y_input_grid, list_X_detector, list_Y_detector,
-                                   list_wavelengths):
+    def display_results_distorsion(self, X_input_grid, Y_input_grid, X_propagated_coded_aperture, Y_propagated_coded_aperture,wavelengths):
 
         self.figure_distorsion.clear()
 
         fig, axs = plt.subplots(3, 1)  # Create a new figure with 3 subplots
         self.figure_distorsion = fig  # Replace the old figure with the new one
 
-        selected_indices = [0, len(list_X_detector) // 2, len(list_X_detector) - 1]
+        selected_indices = [0,wavelengths.shape[0] // 2, wavelengths.shape[0] - 1]
 
         for i, idx in enumerate(selected_indices):
             # ax = axs[i,0]
             X_input_grid_subsampled = undersample_grid(X_input_grid)
             Y_input_grid_subsampled = undersample_grid(Y_input_grid)
 
-            X_detector = undersample_grid(list_X_detector[idx])
-            Y_detector = undersample_grid(list_Y_detector[idx])
-            wavelength = list_wavelengths[idx]
+            X_detector = undersample_grid(X_propagated_coded_aperture[:,:,idx])
+            Y_detector = undersample_grid(Y_propagated_coded_aperture[:,:,idx])
+            wavelength = wavelengths[idx]
 
             X_ref = -1 * X_input_grid_subsampled + X_detector[X_detector.shape[0] // 2, X_detector.shape[1] // 2]
             Y_ref = -1 * Y_input_grid_subsampled + Y_detector[Y_detector.shape[0] // 2, Y_detector.shape[1] // 2]
@@ -141,8 +139,6 @@ class DistorsionResultDisplay(QWidget):
             scatter_new = ax.scatter(X_detector, Y_detector, c=dist, cmap='viridis',label=f'accurate model')
             cbar = fig.colorbar(scatter_new, ax=ax)  # Use the new figure for the colorbar
             cbar.set_label(f'Distorsion at {int(wavelength)} nm [um]')
-            scatter_trad = ax.scatter(X_ref, Y_ref,alpha=0.1,label='classical model')
-
             ax.legend()
 
         # Update the canvas with the new figure
@@ -169,11 +165,10 @@ class Worker(QThread):
 
         self.finished_define_mask_grid.emit((cassi_system.X_coded_aper_coordinates, cassi_system.Y_coded_aper_coordinates))  # Emit a tuple of arrays
 
-        list_X_detector, list_Y_detector, list_wavelengths = cassi_system.propagate_coded_aperture_grid()
-        self.finished_propagate_coded_aperture_grid.emit((list_X_detector, list_Y_detector,list_wavelengths))
+        X_coordinates_propagated_coded_aperture, Y_coordinates_propagated_coded_aperture, wavelengths = cassi_system.propagate_coded_aperture_grid()
 
-
-        self.finished_distorsion.emit((cassi_system.X_coded_aper_coordinates, cassi_system.Y_coded_aper_coordinates,list_X_detector, list_Y_detector, list_wavelengths))
+        self.finished_propagate_coded_aperture_grid.emit((X_coordinates_propagated_coded_aperture, Y_coordinates_propagated_coded_aperture,wavelengths))
+        self.finished_distorsion.emit((cassi_system.X_coded_aper_coordinates, cassi_system.Y_coded_aper_coordinates,X_coordinates_propagated_coded_aperture, Y_coordinates_propagated_coded_aperture, wavelengths))
 
 
 

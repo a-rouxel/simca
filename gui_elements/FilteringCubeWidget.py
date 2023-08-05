@@ -28,7 +28,7 @@ class CodedApertureGridDisplay(QWidget):
         self.layout.addWidget(self.toolbar_cam)
         self.layout.addWidget(self.canvas_cam)
 
-    def display_coded_aperture_grid(self, coded_aperture):
+    def display_pattern_grid(self, pattern):
         self.figure_cam.clear()
 
         ax = self.figure_cam.add_subplot(111)
@@ -68,7 +68,7 @@ class PropagatedcodedapertureGridDisplay(QWidget):
         self.layout.addWidget(self.imageView)
 
 
-    def display_propagated_coded_aperture_grid(self, filtering_cube,list_wavelengths):
+    def display_propagated_pattern_grid(self, filtering_cube,list_wavelengths):
         # Replace NaN values with 0
         self.list_wavelengths = list_wavelengths
 
@@ -104,8 +104,8 @@ class PropagatedcodedapertureGridDisplay(QWidget):
         self.imageView.setImage(np.rot90(self.data[:,:,slice_index]), levels=(0, 255))
 
 class Worker(QThread):
-    finished_define_coded_aperture_grid = pyqtSignal(np.ndarray)
-    finished_propagate_coded_aperture_grid = pyqtSignal(np.ndarray,np.ndarray)
+    finished_define_pattern = pyqtSignal(np.ndarray)
+    finished_propagate_pattern = pyqtSignal(np.ndarray,np.ndarray)
 
     def __init__(self, cassi_system,system_config,simulation_config):
         super().__init__()
@@ -115,10 +115,10 @@ class Worker(QThread):
 
     def run(self):
         # Put your analysis here
-        self.cassi_system.update_config(self.system_config)
+        self.cassi_system.update_config(system_config=self.system_config)
         self.cassi_system.propagate_coded_aperture_grid()
         self.cassi_system.generate_filtering_cube()
-        self.finished_propagate_coded_aperture_grid.emit(self.cassi_system.filtering_cube,self.cassi_system.optical_model.system_wavelengths)  # Emit a tuple of arrays
+        self.finished_propagate_pattern.emit(self.cassi_system.filtering_cube,self.cassi_system.optical_model.system_wavelengths)  # Emit a tuple of arrays
 
 
 class FilteringCubeWidgetEditor(QWidget):
@@ -324,17 +324,17 @@ class FilteringCubeWidget(QWidget):
         self.result_display_widget = QTabWidget()
 
         # Create the result displays and store them as attributes
-        self.camera_result_display = MaskGridDisplay()
-        self.propagated_coded_aperture_display = PropagatedMaskGridDisplay()
+        self.camera_result_display = CodedApertureGridDisplay()
+        self.propagated_pattern_display = PropagatedcodedapertureGridDisplay()
 
 
         # Add the result displays to the tab widget
-        self.result_display_widget.addTab(self.camera_result_display, "Mask Grid")
-        self.result_display_widget.addTab(self.propagated_mask_display, "Filtering cube, slide by slide")
+        self.result_display_widget.addTab(self.camera_result_display, "Patterns")
+        self.result_display_widget.addTab(self.propagated_pattern_display, "Filtering cube, slide by slide")
 
-        # Create the generate mask button
-        self.generate_mask_button = QPushButton('Generate mask')
-        self.generate_mask_button.clicked.connect(self.generate_mask)
+        # Create the generate pattern button
+        self.generate_pattern_button = QPushButton('Generate pattern')
+        self.generate_pattern_button.clicked.connect(self.generate_pattern)
 
 
         # Create the run button
@@ -346,7 +346,7 @@ class FilteringCubeWidget(QWidget):
         self.run_button_group_box = QGroupBox()
         run_button_group_layout = QVBoxLayout()
 
-        run_button_group_layout.addWidget(self.generate_mask_button)
+        run_button_group_layout.addWidget(self.generate_pattern_button)
         run_button_group_layout.addWidget(self.run_button)
         run_button_group_layout.addWidget(self.result_display_widget)
 
@@ -374,28 +374,28 @@ class FilteringCubeWidget(QWidget):
         self.run_button.setDisabled(True)
 
         self.worker = Worker(self.cassi_system,system_config, config_filtering)
-        self.worker.finished_define_mask_grid.connect(self.display_mask_grid)
-        self.worker.finished_propagate_coded_aperture_grid.connect(self.display_propagated_masks)
+        self.worker.finished_define_pattern.connect(self.display_pattern_grid)
+        self.worker.finished_propagate_pattern.connect(self.display_propagated_patterns)
         self.worker.start()
 
-    def generate_mask(self):
+    def generate_pattern(self):
         system_config = self.system_editor.get_config()
         config_filtering = self.filtering_config_editor.get_config()
 
-        self.maskGenerated.connect(self.display_mask_grid)
+        self.patternGenerated.connect(self.display_pattern_grid)
 
-        self.cassi_system.update_config(system_config)
-        self.cassi_system.generate_2D_mask(config_filtering)
+        self.cassi_system.update_config(system_config=system_config)
+        self.cassi_system.generate_2D_pattern(config_filtering)
 
         self.run_button.setEnabled(True)
-        self.maskGenerated.emit(self.cassi_system.mask)
+        self.patternGenerated.emit(self.cassi_system.pattern)
 
     @pyqtSlot(np.ndarray)
-    def display_mask_grid(self, mask):
-        self.camera_result_display.display_mask_grid(mask)
+    def display_pattern_grid(self, pattern):
+        self.camera_result_display.display_pattern_grid(pattern)
 
     @pyqtSlot(np.ndarray,np.ndarray)
-    def display_propagated_masks(self, filtering_cube,np_of_wavelengths):
+    def display_propagated_patterns(self, filtering_cube,np_of_wavelengths):
         self.cassi_system.filtering_cube = filtering_cube
         self.cassi_system.optical_model.system_wavelengths = np_of_wavelengths
-        self.propagated_mask_display.display_propagated_mask_grid(filtering_cube,np_of_wavelengths)
+        self.propagated_pattern_display.display_propagated_pattern_grid(filtering_cube,np_of_wavelengths)
