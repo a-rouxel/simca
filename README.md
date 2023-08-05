@@ -68,6 +68,34 @@ SIMCA includes four main features:
 
 For more detailed information about each feature and further instructions, please visit our [documentation website](https://arouxel.gitlab.io/simca-documentation/).
 
+## Building Documentation
+
+If you wish to build the Sphinx documentation locally:
+
+1. Navigate to the documentation source directory (e.g., `docs/`):
+
+```bash
+cd docs
+```
+
+2. Ensure you have Sphinx and other necessary tools installed:
+
+```bash
+pip install sphinx sphinx_rtd_theme
+```
+
+3. Build the documentation:
+
+```bash
+make html
+```
+
+4. Once built, you can view the documentation by opening the generated HTML files. For example:
+
+```bash
+xdg-open _build/html/index.html
+```
+
 ## License
 
 SIMCA is licensed under the [MIT License](https://www.mit.edu/~amini/LICENSE.md).
