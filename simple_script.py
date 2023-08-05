@@ -2,10 +2,10 @@ from cassi_systems import CassiSystem, load_yaml_config
 
 config_dataset = load_yaml_config("cassi_systems/configs/dataset.yml")
 config_system = load_yaml_config("cassi_systems/configs/cassi_system.yml")
-config_masks = load_yaml_config("cassi_systems/configs/filtering.yml")
+config_patterns = load_yaml_config("cassi_systems/configs/pattern.yml")
 config_acquisition = load_yaml_config("cassi_systems/configs/acquisition.yml")
 
-dataset_name = "PaviaU"
+dataset_name = "indian_pines"
 
 if __name__ == '__main__':
 
@@ -15,11 +15,11 @@ if __name__ == '__main__':
     # DATASET : Load the hyperspectral dataset
     cassi_system.load_dataset(dataset_name, config_dataset["datasets directory"])
 
-    # MASK : Generate the dmd mask
-    cassi_system.generate_2D_mask(config_masks)
+    # pattern : Generate the coded aperture pattern
+    cassi_system.generate_2D_pattern(config_patterns)
 
-    # PROPAGATION : Propagate the mask grid to the detector plane
-    cassi_system.propagate_mask_grid()
+    # PROPAGATION : Propagate the pattern grid to the detector plane
+    cassi_system.propagate_coded_aperture_grid()
 
     # FILTERING CUBE : Generate the filtering cube
     cassi_system.generate_filtering_cube()
@@ -31,4 +31,4 @@ if __name__ == '__main__':
     cassi_system.image_acquisition(use_psf=True,chunck_size=50)
 
     # Save the acquisition
-    cassi_system.save_acquisition(config_masks, config_acquisition)
+    cassi_system.save_acquisition(config_patterns, config_acquisition)

@@ -21,7 +21,7 @@ detector:
     number of pixels along Y: 10                  # number of pixels along Y axis -- no units
     pixel size along X: 400                            # pixel size along X       -- in um
     pixel size along Y: 400                              # pixel size along Y       -- in um
-SLM:
+coded aperture:
     number of pixels along X: 32                  # number of pixels along X axis -- no units
     number of pixels along Y: 12                  # number of pixels along Y axis -- no units
     pixel size along X: 550                              # pixel size along X       -- in um

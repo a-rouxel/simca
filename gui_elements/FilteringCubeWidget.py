@@ -14,7 +14,7 @@ from cassi_systems import CassiSystem
 
 
 
-class MaskGridDisplay(QWidget):
+class CodedApertureGridDisplay(QWidget):
     def __init__(self):
         super().__init__()
 
@@ -28,16 +28,16 @@ class MaskGridDisplay(QWidget):
         self.layout.addWidget(self.toolbar_cam)
         self.layout.addWidget(self.canvas_cam)
 
-    def display_mask_grid(self, mask):
+    def display_coded_aperture_grid(self, coded_aperture):
         self.figure_cam.clear()
 
         ax = self.figure_cam.add_subplot(111)
-        scatter = ax.imshow(mask,cmap="viridis",interpolation='none',vmin=0,vmax=1)
+        scatter = ax.imshow(pattern,cmap="viridis",interpolation='none',vmin=0,vmax=1)
 
         # Set labels with LaTeX font.
-        ax.set_xlabel(f'X mask grid [um]', fontsize=12)
-        ax.set_ylabel(f'Y mask grid[um]', fontsize=12)
-        ax.set_title(f'Mask Grid', fontsize=12)
+        ax.set_xlabel(f'X coded aperture grid [um]', fontsize=12)
+        ax.set_ylabel(f'Y coded aperture grid[um]', fontsize=12)
+        ax.set_title(f'coded aperture Grid', fontsize=12)
 
         self.canvas_cam.draw()
 
@@ -46,7 +46,7 @@ class MaskGridDisplay(QWidget):
 
 
 
-class PropagatedMaskGridDisplay(QWidget):
+class PropagatedcodedapertureGridDisplay(QWidget):
     def __init__(self):
         super().__init__()
 
@@ -68,7 +68,7 @@ class PropagatedMaskGridDisplay(QWidget):
         self.layout.addWidget(self.imageView)
 
 
-    def display_propagated_mask_grid(self, filtering_cube,list_wavelengths):
+    def display_propagated_coded_aperture_grid(self, filtering_cube,list_wavelengths):
         # Replace NaN values with 0
         self.list_wavelengths = list_wavelengths
 
@@ -104,8 +104,8 @@ class PropagatedMaskGridDisplay(QWidget):
         self.imageView.setImage(np.rot90(self.data[:,:,slice_index]), levels=(0, 255))
 
 class Worker(QThread):
-    finished_define_mask_grid = pyqtSignal(np.ndarray)
-    finished_propagate_mask_grid = pyqtSignal(np.ndarray,np.ndarray)
+    finished_define_coded_aperture_grid = pyqtSignal(np.ndarray)
+    finished_propagate_coded_aperture_grid = pyqtSignal(np.ndarray,np.ndarray)
 
     def __init__(self, cassi_system,system_config,simulation_config):
         super().__init__()
@@ -116,9 +116,9 @@ class Worker(QThread):
     def run(self):
         # Put your analysis here
         self.cassi_system.update_config(self.system_config)
-        self.cassi_system.propagate_mask_grid()
+        self.cassi_system.propagate_coded_aperture_grid()
         self.cassi_system.generate_filtering_cube()
-        self.finished_propagate_mask_grid.emit(self.cassi_system.filtering_cube,self.cassi_system.optical_model.system_wavelengths)  # Emit a tuple of arrays
+        self.finished_propagate_coded_aperture_grid.emit(self.cassi_system.filtering_cube,self.cassi_system.optical_model.system_wavelengths)  # Emit a tuple of arrays
 
 
 class FilteringCubeWidgetEditor(QWidget):
@@ -139,9 +139,9 @@ class FilteringCubeWidgetEditor(QWidget):
         # Add your dimensioning parameters here
         self.results_directory = QLineEdit()
 
-        self.mask_type = QComboBox()
-        self.mask_type.addItems(["slit","random","blue-noise type 1","custom h5 mask"])
-        self.mask_type.currentTextChanged.connect(self.on_mask_type_changed)
+        self.pattern_type = QComboBox()
+        self.pattern_type.addItems(["slit","random","blue-noise type 1","custom h5 pattern"])
+        self.pattern_type.currentTextChanged.connect(self.on_pattern_type_changed)
 
         self.slit_position_slider = QSlider(Qt.Horizontal)
         self.slit_position_slider.setMinimum(-200)
@@ -159,7 +159,7 @@ class FilteringCubeWidgetEditor(QWidget):
 
 
         self.general_layout = QFormLayout()
-        self.general_layout.addRow("mask type", self.mask_type)
+        self.general_layout.addRow("pattern type", self.pattern_type)
         self.general_layout.addRow("slit position", self.slit_position_slider)
         self.general_layout.addRow("slit width", self.slit_width_slider)
 
@@ -222,18 +222,18 @@ class FilteringCubeWidgetEditor(QWidget):
         # This method should update your QLineEdit and QSpinBox widgets with the loaded configs.
 
         self.results_directory.setText(self.config['infos']['results directory'])
-        self.mask_type.setCurrentText(self.config['mask']['type'])
+        self.pattern_type.setCurrentText(self.config['pattern']['type'])
 
 
-        if self.config['mask']['type'] == 'slit':
-            self.slit_position_slider.setValue(self.config['mask']['slit position'])
-            self.slit_width_slider.setValue(self.config['mask']['slit width'])
-        elif self.config['mask']['type'] == 'random':
-            self.random_ROM.setText(str(self.config['mask']['ROM']))
+        if self.config['pattern']['type'] == 'slit':
+            self.slit_position_slider.setValue(self.config['pattern']['slit position'])
+            self.slit_width_slider.setValue(self.config['pattern']['slit width'])
+        elif self.config['pattern']['type'] == 'random':
+            self.random_ROM.setText(str(self.config['pattern']['ROM']))
 
 
 
-    def on_mask_type_changed(self, mask_type):
+    def on_pattern_type_changed(self, pattern_type):
 
 
 
@@ -241,12 +241,12 @@ class FilteringCubeWidgetEditor(QWidget):
             # Remove row at index i from the layout
             self.general_layout.removeRow(i)
 
-        if mask_type == "random":
+        if pattern_type == "random":
             self.random_ROM = QLineEdit()
             self.random_ROM.setText("0.5")
             self.general_layout.addRow("ROM", self.random_ROM)
 
-        if mask_type == "slit":
+        if pattern_type == "slit":
             self.slit_position_slider = QSlider(Qt.Horizontal)
             self.slit_position_slider.setMinimum(-200)
             self.slit_position_slider.setMaximum(200)  # Adjust as needed
@@ -261,7 +261,7 @@ class FilteringCubeWidgetEditor(QWidget):
             self.general_layout.addRow("slit width", self.slit_width_slider)
 
 
-        if mask_type == "custom h5 mask":
+        if pattern_type == "custom h5 pattern":
 
             self.file_path = QLineEdit()
 
@@ -278,36 +278,36 @@ class FilteringCubeWidgetEditor(QWidget):
             self.file_path.setText(file_path)
     def on_slit_position_changed(self, position):
         # Update the slit position in your configs
-        self.config['mask']['slit position'] = position
+        self.config['pattern']['slit position'] = position
 
     def on_slit_width_changed(self, width):
         # Update the slit width in your configs
-        self.config['mask']['slit width'] = width
+        self.config['pattern']['slit width'] = width
 
     def get_config(self):
         config = {
-            "mask": {
-                "type": self.mask_type.currentText()
+            "pattern": {
+                "type": self.pattern_type.currentText()
             },
         }
 
-        if config['mask']['type'] == "slit":
-            config['mask']['slit position'] = self.slit_position_slider.value()
-            config['mask']['slit width'] = self.slit_width_slider.value()
+        if config['pattern']['type'] == "slit":
+            config['pattern']['slit position'] = self.slit_position_slider.value()
+            config['pattern']['slit width'] = self.slit_width_slider.value()
 
-        elif config['mask']['type'] == "custom h5 mask":
-            config['mask']['file path'] = self.file_path.text()
-        elif config['mask']['type'] == "random":
-            config['mask']['ROM'] = float(self.random_ROM.text())
+        elif config['pattern']['type'] == "custom h5 pattern":
+            config['pattern']['file path'] = self.file_path.text()
+        elif config['pattern']['type'] == "random":
+            config['pattern']['ROM'] = float(self.random_ROM.text())
         else :
-            config['mask']['slit position'] = None
-            config['mask']['slit width'] = None
+            config['pattern']['slit position'] = None
+            config['pattern']['slit width'] = None
 
         return config
 
 class FilteringCubeWidget(QWidget):
 
-    maskGenerated = pyqtSignal(np.ndarray)
+    patternGenerated = pyqtSignal(np.ndarray)
     def __init__(self, cassi_system=None,system_editor=None,filtering_config_path=None):
         super().__init__()
 
@@ -325,7 +325,7 @@ class FilteringCubeWidget(QWidget):
 
         # Create the result displays and store them as attributes
         self.camera_result_display = MaskGridDisplay()
-        self.propagated_mask_display = PropagatedMaskGridDisplay()
+        self.propagated_coded_aperture_display = PropagatedMaskGridDisplay()
 
 
         # Add the result displays to the tab widget
@@ -375,7 +375,7 @@ class FilteringCubeWidget(QWidget):
 
         self.worker = Worker(self.cassi_system,system_config, config_filtering)
         self.worker.finished_define_mask_grid.connect(self.display_mask_grid)
-        self.worker.finished_propagate_mask_grid.connect(self.display_propagated_masks)
+        self.worker.finished_propagate_coded_aperture_grid.connect(self.display_propagated_masks)
         self.worker.start()
 
     def generate_mask(self):

@@ -6,12 +6,12 @@ def generate_dd_measurement(scene, filtering_cube,chunk_size):
     Generate DD-CASSI type system measurement from a scene and a filtering cube. ref : "Single-shot compressive spectral imaging with a dual-disperser architecture", M.Gehm et al., Optics Express, 2007
 
     Args:
-        scene (numpy array): 3D array of the scene to be measured
-        filtering_cube (numpy array): 3D array corresponding to the spatio-spectral filtering cube of the instrument
+        scene (numpy.ndarray): observed scene (shape = R  x C x W)
+        filtering_cube (numpy.ndarray):   filtering cube of the instrument for a given pattern (shape = R x C x W)
         chunk_size (int) : size of the spatial chunks in which the Hadamard product is performed
 
     Returns:
-        filtered_scene (numpy array): 3D array of the filtered scene
+        numpy.ndarray: filtered scene (shape = R x C x W)
     """
 
     # Initialize an empty array for the result
@@ -36,16 +36,16 @@ def generate_dd_measurement(scene, filtering_cube,chunk_size):
     return filtered_scene
 
 
-def match_scene_to_instrument(scene, filtering_cube):
+def match_dataset_to_instrument(scene, filtering_cube):
     """
-    Match the size of the scene to the size of the filtering cube. Either by padding or by cropping
+    Match the size of the dataset to the size of the filtering cube. Either by padding or by cropping
 
     Args:
-        scene (numpy array): 3D array of the scene to be measured
-        filtering_cube (numpy array): 3D array corresponding to the spatio-spectral filtering cube of the instrument
+        dataset (numpy.ndarray): dataset
+        filtering_cube (numpy.ndarray):  filtering cube of the instrument
 
     Returns:
-        scene (numpy array): 3D array of the scene to be measured, matched to the size of the filtering cube
+        numpy.ndarray: observed scene (shape = R  x C x W)
     """
 
     if filtering_cube.shape[0] != scene.shape[0] or filtering_cube.shape[1] != scene.shape[1]:
@@ -63,16 +63,16 @@ def match_scene_to_instrument(scene, filtering_cube):
 
     return scene
 
-def match_scene_labels_to_instrument(dataset_labels, filtering_cube):
+def match_dataset_labels_to_instrument(dataset_labels, filtering_cube):
     """
     Match the size of the dataset labels to the size of the filtering cube. Either by padding or by cropping
 
     Args:
-        dataset_labels (numpy array): 2D array of the scene to be measured
-        filtering_cube (numpy array): 3D array corresponding to the spatio-spectral filtering cube of the instrument
+        dataset_labels (numpy.ndarray): dataset labels (shape = R_dts  x C_dts)
+        filtering_cube (numpy.ndarray): filtering cube of the instrument
 
     Returns:
-        cropped dataset_labels (numpy array): 2D array of the scene labels, matched to the size of the filtering cube
+        numpy.ndarray: scene labels (shape = R  x C)
     """
 
     if filtering_cube.shape[0] != dataset_labels.shape[0] or filtering_cube.shape[1] != dataset_labels.shape[1]:
@@ -85,31 +85,31 @@ def match_scene_labels_to_instrument(dataset_labels, filtering_cube):
 
     return dataset_labels
 
-def crop_center(array, nb_of_samples_along_x, nb_of_samples_along_y):
+def crop_center(array, nb_of_pixels_along_x, nb_of_pixels_along_y):
     """
     Crop the given array to the given size, centered on the array
 
     Args:
-        array (numpy array): 2D array to be cropped
-        nb_of_samples_along_x (int): number of samples to keep along the x axis
-        nb_of_samples_along_y (int): number of samples to keep along the y axis
+        array (numpy.ndarray): 2D array to be cropped
+        nb_of_pixels_along_x (int): number of samples to keep along the X axis
+        nb_of_pixels_along_y (int): number of samples to keep along the Y axis
 
     Returns:
-        array (numpy array): 2D array cropped
+        numpy.ndarray: cropped array
     """
 
     y_len, x_len = array.shape
 
-    x_start = x_len//2 - nb_of_samples_along_x//2
-    x_end = x_start + nb_of_samples_along_x
+    x_start = x_len//2 - nb_of_pixels_along_x//2
+    x_end = x_start + nb_of_pixels_along_x
 
-    y_start = y_len//2 - nb_of_samples_along_y//2
-    y_end = y_start + nb_of_samples_along_y
+    y_start = y_len//2 - nb_of_pixels_along_y//2
+    y_end = y_start + nb_of_pixels_along_y
 
-    if nb_of_samples_along_x<array.shape[1]:
+    if nb_of_pixels_along_x<array.shape[1]:
         array = array[:, x_start:x_end]
 
-    if nb_of_samples_along_y<array.shape[0]:
+    if nb_of_pixels_along_y<array.shape[0]:
         array = array[y_start:y_end, :]
 
     return array

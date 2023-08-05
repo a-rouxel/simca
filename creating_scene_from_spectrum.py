@@ -37,7 +37,7 @@ def generate_letter_shape(text="A",size=(100,100)):
     position = ((size[0] - text_width) / 2 , (size[1] - text_height) / 2 - 10*factor )
     # Draw the text
     draw.text(position, text, fill=1, font=font)
-    # Convert to numpy array
+    # Convert to numpy.ndarray
     letter = np.array(image)
 
     return  letter
@@ -68,7 +68,7 @@ spectrum_image = np.zeros((letter.shape[0], letter.shape[1], len(wavelengths)))
 np.save("led_spectrum.npy",led_spectrum)
 np.save("wavelengths_sun.npy",wavelengths)
 
-# Fill in spectrum values based on mask
+# Fill in spectrum values based on pattern
 for i in range(letter.shape[0]):
     for j in range(letter.shape[1]):
         if letter[i, j] == 0:
@@ -95,7 +95,7 @@ file.close()
 # save the resultin
 # spectrum_image - 3D cube
 # corresponding wavelengths - 1D array
-# corresponding mask - 2D array of 0 and 1
+# corresponding pattern- 2D array of 0 and 1
 
 #
 

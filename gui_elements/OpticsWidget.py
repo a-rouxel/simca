@@ -51,20 +51,20 @@ class InputGridPropagationDisplay(QWidget):
         self.layout = QVBoxLayout()
         self.setLayout(self.layout)
 
-        self.figure_dmd = plt.figure()
-        self.canvas_dmd = FigureCanvas(self.figure_dmd)
-        self.toolbar_dmd = NavigationToolbar(self.canvas_dmd, self)
+        self.figure_coded_aperture = plt.figure()
+        self.canvas_coded_aperture = FigureCanvas(self.figure_coded_aperture)
+        self.toolbar_coded_aperture = NavigationToolbar(self.canvas_coded_aperture, self)
 
-        self.layout .addWidget(self.toolbar_dmd)
-        self.layout .addWidget(self.canvas_dmd)
+        self.layout .addWidget(self.toolbar_coded_aperture)
+        self.layout .addWidget(self.canvas_coded_aperture)
 
 
 
     def display_mask_propagation(self, list_X_detector, list_Y_detector, list_wavelengths):
 
-        self.figure_dmd.clear()
+        self.figure_coded_aperture.clear()
 
-        ax = self.figure_dmd.add_subplot(111)
+        ax = self.figure_coded_aperture.add_subplot(111)
 
         # Define a color palette with Seaborn
         colors = sns.color_palette("husl", 3)
@@ -95,7 +95,7 @@ class InputGridPropagationDisplay(QWidget):
         ax.set_title(f'Propagated Grids', fontsize=12)
         ax.legend()
 
-        self.canvas_dmd.draw()
+        self.canvas_coded_aperture.draw()
 
 class DistorsionResultDisplay(QWidget):
     def __init__(self):
@@ -152,7 +152,7 @@ class DistorsionResultDisplay(QWidget):
 
 class Worker(QThread):
     finished_define_mask_grid = pyqtSignal(tuple)
-    finished_propagate_mask_grid = pyqtSignal(tuple)
+    finished_propagate_coded_aperture_grid = pyqtSignal(tuple)
     finished_distorsion = pyqtSignal(tuple)
 
     def __init__(self, cassi_system,system_config):
@@ -163,17 +163,17 @@ class Worker(QThread):
 
     def run(self):
         # Put your analysis here
-        self.cassi_system.update_config(self.system_config)
+        self.cassi_system.update_config(system_config=self.system_config)
 
         cassi_system = self.cassi_system
 
-        self.finished_define_mask_grid.emit((cassi_system.X_dmd_coordinates_grid, cassi_system.Y_dmd_coordinates_grid))  # Emit a tuple of arrays
+        self.finished_define_mask_grid.emit((cassi_system.X_coded_aper_coordinates, cassi_system.Y_coded_aper_coordinates))  # Emit a tuple of arrays
 
-        list_X_detector, list_Y_detector, list_wavelengths = cassi_system.propagate_mask_grid()
-        self.finished_propagate_mask_grid.emit((list_X_detector, list_Y_detector,list_wavelengths))
+        list_X_detector, list_Y_detector, list_wavelengths = cassi_system.propagate_coded_aperture_grid()
+        self.finished_propagate_coded_aperture_grid.emit((list_X_detector, list_Y_detector,list_wavelengths))
 
 
-        self.finished_distorsion.emit((cassi_system.X_dmd_coordinates_grid, cassi_system.Y_dmd_coordinates_grid,list_X_detector, list_Y_detector, list_wavelengths))
+        self.finished_distorsion.emit((cassi_system.X_coded_aper_coordinates, cassi_system.Y_coded_aper_coordinates,list_X_detector, list_Y_detector, list_wavelengths))
 
 
 
@@ -321,12 +321,12 @@ class OpticsWidget(QWidget):
 
         # Create the result displays and store them as attributes
         self.camera_result_display = InputGridDisplay()
-        self.dmd_result_display = InputGridPropagationDisplay()
+        self.coded_aperture_result_display = InputGridPropagationDisplay()
         self.distorsion_result_display = DistorsionResultDisplay()
 
         # Add the result displays to the tab widget
         self.result_display_widget.addTab(self.camera_result_display, "Mask Grid")
-        self.result_display_widget.addTab(self.dmd_result_display, "Propagated Grids")
+        self.result_display_widget.addTab(self.coded_aperture_result_display, "Propagated Grids")
         self.result_display_widget.addTab(self.distorsion_result_display, "Distortion Maps")
 
         # Create the run button
@@ -364,7 +364,7 @@ class OpticsWidget(QWidget):
 
         self.worker = Worker(cassi_system,system_config)
         self.worker.finished_define_mask_grid.connect(self.display_mask_grid)
-        self.worker.finished_propagate_mask_grid.connect(self.display_mask_propagation)
+        self.worker.finished_propagate_coded_aperture_grid.connect(self.display_mask_propagation)
         self.worker.finished_distorsion.connect(self.display_results_distorsion)
         self.worker.start()
 
@@ -378,8 +378,8 @@ class OpticsWidget(QWidget):
     @pyqtSlot(tuple)
     def display_mask_propagation(self, arrays_propagated_grid):
         list_X_detector, list_Y_detector, list_wavelengths = arrays_propagated_grid  # Unpack the tuple
-        self.dmd_result_display.display_mask_propagation(list_X_detector, list_Y_detector, list_wavelengths)
+        self.coded_aperture_result_display.display_mask_propagation(list_X_detector, list_Y_detector, list_wavelengths)
     @pyqtSlot(tuple)
-    def display_results_distorsion(self, arrays_dmd_and_cam):
-        X_cam, Y_cam,list_X_detector, list_Y_detector, list_wavelengths = arrays_dmd_and_cam  # Unpack the tuple
+    def display_results_distorsion(self, arrays_coded_aperture_and_cam):
+        X_cam, Y_cam,list_X_detector, list_Y_detector, list_wavelengths = arrays_coded_aperture_and_cam  # Unpack the tuple
         self.distorsion_result_display.display_results_distorsion(X_cam, Y_cam,list_X_detector, list_Y_detector, list_wavelengths)

@@ -13,12 +13,12 @@ from sklearn.decomposition import PCA
 def get_dataset(dataset_name, folder="./datasets/"):
     """Gets the dataset specified by name and return the related components.
     Args:
-        dataset_name: string with the name of the dataset
-        target_folder (optional): folder to store the datasets, defaults to "./datasets/"
+        dataset_name (str): the name of the dataset
+        target_folder (str): folder where the datasets are stored, defaults to "./datasets/"
     Returns:
-        img: 3D hyperspectral image (WxHxB)
-        labels: 2D int array of labels
-        label_values: list of class names
+        numpy.ndarray: 3D hyperspectral image (WxHxB)
+        numpy.ndarray: 2D array of labels (integers)
+        list: list of class names
         ignored_labels: list of int classes to ignore
     """
 

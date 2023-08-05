@@ -9,7 +9,7 @@ system architecture:
     focal lens: 200000
     dispersive element:
     # dispersive element caracteristics
-        type: grating        # name of the dispersive element
+        type: prism        # name of the dispersive element
         A: 15              # apex angle of the prism in degrees      (only used if type == 'prism')   -- in degrees
         m: 1               # grating order to consider         (only used if type == 'grating')       -- no units
         G: 30             # grating density                   (only used if type == 'grating')       -- in lines/mm
@@ -21,7 +21,7 @@ detector:
     number of pixels along Y: 201                  # number of pixels along Y axis -- no units
     pixel size along X: 40                             # pixel size along X       -- in um
     pixel size along Y: 40                              # pixel size along Y       -- in um
-SLM:
+coded aperture:
     number of pixels along X: 253                  # number of pixels along X axis -- no units
     number of pixels along Y: 201                  # number of pixels along Y axis -- no units
     pixel size along X: 55                              # pixel size along X       -- in um

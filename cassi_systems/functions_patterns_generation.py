@@ -2,15 +2,15 @@ import numpy as np
 from scipy import fftpack
 from scipy import ndimage
 import h5py
-def generate_blue_noise_type_1_mask(shape):
+def generate_blue_noise_type_1_pattern(shape):
     """
-    Generate blue noise (high frequency pseudo-random) type mask
+    Generate blue noise (high frequency pseudo-random) type pattern
 
     Args:
-        shape (tuple of int): shape of the mask
+        shape (tuple of int): shape of the pattern
 
     Returns:
-        binary mask (numpy array): binary blue noise type mask
+        numpy.ndarray: binary blue noise type pattern
 
     """
 
@@ -29,23 +29,23 @@ def generate_blue_noise_type_1_mask(shape):
     filtered_spectrum = spectrum * f_matrix
     filtered_noise = fftpack.ifft2(fftpack.ifftshift(filtered_spectrum)).real
 
-    # Make the mask binary
+    # Make the pattern binary
     threshold = np.median(filtered_noise)
-    binary_mask = np.where(filtered_noise > threshold, 1, 0)
+    binary_pattern = np.where(filtered_noise > threshold, 1, 0)
 
-    return binary_mask
+    return binary_pattern
 
-def generate_orthogonal_mask(size, W, N):
+def generate_orthogonal_pattern(size, W, N):
     """
-    Generate an orthogonal mask according to https://hal.laas.fr/hal-02993037
+    Generate an orthogonal pattern according to https://hal.laas.fr/hal-02993037
 
     Args:
-        - size (list of int): size of the mask
-        - W (int): number of wavelengths in the scene
-        - N (int): number of acquisitions
+        size (list of int): size of the pattern
+        W (int): number of wavelengths in the scene
+        N (int): number of acquisitions
 
     Returns:
-        - mask (numpy array of shape size[0] x (size[1]+W-1) x N): orthogonal mask
+        numpy.ndarray: orthogonal pattern :  shape =  size[0] x (size[1]+W-1) x N):
     """
 
     C, R = size[0], size[1] # Number of columns, number of rows
@@ -67,21 +67,21 @@ def generate_orthogonal_mask(size, W, N):
                 for i in sorted(ind, reverse=True):
                     available_pos.pop(i) # Remove the positions of already opened mirrors
 
-    mask = np.tile(H_model, [1, int(np.ceil(K/W)), 1])[:, :K, :] # Repeat the model periodically
+    pattern = np.tile(H_model, [1, int(np.ceil(K/W)), 1])[:, :K, :] # Repeat the model periodically
 
-    return mask
+    return pattern
 
-def generate_ln_orthogonal_mask(size, W, N):
+def generate_ln_orthogonal_pattern(size, W, N):
     """
-    Generate a Length-N orthogonal mask according to https://hal.laas.fr/hal-02993037
+    Generate a Length-N orthogonal pattern according to https://hal.laas.fr/hal-02993037
 
     Args:
-        - size (list of int): size of the mask
-        - W (int): number of wavelengths in the scene
-        - N (int): number of acquisitions
+        size (list of int): size of the pattern
+        W (int): number of wavelengths in the scene
+        N (int): number of acquisitions
 
     Returns:
-        - mask (numpy array of shape size[0] x (size[1]+W-1) x N): length-N orthogonal mask
+        numpy.ndarray : length-N orthogonal pattern of shape = size[0] x (size[1]+W-1) x N):
     """
 
     C, R = size[1], size[0] # Number of columns, number of rows
@@ -101,48 +101,52 @@ def generate_ln_orthogonal_mask(size, W, N):
             ind = np.random.randint(len(available)) # Randomly open those mirrors among the remaining positions
             H_model[line, available[ind], n] = 1
             available.pop(ind)
-    mask = np.tile(H_model, [1, int(np.ceil(K/W)), 1])[:, :K, :]
+    pattern = np.tile(H_model, [1, int(np.ceil(K/W)), 1])[:, :K, :]
 
-    list_of_masks = []
-    for i in range(mask.shape[2]):
-        m = mask[:, :-(W-1), i]
-        list_of_masks.append(m)
+    list_of_patterns = []
+    for i in range(pattern.shape[2]):
+        m = pattern[:, :-(W-1), i]
+        list_of_patterns.append(m)
 
-    return list_of_masks
+    return list_of_patterns
 
-def generate_random_mask(shape, ROM):
+def generate_random_pattern(shape, ROM):
     """
-    Generate a random mask with a given rate of open/close mirrors
+    Generate a random pattern with a given rate of open/close mirrors
 
     Args:
-        shape (tuple of int): shape of the mask
+        shape (tuple of int): shape of the pattern
         ROM (float): ratio of open mirrors
 
     Returns:
-        mask (numpy array): random mask
+        numpy.ndarray: random pattern
     """
 
-    mask = np.random.choice([0, 1], size=shape, p=[1 - ROM, ROM])
+    pattern = np.random.choice([0, 1], size=shape, p=[1 - ROM, ROM])
 
-    return mask
+    return pattern
 
-def generate_slit_mask(shape, slit_position,slit_width):
+def generate_slit_pattern(shape, slit_position,slit_width):
     """
-    Generate a slit mask that starts at the center of the image and goes to the right as slit position increases.
+    Generate a slit pattern that starts at the center of the image and goes to the right as slit position increases.
 
     Args:
-        shape (tuple): shape of the mask
+        shape (tuple): shape of the pattern
         slit_position (int): position of the slit in relation to the central column
         slit_width (int): width of the slit in pixels
+
+    Returns:
+        numpy.ndarray: slit pattern
+
     """
     size_y, size_x = shape[0], shape[1]
     slit_position = size_x // 2 + slit_position
     slit_width = slit_width
-    mask = np.zeros((size_y,size_x))
+    pattern = np.zeros((size_y,size_x))
 
-    mask[:, slit_position - slit_width // 2:slit_position + slit_width] = 1
+    pattern[:, slit_position - slit_width // 2:slit_position + slit_width] = 1
 
-    return mask
+    return pattern
 
 # Source of blue noise codes: https://momentsingraphics.de/BlueNoise.html
 def FindLargestVoid(BinaryPattern,StandardDeviation):
@@ -237,83 +241,83 @@ def GetVoidAndClusterBlueNoise(OutputShape,StandardDeviation=1.5,InitialSeedFrac
         DitherArray.flat[iTightestCluster]=Rank
     return DitherArray
 
-def generate_blue_noise_type_2_mask(shape, std=1.5, initial_seed_fraction=0.1):
+def generate_blue_noise_type_2_pattern(shape, std=1.5, initial_seed_fraction=0.1):
     """
-    Generate blue noise mask according to the void-and-cluster method proposed by Ulichney [1993] in "The void-and-cluster method for dither array generation" published in Proc. SPIE 1913.
+    Generate blue noise pattern according to the void-and-cluster method proposed by Ulichney [1993] in "The void-and-cluster method for dither array generation" published in Proc. SPIE 1913.
 
     Args:
-        shape (tuple): size of the mask
+        shape (tuple): size of the pattern
         std (float): standard deviation in pixels used for the Gaussian filter
         initial_seed_fraction (float): Initial fraction of marked pixels in the grid. Has to be less than 0.5.
                                          Very small values lead to ordered patterns
     Returns:
-        mask (numpy array of shape size): float blue noise mask
+        numpy.ndarray: float blue noise pattern
     """
     texture=GetVoidAndClusterBlueNoise(shape,std, initial_seed_fraction)
-    mask = (texture/np.max(texture)) # Float value between 0 and 1
+    pattern = (texture/np.max(texture)) # Float value between 0 and 1
 
-    return mask
+    return pattern
 
-def load_custom_mask(shape,mask_path):
+def load_custom_pattern(shape,pattern_path):
     """
-    Load custom mask from h5 file. If the mask is not the same size as the SLM, crop from the center of the loaded mask.
+    Load custom pattern from h5 file. If the pattern is not the same size as the coded aperture, crop from the center of the loaded pattern.
 
     Args:
-        shape (tuple): size of the mask
-        mask_path (str): path to the h5 file containing the mask
+        shape (tuple): size of the pattern
+        pattern_path (str): path to the h5 file containing the pattern
 
     Returns:
-        mask (numpy array): float blue noise mask
+        numpy.ndarray: float blue noise pattern
 
     """
     size_y, size_x = shape[0], shape[1]
 
-    if mask_path is None:
-        raise ValueError("Please provide h5 file path for custom mask.")
+    if pattern_path is None:
+        raise ValueError("Please provide h5 file path for custom pattern.")
     else:
-        with h5py.File(mask_path, 'r') as f:
-            mask = f['mask'][:]
+        with h5py.File(pattern_path, 'r') as f:
+            pattern = f['pattern'][:]
 
-        slm_sampling_y = size_y
-        slm_sampling_x = size_x
+        coded_aperture_sampling_y = size_y
+        coded_aperture_sampling_x = size_x
 
-        if mask.shape[0] != slm_sampling_y or mask.shape[1] != slm_sampling_x:
-            # Find center point of the mask
-            center_y, center_x = mask.shape[0] // 2, mask.shape[1] // 2
+        if pattern.shape[0] != coded_aperture_sampling_y or pattern.shape[1] != coded_aperture_sampling_x:
+            # Find center point of the pattern
+            center_y, center_x = pattern.shape[0] // 2, pattern.shape[1] // 2
 
             # Determine starting and ending indices for the crop
-            start_y = center_y - slm_sampling_y // 2
-            end_y = start_y + slm_sampling_y
-            start_x = center_x - slm_sampling_x // 2
-            end_x = start_x + slm_sampling_x
+            start_y = center_y - coded_aperture_sampling_y // 2
+            end_y = start_y + coded_aperture_sampling_y
+            start_x = center_x - coded_aperture_sampling_x // 2
+            end_x = start_x + coded_aperture_sampling_x
 
-            # Crop the mask
-            mask = mask[start_y:end_y, start_x:end_x]
+            # Crop the pattern
+            pattern = pattern[start_y:end_y, start_x:end_x]
 
-            # Confirm the mask is the correct shape
-            if mask.shape[0] != slm_sampling_y or mask.shape[1] != slm_sampling_x:
-                raise ValueError("Error cropping the mask, its shape does not match the SLM sampling.")
-        return mask
-def load_custom_list_of_masks(shape,masks_path):
+            # Confirm the pattern is the correct shape
+            if pattern.shape[0] != coded_aperture_sampling_y or pattern.shape[1] != coded_aperture_sampling_x:
+                raise ValueError("Error cropping the pattern, its shape does not match the coded aperture sampling.")
+        return pattern
+def load_custom_list_of_patterns(shape,patterns_path):
     """
-    Load custom list of masks from h5 file. If the masks are not the same size as the SLM, crop from the center of the loaded masks.
+    Load custom list of patterns from h5 file. If the patterns are not the same size as the coded aperture, crop from the center of the loaded patterns.
 
     Args:
-        shape (tuple): size of the mask
-        masks_path (str): path to the h5 file containing the masks
+        shape (tuple): size of the pattern
+        patterns_path (str): path to the h5 file containing the patterns
 
     Returns:
-        list_of_SLM_masks (list): list of masks
+        list: list of patterns
     """
 
 
-    list_of_SLM_masks = []
+    list_of_coded_aperture_masks = []
     size_y, size_x = shape[0], shape[1]
 
-    if masks_path is None:
+    if patterns_path is None:
         raise ValueError("Please provide h5 file path for custom mask.")
     else:
-        with h5py.File(masks_path, 'r') as f:
+        with h5py.File(patterns_path, 'r') as f:
             list_of_masks = f['list_of_masks'][:]
 
         for mask in list_of_masks:
@@ -334,7 +338,7 @@ def load_custom_list_of_masks(shape,masks_path):
 
                 # Confirm the mask is the correct shape
                 if mask.shape[0] != size_y or mask.shape[1] != size_x:
-                    raise ValueError("Error cropping the mask, its shape does not match the SLM sampling.")
-            list_of_SLM_masks.append(mask)
+                    raise ValueError("Error cropping the mask, its shape does not match the coded aperture sampling.")
+            list_of_coded_aperture_masks.append(mask)
 
-        return list_of_SLM_masks
+        return list_of_coded_aperture_masks

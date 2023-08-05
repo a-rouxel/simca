@@ -11,10 +11,10 @@ def load_yaml_config(file_path):
     Load a YAML configuration file as a dictionary
 
     Args:
-        file_path (str): The path to the YAML configuration file
+        file_path (str): path to the YAML configuration file
 
     Returns:
-        config (dict): The configuration dictionary
+        dict: configuration dictionary
     """
     with open(file_path, "r") as file:
         config = yaml.safe_load(file)
@@ -29,7 +29,7 @@ def initialize_acquisitions_directory(config):
         config (dict): a configuration dictionary containing storing information
 
     Returns:
-        result_directory (str): the path to the directory where the results will be stored
+        str: path to the directory where the results will be stored
     """
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     result_directory = os.path.join(config["results directory"], config["acquisition name"], timestamp)
@@ -41,11 +41,9 @@ def save_data_in_hdf5(file_name, data,result_directory):
     Save a dataset in a HDF5 file
 
     Args:
-        file_name (str): the name of the file
-        data (any type): the data to save
-        result_directory (str): the path to the directory where the results will be stored
-
-    Returns:
+        file_name (str): name of the file
+        data (any type): data to save
+        result_directory (str): path to the directory where the results will be stored
 
     """
 
@@ -58,11 +56,9 @@ def save_config_file(config_file_name,config_file,result_directory):
     Save a configuration file in a YAML file
 
     Args:
-        config_file_name (str): the name of the file
-        config_file (dict): the configuration file to save
-        result_directory (str): the path to the directory where the results will be stored
-
-    Returns:
+        config_file_name (str): name of the file
+        config_file (dict): configuration file to save
+        result_directory (str): path to the directory where the results will be stored
 
     """
     with open(result_directory + f"/{config_file_name}.yml", 'w') as file:
@@ -70,56 +66,56 @@ def save_config_file(config_file_name,config_file,result_directory):
 
 def rotation_z(theta):
     """
-    Rotate 3D matrix around the z axis
+    Rotate 3D matrix around the Z axis
 
     Args:
         theta (float): Input angle (in rad)
 
     Returns:
-        r (numpy array) : 2D rotation matrix
+        numpy.ndarray : 2D rotation matrix
 
     """
 
     r = np.array(((np.cos(theta), -np.sin(theta), 0),
                   (np.sin(theta), np.cos(theta), 0),
-                  (0, 0, 1)));
+                  (0, 0, 1)))
 
     return r
 
 
 def rotation_y(theta):
     """
-    Rotate 3D matrix around the y axis
+    Rotate 3D matrix around the Y axis
 
     Args:
         theta (float): Input angle (in rad)
 
     Returns:
-        r (numpy array) : 2D rotation matrix
+        numpy.ndarray : 2D rotation matrix
 
     """
 
     r = np.array(((np.cos(theta), 0, np.sin(theta)),
                   (0, 1, 0),
-                  (-np.sin(theta), 0, np.cos(theta))));
+                  (-np.sin(theta), 0, np.cos(theta))))
 
     return r
 
 
 def rotation_x(theta):
     """
-    Rotate 3D matrix around the x axis
+    Rotate 3D matrix around the X axis
 
     Args:
         theta (float): Input angle (in rad)
 
     Returns:
-        r (numpy array) : 2D rotation matrix
+        numpy.ndarray : 2D rotation matrix
 
     """
 
     r = np.array(((1, 0, 0),
                   (0, math.cos(theta), -math.sin(theta)),
-                  (0, math.sin(theta), math.cos(theta))));
+                  (0, math.sin(theta), math.cos(theta))))
 
     return r

@@ -2,15 +2,29 @@ from cassi_systems.functions_general_purpose import *
 
 class OpticalModel:
     """
-    Class that contains the optical model caracteristics and propagation model
+    Class that contains the optical model caracteristics and propagation models
     """
     def __init__(self, system_config):
         self.set_optical_config(system_config)
 
     def update_config(self, new_config):
+        """
+        Update the optical model configuration
+
+        Args:
+            new_config (dict): new configuration
+
+        """
         self.set_optical_config(new_config)
 
     def set_optical_config(self, config):
+        """
+        Set the optical model configuration
+
+        Args:
+            config (dict): configuration file
+
+        """
 
         self.system_config = config
 
@@ -29,21 +43,20 @@ class OpticalModel:
 
     def propagation_with_distorsions(self, X_input_grid, Y_input_grid):
         """
-        Propagate the SLM mask through one CASSI system
+        Propagate the coded aperture coded_aperture through one CASSI system
 
         Args:
-            X_input_grid (numpy array): x coordinates grid
-            Y_input_grid (numpy array): y coordinates grid
+            X_input_grid (numpy.ndarray): x coordinates grid
+            Y_input_grid (numpy.ndarray): y coordinates grid
 
         Returns:
-            list_X_propagated_mask (list): list of the X coordinates of the propagated masks
-            list_Y_propagated_mask (list): list of the Y coordinates of the propagated masks
+            tuple: list of the X coordinates of the propagated coded aperture grids, list of the Y coordinates of the propagated coded aperture grids
         """
 
         self.calculate_central_dispersion()
 
-        list_X_propagated_mask = list()
-        list_Y_propagated_mask = list()
+        list_X_propagated_coded_aperture = list()
+        list_Y_propagated_coded_aperture = list()
 
 
         X_input_grid_flatten = X_input_grid.flatten()
@@ -57,40 +70,39 @@ class OpticalModel:
             n_array_flatten = np.full(X_input_grid_flatten.shape, self.sellmeier(lba))
             lba_array_flatten = np.full(X_input_grid_flatten.shape, lba)
 
-            X_propagated_mask, Y_propagated_mask = self.propagate_through_arm(X_input_grid_flatten,Y_input_grid_flatten,n=n_array_flatten,lba=lba_array_flatten)
+            X_propagated_coded_aperture, Y_propagated_coded_aperture = self.propagate_through_arm(X_input_grid_flatten,Y_input_grid_flatten,n=n_array_flatten,lba=lba_array_flatten)
 
-            list_X_propagated_mask.append(X_propagated_mask.reshape(X_input_grid.shape))
-            list_Y_propagated_mask.append(Y_propagated_mask.reshape(Y_input_grid.shape))
+            list_X_propagated_coded_aperture.append(X_propagated_coded_aperture.reshape(X_input_grid.shape))
+            list_Y_propagated_coded_aperture.append(Y_propagated_coded_aperture.reshape(Y_input_grid.shape))
 
-        return list_X_propagated_mask, list_Y_propagated_mask
+        return list_X_propagated_coded_aperture, list_Y_propagated_coded_aperture
 
     def propagation_with_no_distorsions(self, X_input_grid=None, Y_input_grid=None):
         """
         Vanilla Propagation model used in most cassi acquisitions simulation.
 
         Args:
-            X_input_grid (numpy array): x coordinates of the grid to be propagated
-            Y_input_grid (numpy array): y coordinates of the grid to be propagated
+            X_input_grid (numpy.ndarray): X coordinates of the grid to be propagated
+            Y_input_grid (numpy.ndarray): Y coordinates of the grid to be propagated
 
         Returns:
-            list_X_propagated_mask (list): list of the X coordinates grids of the propagated masks
-            list_Y_propagated_mask (list): list of the Y coordinates grids of the propagated masks
+            tuple: list of the X coordinates grids of the propagated coded apertures, list of the Y coordinates grids of the propagated coded apertures
         """
 
         self.calculate_central_dispersion()
 
-        list_X_propagated_mask = list()
-        list_Y_propagated_mask = list()
+        list_X_propagated_coded_aperture = list()
+        list_Y_propagated_coded_aperture = list()
 
         for idx, wav in enumerate(self.system_wavelengths):
 
             X_ref = -1 * X_input_grid + self.X0_propagated[idx]
             Y_ref = -1 * Y_input_grid + self.Y0_propagated[idx]
 
-            list_X_propagated_mask.append(X_ref)
-            list_Y_propagated_mask.append(Y_ref)
+            list_X_propagated_coded_aperture.append(X_ref)
+            list_Y_propagated_coded_aperture.append(Y_ref)
 
-        return list_X_propagated_mask, list_Y_propagated_mask
+        return list_X_propagated_coded_aperture, list_Y_propagated_coded_aperture
 
     def set_wavelengths(self, wavelength_min, wavelength_max, nb_of_spectral_samples):
         """
@@ -111,12 +123,10 @@ class OpticalModel:
 
     def calculate_central_dispersion(self):
         """
-        Calculate the dispersion related to the central pixel of the SLM
+        Calculate the dispersion related to the central pixel of the coded aperture
 
         Returns:
-            X0_propagated (numpy array): x coordinates of the central pixel of the SLM, each coordinate is associated to a system wavelength
-            Y0_propagated (numpy array): y coordinates of the central pixel of the SLM, each coordinate is associated to a system wavelength
-
+            numpy.float: spectral dispersion of the central pixel of the coded aperture
         """
 
         self.alpha_c = self.calculate_alpha_c()
@@ -133,7 +143,7 @@ class OpticalModel:
 
         self.central_distorsion_in_X = np.abs(self.X0_propagated[-1] - self.X0_propagated[0])
 
-        return X0_propagated, Y0_propagated
+        return self.central_distorsion_in_X
 
     def propagate_through_arm(self, X_vec_in, Y_vec_in, n, lba):
 
@@ -141,14 +151,13 @@ class OpticalModel:
         Propagate the light through one system arm : (lens + dispersive element + lens)
 
         Args:
-            X_vec_in (numpy array) : 1D array of the x coordinates of the SLM pixels
-            Y_vec_in (numpy array) : 1D array of the y coordinates of the SLM pixels
-            n (numpy array) : 1D array of the refractive index of the system (at the corresponding wavelength)
-            lba (numpy array) : 1D array of the considered wavelength
+            X_vec_in (numpy.ndarray) : X coordinates of the coded aperture pixels (1D array)
+            Y_vec_in (numpy.ndarray) : Y coordinates of the coded aperture pixels (1D array)
+            n (numpy.ndarray) : refractive indexes of the system (at the corresponding wavelength)
+            lba (numpy.ndarray) : wavelengths
 
         Returns:
-            X_vec_out (numpy array) : 1D array of the x coordinates after propagation through the system
-            Y_vec_out (numpy array) : 1D array of the y coordinates after propagation through the system
+            tuple: flatten arrays corresponding to the propagated X and Y coordinates
         """
 
         dispersive_element_type = self.dispersive_element_type
@@ -189,10 +198,7 @@ class OpticalModel:
             # Rotation in relation to P2 around the Y axis
             k_1_bis = np.dot(rotation_y(angle_with_P2), k_2_bis)
 
-            theta_out = np.arctan(k_1_bis[0] / k_1_bis[2])
-            phi_out = np.arctan(k_1_bis[1] / k_1_bis[2])
-
-            [X_vec_out, Y_vec_out] = self.model_Lens_angle_to_position(theta_out, phi_out, F)
+            X_vec_out, Y_vec_out = self.model_Lens_angle_to_position(k_1_bis, F)
 
 
         elif dispersive_element_type == "grating":
@@ -221,10 +227,7 @@ class OpticalModel:
             # Rotation in relation to P2 around the Y axis
             k_1_bis = np.dot(rotation_y(angle_with_P2), k_2_bis)
 
-            theta_out = np.arctan(k_1_bis[0] / k_1_bis[2])
-            phi_out = np.arctan(k_1_bis[1] / k_1_bis[2])
-
-            [X_vec_out, Y_vec_out] = self.model_Lens_angle_to_position(theta_out, phi_out, F)
+            X_vec_out, Y_vec_out = self.model_Lens_angle_to_position(k_1_bis, F)
 
         else:
             raise Exception("dispersive_element_type should be prism or grating")
@@ -232,6 +235,19 @@ class OpticalModel:
         return X_vec_out, Y_vec_out
 
     def model_Grating_angle_to_angle(self,k_in, lba, m, G):
+        """
+        Model of the grating
+
+        Args:
+            k_in (numpy.ndarray) : wave vector of the incident ray (shape = 3 x N)
+            lba (numpy.ndarray) : wavelengths (shape = N) -- in nm
+            m (float) : diffraction order of the grating -- no units
+            G (float) : lines density of the grating -- in lines/mm
+
+        Returns:
+            numpy.ndarray: wave vector of the outgoing ray (shape = 3 x N)
+
+        """
 
         alpha_in = np.arctan(k_in[0]) * np.sqrt(1 + np.tan(k_in[0])**2 + np.tan(k_in[1])**2)
         beta_in = np.arctan(k_in[1]) * np.sqrt(1 + np.tan(k_in[0])**2 + np.tan(k_in[1])**2)
@@ -247,34 +263,56 @@ class OpticalModel:
         return k_out
 
     def simplified_grating_in_out(self, alpha,lba,m,G):
+        """
+        Model 1D of the grating in the dispersion direction
+
+        Args:
+            alpha (numpy.ndarray) : angle of the incident ray (shape = N) -- in radians
+            lba (numpy.ndarray) : wavelengths (shape = N) -- in nm
+            m (float) : diffraction order of the grating -- no units
+            G (float) : lines density of the grating -- in lines/mm
+
+        Returns:
+            numpy.ndarray: angle of the outgoing ray (shape = N) -- in radians
+
+        """
 
         alpha_out = np.arcsin(m * lba * 10 ** -9 * G * 10 ** 3 - np.sin(alpha))
 
         return alpha_out
 
-    def model_Lens_angle_to_position(self,alpha, beta,F):
+    def model_Lens_angle_to_position(self,k_in,F):
+        """
+        Model of the lens : angle to position
+
+        Args:
+            k_in (numpy.ndarray) : wave vector of the incident ray (shape = 3 x N)
+            F (float) : focal length of the lens -- in um
+
+        Returns:
+            tuple: position in the image plane (X,Y) -- in um
+
+        """
+
+        alpha = np.arctan(k_in[0] / k_in[2])
+        beta = np.arctan(k_in[1] / k_in[2])
 
         x = F * np.tan(alpha)
         y = F * np.tan(beta)
 
-        return [x, y]
+        return x, y
 
     def model_Prism_angle_to_angle(self,k0, n,A):
         """
         Ray tracing through the prism
 
-        Parameters
-        ----------
-        k0 : numpy array -- no units
-            input vector
-        n : float -- no units
-            refractive index of the considered wavelength
-        A : float -- degrees
-            apex angle of the prism
-        Returns
-        -------
-        kout : numpy array -- no units
-            output vector
+        Args:
+            k0 (numpy.ndarray) : wave vector of the incident ray (shape = 3 x N)
+            n (numpy.ndarray) : refractive index of the prism (shape = N)
+            A (float) : angle of the prism -- in radians
+
+        Returns:
+            numpy.ndarray: wave vector of the outgoing ray (shape = 3 x N)
 
         """
 
@@ -288,24 +326,34 @@ class OpticalModel:
 
 
     def model_Lens_pos_to_angle(self,x_obj, y_obj, F):
+        """
+        Model of the lens : position to angle
+
+        Args:
+            x_obj (numpy.ndarray) : position X in the image plane (shape = N) -- in um
+            y_obj (numpy.ndarray) : position Y in the image plane (shape = N) -- in um
+            F (float) : focal length of the lens -- in um
+
+        Returns:
+            numpy.ndarray: wave vector of the outgoing ray (shape = 3 x N)
+
+        """
 
         alpha = -1*np.arctan(x_obj / F)
         beta  = -1*np.arctan(y_obj / F)
 
-        k0 = np.array([[np.sin(alpha) * np.cos(beta)],
+        k_out = np.array([[np.sin(alpha) * np.cos(beta)],
                        [np.sin(beta)*np.cos(alpha)],
                        [np.cos(alpha) * np.cos(beta)]])
 
-        return k0
+        return k_out
 
     def calculate_alpha_c(self):
         """
         Calculate the relative angle of incidence between the lenses and the dispersive element
 
-        Args:
-
         Returns:
-            alpha_c (float): angle of incidence
+            float: angle of incidence
         """
         if self.dispersive_element_type == "prism":
             self.Dm = self.calculate_minimum_deviation(self.sellmeier(self.lba_c), self.A)
@@ -324,11 +372,11 @@ class OpticalModel:
         minimum deviation angle of a prism of index n and apex angle A
 
         Args:
-            n (float or numpy array): index of the prism -- no units
+            n (float or numpy.ndarray): index of the prism -- no units
             A (float): apex angle of the prism -- in radians
 
         Returns:
-            D_m (float or numpy array): minimum deviation angle -- in radians
+            float or numpy.ndarray: minimum deviation angle -- in radians
         """
         return 2 * np.arcsin(n * np.sin(A / 2)) - A
 
@@ -340,6 +388,8 @@ class OpticalModel:
             A (float): apex angle of the prism -- in radians
             D_m (float): minimum deviation angle -- in radians
 
+        Returns:
+            float: angle of incidence corresponding to minimum of deviation -- in radians
         """
         return (A + D_m) / 2
 
@@ -349,10 +399,10 @@ class OpticalModel:
         Evaluating the refractive index value of a prism for a given lambda based on Sellmeier equation
 
         Args:
-            lambda_ (numpy array of float) : wavelength in nm
+            lambda_ (numpy.ndarray of float) : wavelength in nm
 
         Returns:
-            n (numpy array of float): index value corresponding to the input wavelength
+            numpy.ndarray of float: index value corresponding to the input wavelength
 
         """
 
@@ -380,14 +430,12 @@ class OpticalModel:
 
         Args:
             radius (float): radius of the Gaussian
-            sample_size_x (float): size of each sample along the x axis
-            sample_size_y (float): size of each sample along the y axis
+            sample_size_x (float): size of each sample along the X axis
+            sample_size_y (float): size of each sample along the Y axis
             nb_of_samples (int): number of samples along each axis
 
         Returns:
-            X (numpy array): 2D array of the x coordinates of the grid
-            Y (numpy array): 2D array of the y coordinates of the grid
-            gaussian_2d (numpy array): array of the 2D Gaussian
+            numpy.ndarray: 2D Gaussian shape array
         """
 
         # Define the grid
@@ -400,7 +448,7 @@ class OpticalModel:
         # Compute the 2D Gaussian function
         gaussian_2d = np.exp(-(X ** 2 + Y ** 2) / (2 * radius ** 2))
 
-        return X, Y, gaussian_2d
+        return gaussian_2d
     def generate_psf(self, type, radius):
         """
         Generate a PSF
@@ -410,11 +458,11 @@ class OpticalModel:
             radius (float): radius of the PSF
 
         Returns:
-            PSF (numpy array): PSF generated
+            numpy.ndarray: PSF generated (shape = R x C)
         """
 
         if type == "Gaussian":
-            X, Y, PSF = self.generate_2D_gaussian(radius, self.system_config["detector"]["pixel size along X"],
+            PSF = self.generate_2D_gaussian(radius, self.system_config["detector"]["pixel size along X"],
                                              self.system_config["detector"]["pixel size along Y"], 10)
             self.psf = PSF
 
@@ -425,7 +473,7 @@ class OpticalModel:
         Check if the sampling is sufficiant to avoid aliasing.
 
         Returns:
-            nb_of_sample_points_per_pix (float): number of sample points per pixel
+            float: number of sample points per pixel
 
         """
 

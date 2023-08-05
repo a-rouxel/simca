@@ -1,9 +1,9 @@
 #####  Configuration file for the chosen optical system
 
 infos:
-    results directory: ./data/masks/
+    results directory: ./data/patterns/
 
-mask:
+pattern:
     type: slit
     slit position: -120
     slit width: 1
