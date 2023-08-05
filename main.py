@@ -43,7 +43,7 @@ class MainWindow(QMainWindow):
         self.addDockWidget(Qt.RightDockWidgetArea, self.optics_dock)
 
         self.filtering_widget = FilteringCubeWidget(cassi_system=self.cassi_system, system_editor=self.system_editor, filtering_config_path="cassi_systems/configs/pattern.yml")
-        self.filtering_dock = QDockWidget("Masks")
+        self.filtering_dock = QDockWidget("Coded Aperture")
         self.filtering_dock.setWidget(self.filtering_widget)
         self.addDockWidget(Qt.RightDockWidgetArea, self.filtering_dock)
 
