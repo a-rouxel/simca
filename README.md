@@ -81,7 +81,7 @@ cd docs
 2. Ensure you have Sphinx and other necessary tools installed:
 
 ```bash
-pip install sphinx
+pip install sphinx sphinx_rtd_theme
 ```
 
 3. Build the documentation:
