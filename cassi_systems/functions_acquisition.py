@@ -1,6 +1,32 @@
 import numpy as np
+from scipy.interpolate import griddata
 from tqdm import tqdm
+import multiprocessing as mp
+from multiprocessing import Pool
 
+
+def generate_sd_measurement_cube(filtered_scene,X_input, Y_input, X_target, Y_target,grid_type,interp_method):
+    """
+    Generate SD measurement cube from the coded aperture and the scene.
+    For Single-Disperser CASSI systems, the scene is filtered then propagated in the detector plane.
+
+    Args:
+        filtered_scene (numpy.ndarray): filtered scene (shape = R x C x W)
+
+    Returns:
+        numpy.ndarray: SD measurement cube (shape = R x C x W)
+    """
+
+    print("--- Generating SD measurement cube ---- ")
+
+    measurement_sd = interpolate_data_on_grid_positions(filtered_scene,
+                                                             X_input,
+                                                             Y_input,
+                                                             X_target,
+                                                             Y_target,
+                                                             grid_type=grid_type,
+                                                             interp_method=interp_method)
+    return measurement_sd
 def generate_dd_measurement(scene, filtering_cube,chunk_size):
     """
     Generate DD-CASSI type system measurement from a scene and a filtering cube. ref : "Single-shot compressive spectral imaging with a dual-disperser architecture", M.Gehm et al., Optics Express, 2007
@@ -36,7 +62,10 @@ def generate_dd_measurement(scene, filtering_cube,chunk_size):
     return filtered_scene
 
 
-def match_dataset_to_instrument(scene, filtering_cube):
+
+
+
+def match_dataset_to_instrument(dataset, filtering_cube):
     """
     Match the size of the dataset to the size of the filtering cube. Either by padding or by cropping
 
@@ -48,18 +77,19 @@ def match_dataset_to_instrument(scene, filtering_cube):
         numpy.ndarray: observed scene (shape = R  x C x W)
     """
 
-    if filtering_cube.shape[0] != scene.shape[0] or filtering_cube.shape[1] != scene.shape[1]:
-        if scene.shape[0] < filtering_cube.shape[0]:
-            scene = np.pad(scene, ((0, filtering_cube.shape[0] - scene.shape[0]), (0, 0), (0, 0)), mode="constant")
-        if scene.shape[1] < filtering_cube.shape[1]:
-            scene = np.pad(scene, ((0, 0), (0, filtering_cube.shape[1] - scene.shape[1]), (0, 0)), mode="constant")
-        scene = scene[0:filtering_cube.shape[0], 0:filtering_cube.shape[1], :]
+    if filtering_cube.shape[0] != dataset.shape[0] or filtering_cube.shape[1] != dataset.shape[1]:
+        if dataset.shape[0] < filtering_cube.shape[0]:
+            dataset = np.pad(dataset, ((0, filtering_cube.shape[0] - dataset.shape[0]), (0, 0), (0, 0)), mode="constant")
+        if dataset.shape[1] < filtering_cube.shape[1]:
+            dataset = np.pad(dataset, ((0, 0), (0, filtering_cube.shape[1] - dataset.shape[1]), (0, 0)), mode="constant")
+        scene = dataset[0:filtering_cube.shape[0], 0:filtering_cube.shape[1], :]
         print("Filtering cube and scene must have the same lines and columns")
 
     if len(filtering_cube.shape) == 3:
-        if filtering_cube.shape[2] != scene.shape[2]:
-            scene = scene[:, :, 0:filtering_cube.shape[2]]
+        if filtering_cube.shape[2] != dataset.shape[2]:
+            scene = dataset[:, :, 0:filtering_cube.shape[2]]
             print("Filtering cube and scene must have the same number of wavelengths")
+
 
     return scene
 
@@ -113,6 +143,92 @@ def crop_center(array, nb_of_pixels_along_x, nb_of_pixels_along_y):
         array = array[y_start:y_end, :]
 
     return array
+
+
+
+
+def interpolate_data_on_grid_positions(data, X_init, Y_init, X_target, Y_target, grid_type="unstructured", interp_method="linear"):
+    """
+    Interpolate data on a single 2D grid defined by X_target and Y_target
+
+    Args:
+        data (numpy.ndarray): data to interpolate (3D or 2D)
+        X_init (numpy.ndarray): X coordinates of the initial grid (3D)
+        Y_init (numpy.ndarray): Y coordinates of the initial grid (3D)
+        X_target (numpy.ndarray): X coordinates of the target grid (2D)
+        Y_target (numpy.ndarray): Y coordinates of the target grid (2D)
+        grid_type (str): type of the target grid (default = "unstructured", other option = "regular")
+        interp_method (str): interpolation method (default = "linear")
+
+    Returns:
+        numpy.ndarray: 3D data interpolated on the target grid
+    """
+
+    interpolated_data = np.zeros((X_target.shape[0],X_target.shape[1],X_init.shape[2]))
+    nb_of_grids = X_init.shape[2]
+
+    if grid_type == "unstructured":
+        worker = worker_unstructured
+    elif grid_type == "regular":
+        worker = worker_regulargrid
+
+    if data.ndim == 2:
+        data = data[:, :, np.newaxis]
+        data = np.repeat(data, nb_of_grids, axis=2)
+
+    with Pool(mp.cpu_count()) as p:
+
+        tasks = [(X_init[:, :, i], Y_init[:, :, i], data[:, :, i], X_target, Y_target, interp_method) for i in
+                 range(nb_of_grids)]
+
+        for index, zi in tqdm(enumerate(p.imap(worker, tasks)), total=nb_of_grids,
+                              desc='Interpolate 3D data on grid positions'):
+            interpolated_data[:, :, index] = zi
+
+    interpolated_data = np.nan_to_num(interpolated_data)
+
+    return interpolated_data
+
+
+def worker_unstructured(args):
+    """
+    Process to parallellize the unstructured griddata interpolation between the propagated grid (mask and the detector grid
+
+    Args:
+        args (tuple): containing the following elements: X_init_2D, Y_init_2D, data_2D, X_target_2D, Y_target_2D
+
+    Returns:
+        numpy.ndarray: 2D array of the data interpolated on the target grid
+    """
+    X_init_2D, Y_init_2D, data_2D, X_target_2D, Y_target_2D, interp_method = args
+
+    interpolated_data = griddata((X_init_2D.flatten(),
+                                  Y_init_2D.flatten()),
+                                 data_2D.flatten(),
+                                 (X_target_2D, Y_target_2D),
+                                 method=interp_method)
+    return interpolated_data
+
+def worker_regulargrid(args):
+    """
+    Process to parallellize the structured griddata interpolation between the propagated grid (mask and the detector grid
+    Note : For now it is identical to the unstructured method but it could be faster ...
+
+    Args:
+        args (tuple): containing the following elements: X_init_2D, Y_init_2D, data_2D, X_target_2D, Y_target_2D
+
+    Returns:
+        numpy.ndarray: 2D array of the data interpolated on the target grid
+    """
+    X_init_2D, Y_init_2D, data_2D, X_target_2D, Y_target_2D, interp_method = args
+
+    interpolated_data = griddata((X_init_2D.flatten(),
+                                  Y_init_2D.flatten()),
+                                 data_2D.flatten(),
+                                 (X_target_2D, Y_target_2D),
+                                 method=interp_method)
+    return interpolated_data
+
 
 
 

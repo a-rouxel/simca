@@ -37,6 +37,11 @@ class OpticalModel:
         self.delta_alpha_c = math.radians(config["system architecture"]["dispersive element"]["delta alpha c"])
         self.delta_beta_c = math.radians(config["system architecture"]["dispersive element"]["delta beta c"])
 
+        self.nb_of_det_pixels_X = config["detector"]["number of pixels along X"]
+        self.nb_of_det_pixels_Y = config["detector"]["number of pixels along Y"]
+        self.nb_of_coded_apert_pixels_X = config["coded aperture"]["number of pixels along X"]
+        self.nb_of_coded_apert_pixels_Y = config["coded aperture"]["number of pixels along Y"]
+
         self.set_wavelengths(config["spectral range"]["wavelength min"],
                              config["spectral range"]["wavelength max"],
                              config["spectral range"]["number of spectral samples"])
@@ -50,59 +55,59 @@ class OpticalModel:
             Y_input_grid (numpy.ndarray): y coordinates grid
 
         Returns:
-            tuple: list of the X coordinates of the propagated coded aperture grids, list of the Y coordinates of the propagated coded aperture grids
+            tuple: X coordinates of the propagated coded aperture grids, Y coordinates of the propagated coded aperture grids
         """
 
         self.calculate_central_dispersion()
 
-        list_X_propagated_coded_aperture = list()
-        list_Y_propagated_coded_aperture = list()
-
+        X_coordinates_propagated_coded_aperture = np.zeros((X_input_grid.shape[0],X_input_grid.shape[1],
+                                                            self.nb_of_spectral_samples))
+        Y_coordinates_propagated_coded_aperture = np.zeros((X_input_grid.shape[0],X_input_grid.shape[1],
+                                                            self.nb_of_spectral_samples))
 
         X_input_grid_flatten = X_input_grid.flatten()
         Y_input_grid_flatten = Y_input_grid.flatten()
 
-
-        for lba in np.linspace(self.system_wavelengths[0],
-                               self.system_wavelengths[-1],
-                               self.system_wavelengths.shape[0]):
+        for idx,lba in enumerate(np.linspace(self.system_wavelengths[0], self.system_wavelengths[-1],self.nb_of_spectral_samples)):
 
             n_array_flatten = np.full(X_input_grid_flatten.shape, self.sellmeier(lba))
             lba_array_flatten = np.full(X_input_grid_flatten.shape, lba)
 
             X_propagated_coded_aperture, Y_propagated_coded_aperture = self.propagate_through_arm(X_input_grid_flatten,Y_input_grid_flatten,n=n_array_flatten,lba=lba_array_flatten)
 
-            list_X_propagated_coded_aperture.append(X_propagated_coded_aperture.reshape(X_input_grid.shape))
-            list_Y_propagated_coded_aperture.append(Y_propagated_coded_aperture.reshape(Y_input_grid.shape))
+            X_coordinates_propagated_coded_aperture[:,:,idx] = X_propagated_coded_aperture.reshape(X_input_grid.shape)
+            Y_coordinates_propagated_coded_aperture[:,:,idx] = Y_propagated_coded_aperture.reshape(Y_input_grid.shape)
 
-        return list_X_propagated_coded_aperture, list_Y_propagated_coded_aperture
+        return X_coordinates_propagated_coded_aperture, Y_coordinates_propagated_coded_aperture
 
-    def propagation_with_no_distorsions(self, X_input_grid=None, Y_input_grid=None):
+    def propagation_with_no_distorsions(self, X_input_grid, Y_input_grid):
         """
         Vanilla Propagation model used in most cassi acquisitions simulation.
 
         Args:
-            X_input_grid (numpy.ndarray): X coordinates of the grid to be propagated
-            Y_input_grid (numpy.ndarray): Y coordinates of the grid to be propagated
+            X_input_grid (numpy.ndarray): X coordinates of the grid to be propagated (2D)
+            Y_input_grid (numpy.ndarray): Y coordinates of the grid to be propagated (2D)
 
         Returns:
-            tuple: list of the X coordinates grids of the propagated coded apertures, list of the Y coordinates grids of the propagated coded apertures
+            tuple: X coordinates grids of the propagated coded apertures, Y coordinates grids of the propagated coded apertures
         """
 
         self.calculate_central_dispersion()
 
-        list_X_propagated_coded_aperture = list()
-        list_Y_propagated_coded_aperture = list()
+        X_coordinates_propagated_coded_aperture = np.zeros((X_input_grid.shape[0],X_input_grid.shape[1],
+                                                            self.nb_of_spectral_samples))
+        Y_coordinates_propagated_coded_aperture = np.zeros((X_input_grid.shape[0],X_input_grid.shape[1],
+                                                            self.nb_of_spectral_samples))
 
         for idx, wav in enumerate(self.system_wavelengths):
 
             X_ref = -1 * X_input_grid + self.X0_propagated[idx]
             Y_ref = -1 * Y_input_grid + self.Y0_propagated[idx]
 
-            list_X_propagated_coded_aperture.append(X_ref)
-            list_Y_propagated_coded_aperture.append(Y_ref)
+            X_coordinates_propagated_coded_aperture[:,:,idx] = X_ref
+            Y_coordinates_propagated_coded_aperture[:,:,idx] = Y_ref
 
-        return list_X_propagated_coded_aperture, list_Y_propagated_coded_aperture
+        return X_coordinates_propagated_coded_aperture, Y_coordinates_propagated_coded_aperture
 
     def set_wavelengths(self, wavelength_min, wavelength_max, nb_of_spectral_samples):
         """
@@ -267,8 +272,8 @@ class OpticalModel:
         Model 1D of the grating in the dispersion direction
 
         Args:
-            alpha (numpy.ndarray) : angle of the incident ray (shape = N) -- in radians
-            lba (numpy.ndarray) : wavelengths (shape = N) -- in nm
+            alpha (numpy.ndarray or float) : angle of the incident ray (shape = N) -- in radians
+            lba (numpy.ndarray or float) : wavelengths (shape = N) -- in nm
             m (float) : diffraction order of the grating -- no units
             G (float) : lines density of the grating -- in lines/mm
 

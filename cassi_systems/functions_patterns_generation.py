@@ -76,7 +76,7 @@ def generate_ln_orthogonal_pattern(size, W, N):
     Generate a Length-N orthogonal pattern according to https://hal.laas.fr/hal-02993037
 
     Args:
-        size (list of int): size of the pattern
+        size (tuple): size of the pattern
         W (int): number of wavelengths in the scene
         N (int): number of acquisitions
 
@@ -217,7 +217,7 @@ def GetVoidAndClusterBlueNoise(OutputShape,StandardDeviation=1.5,InitialSeedFrac
         if(iLargestVoid==iTightestCluster):
             InitialBinaryPattern.flat[iTightestCluster]=True
             # Nothing has changed, so we have converged
-            break;
+            break
         else:
             InitialBinaryPattern.flat[iLargestVoid]=True
     # Rank all pixels
