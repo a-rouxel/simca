@@ -62,7 +62,7 @@ SIMCA includes four main features:
 
 - **Optical Design**: This module is used to compare the performances of various optical systems.
 
-- **Masks Generation**: This module is used to generate spectral and/or spatial filtering, based on the optical design.
+- **Coded Aperture Patterns Generation**: This module is used to generate spectral and/or spatial filtering, based on the optical design.
 
 - **Acquisition Coded Images**: This module is used to encode and acquire images.
 
