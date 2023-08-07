@@ -252,7 +252,7 @@ class CassiSystem():
 
         for idx in range(number_of_patterns):
 
-            self.filtering_cube = interpolate_data_on_grid_positions(data=self.pattern,
+            self.filtering_cube = interpolate_data_on_grid_positions(data=self.list_of_patterns[idx],
                                                                      X_init=self.X_coordinates_propagated_coded_aperture,
                                                                      Y_init=self.Y_coordinates_propagated_coded_aperture,
                                                                      X_target=self.X_detector_coordinates_grid,

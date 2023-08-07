@@ -50,9 +50,9 @@ class TestCassiSystemInitialization(unittest.TestCase):
             self.assertIsInstance(cassi_system.dataset, np.ndarray)
             self.assertEqual(cassi_system.dataset.ndim, 3)
 
-            self.assertIsInstance(cassi_system.dataset_wavelengths, list)
-            self.assertIs(len(cassi_system.dataset_wavelengths) > 0, True)
-            self.assertEqual(len(cassi_system.dataset_wavelengths), cassi_system.dataset.shape[2])
+            self.assertIsInstance(cassi_system.dataset_wavelengths, np.ndarray)
+            self.assertIs(cassi_system.dataset_wavelengths.shape[0] > 0, True)
+            self.assertEqual(cassi_system.dataset_wavelengths.shape[0], cassi_system.dataset.shape[2])
 
             if cassi_system.dataset_labels is not None :
                 self.assertIsInstance(cassi_system.dataset_labels,np.ndarray)
