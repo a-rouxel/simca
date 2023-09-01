@@ -4,7 +4,7 @@ infos:
     system name: HYACAMEO
 
 system architecture:
-    system type: DD-CASSI
+    system type: SD-CASSI
     propagation type: simca
     focal lens: 200000
     dispersive element:

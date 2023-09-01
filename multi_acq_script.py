@@ -27,10 +27,6 @@ if __name__ == '__main__':
     # PROPAGATION : Propagate the pattern grid to the detector plane
     cassi_system.propagate_coded_aperture_grid()
 
-    for i in range(nb_of_acq):
-        plt.imshow(cassi_system.list_of_patterns[i])
-        plt.show()
-
     # FILTERING CUBE : Generate the filtering cubes
     cassi_system.generate_multiple_filtering_cubes(nb_of_acq)
 

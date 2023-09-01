@@ -16,13 +16,13 @@ It is built upon ray-tracing equations and interpolation methods to estimate the
 
 Available **system architectures** are:
 
-- Single-Disperser CASSI
-- Double-Disperser CASSI
+- Single-Disperser CASSI (:cite:`Wagadarikar2008`) 
+- Double-Disperser CASSI (:cite:`Gehm2007`)
 
 Available **propagation models** are:
 
 - Higher-Order from :cite:`Arguello2013`
-- Ray-tracing (first implementation in :cite:`Hemsley2020`)
+- Ray-tracing (first implementation in :cite:`Hemsley2020a`)
 
 Available **optical components** and related characteristics are:
 
@@ -67,6 +67,7 @@ Indices and tables
 * :ref:`modindex`
 * :ref:`search`
 
+
 License
 =======
 
@@ -76,3 +77,7 @@ Contact
 =======
 
 For any questions or feedback, please contact us at arouxel@laas.fr
+
+References
+==========
+.. bibliography:: ./resources/biblio.bib

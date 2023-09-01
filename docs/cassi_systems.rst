@@ -4,6 +4,9 @@ CASSI system API Reference
 .. toctree::
    :maxdepth: 4
 
+The CASSI system package is based on the work :cite:`rouxelphdthesis`
+
+
 
 classes
 -------

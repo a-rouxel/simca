@@ -207,7 +207,7 @@ class Worker(QThread):
         self.cassi_system.update_config(system_config=self.system_config)
 
         if self.acquisition_config["psf"]["use_psf"] == True:
-            self.cassi_system.generate_psf(self.acquisition_config["psf"]["type"],self.acquisition_config["psf"]["radius"])
+            self.cassi_system.optical_model.generate_psf(self.acquisition_config["psf"]["type"],self.acquisition_config["psf"]["radius"])
         self.cassi_system.image_acquisition(use_psf=self.acquisition_config["psf"]["use_psf"],chunck_size=50)
         self.finished_interpolated_scene.emit(self.cassi_system.interpolated_scene)
         self.finished_acquire_measure.emit(self.cassi_system.last_filtered_interpolated_scene)  # Emit a tuple of arrays

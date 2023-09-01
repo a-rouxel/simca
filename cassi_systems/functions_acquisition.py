@@ -77,6 +77,8 @@ def match_dataset_to_instrument(dataset, filtering_cube):
         numpy.ndarray: observed scene (shape = R  x C x W)
     """
 
+
+
     if filtering_cube.shape[0] != dataset.shape[0] or filtering_cube.shape[1] != dataset.shape[1]:
         if dataset.shape[0] < filtering_cube.shape[0]:
             dataset = np.pad(dataset, ((0, filtering_cube.shape[0] - dataset.shape[0]), (0, 0), (0, 0)), mode="constant")
@@ -89,7 +91,8 @@ def match_dataset_to_instrument(dataset, filtering_cube):
         if filtering_cube.shape[2] != dataset.shape[2]:
             scene = dataset[:, :, 0:filtering_cube.shape[2]]
             print("Filtering cube and scene must have the same number of wavelengths")
-
+    else:
+        scene = dataset
 
     return scene
 
