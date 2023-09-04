@@ -19,15 +19,12 @@ class AcquisitionPanchromaticWidget(QWidget):
         self.imageView = pg.ImageView(view=pg.PlotItem())
         self.layout.addWidget(self.imageView)
 
-    def display_panchrom_acquisition(self, measurement_3D):
+    def display_panchrom_acquisition(self, panchro):
         """
 
         """
-        # Compute the sum along the third axis
-        image = np.sum(measurement_3D, axis=2)
-
         # Display the image
-        self.imageView.setImage(np.rot90(image))
+        self.imageView.setImage(np.rot90(panchro))
 
 
 class AcquisitionSlideBySlideWidget(QWidget):
@@ -209,7 +206,7 @@ class Worker(QThread):
         if self.acquisition_config["psf"]["use_psf"] == True:
             self.cassi_system.optical_model.generate_psf(self.acquisition_config["psf"]["type"],self.acquisition_config["psf"]["radius"])
         self.cassi_system.image_acquisition(use_psf=self.acquisition_config["psf"]["use_psf"],chunck_size=50)
-        self.finished_interpolated_scene.emit(self.cassi_system.interpolated_scene)
+        self.finished_interpolated_scene.emit(self.cassi_system.panchro)
         self.finished_acquire_measure.emit(self.cassi_system.last_filtered_interpolated_scene)  # Emit a tuple of arrays
 
         print("Acquisition finished")
@@ -286,8 +283,8 @@ class AcquisitionWidget(QWidget):
     def display_measurement_by_slide(self, measurement_3D):
         self.last_filtered_interpolated_scene = measurement_3D
         self.acquisition_by_slice_display.display_measurement_slice_by_slice(measurement_3D)
-    def display_panchrom_display(self, scene):
-        self.interpolated_scene = scene
-        self.acquisition_panchro_display.display_panchrom_acquisition(scene)
+    def display_panchrom_display(self, panchro):
+
+        self.acquisition_panchro_display.display_panchrom_acquisition(panchro)
 
 

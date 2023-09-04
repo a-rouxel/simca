@@ -324,6 +324,8 @@ class CassiSystem():
                 scene_labels = match_dataset_labels_to_instrument(dataset_labels, self.last_filtered_interpolated_scene)
                 self.scene_labels = scene_labels
 
+        self.panchro = np.sum(self.interpolated_scene, axis=2)
+
         if use_psf:
             self.apply_psf()
         else:
@@ -331,7 +333,7 @@ class CassiSystem():
 
         # Calculate the other two arrays
         self.measurement = np.sum(self.last_filtered_interpolated_scene, axis=2)
-        self.panchro = np.sum(self.interpolated_scene, axis=2)
+
 
         return self.measurement
 
@@ -402,6 +404,7 @@ class CassiSystem():
                                                                     self.Y_detector_coordinates_grid)
                 self.list_of_filtered_scenes.append(sd_measurement_cube)
 
+        self.panchro = np.sum(self.interpolated_scene, axis=2)
 
         if use_psf:
             self.apply_psf()
@@ -412,8 +415,6 @@ class CassiSystem():
         self.list_of_measurements = []
         for i in range(nb_of_filtering_cubes):
             self.list_of_measurements.append(np.sum(self.list_of_filtered_scenes[i], axis=2))
-
-        self.panchro = np.sum(self.interpolated_scene, axis=2)
 
         return self.list_of_measurements
 
@@ -487,12 +488,15 @@ class CassiSystem():
 
             # Perform the convolution using convolve
             result = convolve(self.last_filtered_interpolated_scene, psf_3D, mode='same')
+            result_panchro = convolve(self.panchro, self.optical_model.psf, mode='same')
 
         else:
             print("No PSF or last measurement to apply PSF")
             result = self.last_filtered_interpolated_scene
+            result_panchro = self.panchro
 
         self.last_filtered_interpolated_scene = result
+        self.panchro = result_panchro
 
         return self.last_filtered_interpolated_scene
 
