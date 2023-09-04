@@ -56,9 +56,9 @@ Our contribution is motivated by the lack of tools to simulate CASSI systems acq
 # Brief software description
 
 `SIMCA` is a simulation tool to generate realistic Coded-Aperture Spectral Snapshot Imagers measurements.
-The repository contains an application programming interface (API) and a graphical user interface (GUI) built in PyQt5 to analyze hyperspectral scenes and interact with the API.
+The repository contains a python package and a graphical user interface (GUI) built in PyQt5 to analyze hyperspectral scenes and interact with the package.
 
-Tutorials for using the API and GUI are available [here](https://arouxel.gitlab.io/simca-documentation/).
+Tutorials for using the package and GUI are available [here](https://arouxel.gitlab.io/simca-documentation/).
 
 
 ## Optical model
