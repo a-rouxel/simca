@@ -21,7 +21,7 @@ class MainWindow(QMainWindow):
         self.cassi_system = CassiSystem(system_config_path="cassi_systems/configs/cassi_system.yml")
 
         self.scene_widget = DatasetWidget(cassi_system=self.cassi_system, dataset_config_path="cassi_systems/configs/dataset.yml")
-        self.scene_dock = QDockWidget("Scene")
+        self.scene_dock = QDockWidget("Dataset")
         self.scene_dock.setWidget(self.scene_widget)
         self.addDockWidget(Qt.RightDockWidgetArea, self.scene_dock)
 
