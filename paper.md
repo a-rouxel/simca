@@ -89,19 +89,20 @@ We provide a sample of coded-aperture generation methods, including:
 None of these methods require prior-knowledge of the scene.
 
 
-## Compressed image formation
+## Coded image formation
   
-We provide a way of harnessing this optics-related data to generate realistic measurements of the scene.
-Depending on the system architecture, the compressed image formation varies.
-However for each cases it requires multiple projections of the coded-aperture pattern onto the detector after propagation through the optical system, each projection correponds to a specific wavelength.
-Interpolation between these multiple projections (none-structured) and the detector pixels grid (structured) is performed, then all these projections are summed to obtain the compressed measurement.
+We provide a way of harnessing this optics-related data to generate realistic measurements of the scene corresponding to coded images as recorded by the detector.
+Depending on the system architecture, the coded image formation varies.
+However for each case it requires multiple projections of the coded-aperture pattern onto the detector after propagation through the optical system, each projection correponding to a specific wavelength within the spectral range of the scene under study.
+Interpolation between these multiple (none-structured) projections and the (structured) detector pixels grid is performed, then all these projections are summed to obtain the coded image.
 
 
 
 
 # Acknowledgements
 
-We acknowledge multiple discussions, testing and critiques from Maud Biquard, Hervé Carfantan, Valentin Portmann, , Trung Tin DINH
+We acknowledge multiple discussions, testing and fruitful comments from Maud Biquard, Hervé Carfantan, Valentin Portmann, , Trung Tin DINH
 
 
 # References
+TODO???
