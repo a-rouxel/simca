@@ -83,8 +83,8 @@ Available optical components and related caracteristics are:
 The generation of coded-apertures is a key step in the design of CASSI systems.
 We provide a sample of coded-aperture generation methods, including:
 * Random with various ratios of open/closed coded aperture pixels
-* two types of blue-noise
-* LN-Random (\cite{Ibrahim, Hemsley2022})
+* Two types of blue-noise random patterns
+* LN-Random (\cite{Ibrahim, Hemsley2022}) patterns
 
 None of these methods require prior-knowledge of the scene.
 
