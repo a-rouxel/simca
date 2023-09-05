@@ -48,7 +48,7 @@ However, the image formation process is complex, and the calibration of these in
 
 A ray-tracing based parametric propagation model, associated to interpolation methods whose relevance was underlined in \cite{Arguello2013}, is used to simulate the image formation process in CASSI systems.
 Our tool allows for a comparison of various system architectures, optical components and coded-aperture patterns.
-In addition, this same model can utilized to calibrate a real instrument, build a virtual prototype for testing and training, and explore the optical processing of the compressed measurements in regard of a given task.
+In addition, this same model can be used to calibrate a real instrument, build a virtual prototype for testing and training, and explore the optical processing of the compressed measurements in regard of a given task.
 
 Our contribution is motivated by the lack of tools to simulate CASSI systems acquisitions precisely, and the lack of knowledge on the optical caracteristics and the coded aperture needed to interpret a hyperspectral scene.
 
