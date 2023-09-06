@@ -6,7 +6,7 @@ Getting started
 
 
 Installation
-.............
+------------
 
 To install :code:`simca`, follow the steps below:
 
@@ -33,14 +33,18 @@ To install :code:`simca`, follow the steps below:
 
    # Install necessary Python packages with pip
    pip install -r requirements.txt
+   
+
+Usage
+-----   
 
 Download datasets
-..................
+^^^^^^^^^^^^^^^^^^
 
 4. Download the standard datasets from this `link <https://cloud.laas.fr/index.php/s/zfh5RFmsjYfk108/download>`_, then unzip and paste the `datasets` folder in the root directory of SIMCA.
 
 Quick Start with GUI (option 1)
-................................
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 5. Start the application:
 
@@ -50,7 +54,7 @@ Quick Start with GUI (option 1)
    python main.py
 
 Quick Start with API (option 2)
-..................................
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 5. Run the example script :
 

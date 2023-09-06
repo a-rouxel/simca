@@ -10,7 +10,7 @@ SIMCA : optical simulations for coded spectral imaging
 .. image:: ./resources/SIMCA_logo-2-cropped.png
 
 SIMCA is a python-based tool designed to perform optical simulations of Coded Aperture Snapshot Spectral Imaging (CASSI) systems.
-We provide an application programming interface (API) and a graphical-user interface (GUI) developped in PyQt5.
+We provide a python package and a graphical user-interface developed in PyQt5.
 
 It is built upon ray-tracing equations and interpolation methods to estimate the image formation process and generate realistic measurements of various cassi instruments.
 
@@ -36,7 +36,7 @@ More system architectures and optical components will be added in the future.
 Main Features
 =============
 
-:code:`simca` includes four main features:
+SIMCA includes four main features:
 
 - **Scene Analysis** (only with GUI): for analyzing multi- or hyper-spectral datasets. It includes vizualization of data slices, spectrum analysis, and dataset labeling.
 
@@ -46,7 +46,7 @@ Main Features
 
 - **Acquisition Coded Images**: for simulating the acquisition process
 
-For more detailed information about each feature and further instructions, please visit our `Tutorial - Basics (with GUI) <Tutorial_with_GUI.html>`_ and `Tutorial - Advanced (script) <Tutorial_advanced.html>`_.
+For more detailed information about each feature and further instructions, please visit our `Tutorial - Basics (with GUI) <Tutorial_with_GUI.html>`_ and `Tutorial - Advanced (only script) <Tutorial_advanced.html>`_.
 
 
 .. toctree::
@@ -56,7 +56,7 @@ For more detailed information about each feature and further instructions, pleas
    getting_started
    Tutorial_with_GUI
    Tutorial_advanced
-   cassi_systems
+   simca
 
 
 
