@@ -1,0 +1,28 @@
+coded aperture:
+  number of pixels along X: 50
+  number of pixels along Y: 50
+  pixel size along X: 10
+  pixel size along Y: 10
+detector:
+  number of pixels along X: 50
+  number of pixels along Y: 50
+  pixel size along X: 10
+  pixel size along Y: 10
+infos:
+  system name: HYACAMEO
+spectral range:
+  number of spectral samples: 3
+  wavelength max: 600
+  wavelength min: 400
+system architecture:
+  dispersive element:
+    A: 15
+    G: 30
+    delta alpha c: 0
+    delta beta c: 0
+    m: 1
+    type: prism
+    wavelength center: 550
+  focal lens: 200000
+  propagation type: simca
+  system type: DD-CASSI
