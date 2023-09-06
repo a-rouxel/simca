@@ -10,7 +10,7 @@ from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as Navigatio
 import pyqtgraph as pg
 import numpy as np
 import yaml
-from cassi_systems import CassiSystem
+from simca import CassiSystem
 
 
 

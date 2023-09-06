@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import (QTabWidget, QSpinBox,QHBoxLayout, QPushButton,
                              QFormLayout, QVBoxLayout, QGroupBox, QScrollArea)
 from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot
 
-from cassi_systems import CassiSystem
+from simca import CassiSystem
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 import matplotlib.pyplot as plt

@@ -1,13 +1,13 @@
 import matplotlib.pyplot as plt
 
-from cassi_systems import CassiSystem
-from cassi_systems.functions_general_purpose import *
+from simca import CassiSystem
+from simca.functions_general_purpose import *
 import os
 
-config_dataset = load_yaml_config("cassi_systems/configs/dataset.yml")
-config_system = load_yaml_config("cassi_systems/configs/cassi_system.yml")
-config_patterns = load_yaml_config("cassi_systems/configs/pattern.yml")
-config_acquisition = load_yaml_config("cassi_systems/configs/acquisition.yml")
+config_dataset = load_yaml_config("simca/configs/dataset.yml")
+config_system = load_yaml_config("simca/configs/cassi_system.yml")
+config_patterns = load_yaml_config("simca/configs/pattern.yml")
+config_acquisition = load_yaml_config("simca/configs/acquisition.yml")
 
 dataset_name = "indian_pines"
 results_directory = "./data/results/lego_test_1"

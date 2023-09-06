@@ -1,9 +1,9 @@
-from cassi_systems import CassiSystem, load_yaml_config
+from simca import CassiSystem, load_yaml_config
 
-config_dataset = load_yaml_config("cassi_systems/configs/dataset.yml")
-config_system = load_yaml_config("cassi_systems/configs/cassi_system.yml")
-config_patterns = load_yaml_config("cassi_systems/configs/pattern.yml")
-config_acquisition = load_yaml_config("cassi_systems/configs/acquisition.yml")
+config_dataset = load_yaml_config("simca/configs/dataset.yml")
+config_system = load_yaml_config("simca/configs/cassi_system.yml")
+config_patterns = load_yaml_config("simca/configs/pattern.yml")
+config_acquisition = load_yaml_config("simca/configs/acquisition.yml")
 
 dataset_name = "indian_pines"
 

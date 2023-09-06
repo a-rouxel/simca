@@ -4,13 +4,13 @@ infos:
     system name: HYACAMEO
 
 system architecture:
-    system type: SD-CASSI
+    system type: DD-CASSI
     propagation type: simca
     focal lens: 200000
     dispersive element:
     # dispersive element caracteristics
         type: prism        # name of the dispersive element
-        A: 15              # apex angle of the prism in degrees      (only used if type == 'prism')   -- in degrees
+        A: 60              # apex angle of the prism in degrees      (only used if type == 'prism')   -- in degrees
         m: 1               # grating order to consider         (only used if type == 'grating')       -- no units
         G: 30             # grating density                   (only used if type == 'grating')       -- in lines/mm
         delta alpha c: 0
@@ -28,6 +28,6 @@ coded aperture:
     pixel size along Y: 55                              # pixel size along Y       -- in um
 
 spectral range:
-    wavelength min: 450     # minimum wavelength -- in nm
-    wavelength max: 640      # maximum wavelength -- in nm
-    number of spectral samples: 50
+    wavelength min: 400     # minimum wavelength -- in nm
+    wavelength max: 600      # maximum wavelength -- in nm
+    number of spectral samples: 3

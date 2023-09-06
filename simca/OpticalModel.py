@@ -1,4 +1,4 @@
-from cassi_systems.functions_general_purpose import *
+from simca.functions_general_purpose import *
 
 class OpticalModel:
     """

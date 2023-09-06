@@ -1,8 +1,8 @@
-from cassi_systems.OpticalModel import OpticalModel
-from cassi_systems.functions_acquisition import *
-from cassi_systems.functions_patterns_generation import *
-from cassi_systems.functions_scenes import *
-from cassi_systems.functions_general_purpose import *
+from simca.OpticalModel import OpticalModel
+from simca.functions_acquisition import *
+from simca.functions_patterns_generation import *
+from simca.functions_scenes import *
+from simca.functions_general_purpose import *
 from scipy.signal import convolve
 
 
