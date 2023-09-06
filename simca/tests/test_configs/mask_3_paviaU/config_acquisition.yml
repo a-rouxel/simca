@@ -1,0 +1,7 @@
+acquisition name: mask_3
+acquisition type: single acq.
+psf:
+  radius: 100.0
+  type: Gaussian
+  use_psf: false
+results directory: ./data/results/
