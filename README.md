@@ -72,10 +72,10 @@ For more detailed information about each feature and further instructions, pleas
 
 If you wish to build the Sphinx documentation locally:
 
-1. Navigate to the documentation source directory (e.g., `docs/`):
+1. Navigate to the documentation source directory (e.g., `doc/`):
 
 ```bash
-cd docs
+cd doc
 ```
 
 2. Ensure you have Sphinx and other necessary tools installed:
