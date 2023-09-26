@@ -8,7 +8,7 @@ Go check the documentation page [here](https://a-rouxel.github.io/simca/)
 
 To install SIMCA, follow the steps below:
 
-1. Clone the repository from GitLab:
+1. Clone the repository from Github:
 
 ```bash
 git clone https://github.com/a-rouxel/simca.git
