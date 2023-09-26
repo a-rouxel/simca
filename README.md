@@ -2,7 +2,7 @@
 
 SIMCA is a Python/Qt application designed to perform optical simulations for Coded Aperture Snapshot Spectral Imaging (CASSI). 
 
-Go check the documentation page [here](https://arouxel.gitlab.io/simca-documentation/)
+Go check the documentation page [here](https://a-rouxel.github.io/simca/)
 
 ## Installation
 
