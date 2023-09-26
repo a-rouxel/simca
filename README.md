@@ -11,7 +11,7 @@ To install SIMCA, follow the steps below:
 1. Clone the repository from GitLab:
 
 ```bash
-git clone git@gitlab.laas.fr:arouxel/simca.git
+git clone https://github.com/a-rouxel/simca.git
 cd simca
 ```
 
