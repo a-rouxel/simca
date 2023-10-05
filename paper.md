@@ -39,6 +39,7 @@ bibliography: paper.bib
 The image formation in coded-aperture spectral snapshot imagers (CASSI) is key information to process the acquired compressed data, and the optical system design and calibration of these instruments require great care.  
 `SIMCA` is a Python-based tool built upon ray-tracing equations of each optical component to produce realist measurements of various CASSI systems.
 The underlying model takes into account spatial filtering, spectral dispersion, optical distortions, PSF, sampling effects, and optical misalignments.
+It can be easily interfaced with image processing algorithms to assess CASSI systems performances regarding various tasks.
 
 # Statement of need
 ![Working principle of a Double-Disperser CASSI.\label{fig:DD-CASSI}](DD-CASSI.png){width="70%"}
