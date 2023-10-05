@@ -48,7 +48,7 @@ Spectral imaging has been considerably renewed by the advent of coded aperture i
 These computational imaging systems reduce the number of acquisitions required to interpret High-Dimensional data such as hyperspectral scenes, they remove the need for mechanical scanning, and they allow for exploration of optimal optical processing in regard of a given task (classification, unmixing, target detection, reconstruction, etc...) 
 
 
-In order to interpret these multiplexed measurements, various algorithms have been proposed, mainly focusing on classification [@Zhang2021][@Dunlop-Gray2016][@Biquard2022] and reconstruction [@BioucasDias2007] [@Yuan2016] [@Mao2019] [@Chan2016] [@Ardi2018] of the observed scene.
+In order to interpret these multiplexed measurements, various algorithms have been proposed, mainly focusing on classification [@Zhang2021][@DunlopGray2016][@Biquard2022] and reconstruction [@BioucasDias2007] [@Yuan2016] [@Miao2019] [@Chan2016] [@Ardi2018] of the observed scene.
 All these algorithms rely on a precise knowledge of the spatial and spectral information contained in the compressed measurements, which is directly related to the optical system caracteristics and calibration.
 However, the image formation process is complex, and the calibration of these instruments is a tedious process.
 
