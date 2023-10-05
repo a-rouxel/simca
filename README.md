@@ -1,3 +1,6 @@
+[![pages-build-deployment](https://github.com/a-rouxel/simca/actions/workflows/pages/pages-build-deployment/badge.svg)](https://github.com/a-rouxel/simca/actions/workflows/pages/pages-build-deployment)
+
+
 # SIMCA: Coded Aperture Snapshot Spectral Imaging (CASSI) Simulator
 
 SIMCA is a Python/Qt application designed to perform optical simulations for Coded Aperture Snapshot Spectral Imaging (CASSI). 
