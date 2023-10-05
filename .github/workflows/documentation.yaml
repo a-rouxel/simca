@@ -11,7 +11,6 @@ jobs:
       - name: Install dependencies
         run: |
           pip install sphinx sphinx_rtd_theme sphinxcontrib-bibtex
-          sphinxcontrib-bibtex --use-cache
       - name: Sphinx build
         run: |
           cd doc
