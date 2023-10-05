@@ -1,5 +1,5 @@
 [![pages-build-deployment](https://github.com/a-rouxel/simca/actions/workflows/pages/pages-build-deployment/badge.svg)](https://github.com/a-rouxel/simca/actions/workflows/pages/pages-build-deployment)
-
+[![.github/workflows/draft-pdf.yml](https://github.com/a-rouxel/simca/actions/workflows/draft-pdf.yml/badge.svg?branch=JOSS)](https://github.com/a-rouxel/simca/actions/workflows/draft-pdf.yml)
 
 # SIMCA: Coded Aperture Snapshot Spectral Imaging (CASSI) Simulator
 
