@@ -37,7 +37,7 @@ pip install -r requirements.txt
 
 ## Download datasets
 
-4. Download the standard datasets from this [link](https://cloud.laas.fr/index.php/s/zfh5RFmsjYfk108/download), then unzip and paste the `datasets` folder in the root directory of SIMCA.
+4. Download the standard datasets from this [link](https://cloud.laas.fr/index.php/s/LQjWVsZgeq27Wz6/download), then unzip and paste the `datasets` folder in the root directory of SIMCA.
 
 ## Quick Start with GUI (option 1)
 
