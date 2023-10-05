@@ -48,7 +48,7 @@ Spectral imaging has been considerably renewed by the advent of CASSI systems ("
 These computational imaging systems reduce the number of acquisitions required to interpret high-dimensional hyperspectral scenes, remove the need for mechanical scanning, and allow for exploration of optimal processing for a given task (classification, unmixing, target detection, reconstruction, etc.) 
 
 
-In order to interpret these multiplexed measurements, various algorithms have been proposed, mainly focusing on classification [@Zhang2021,@DunlopGray2016,@Biquard2022] and reconstruction [@BioucasDias2007,@Yuan2016,@Miao2019,@Chan2016,@Ardi2018] of the observed scene.
+In order to interpret these multiplexed measurements, various algorithms have been proposed, mainly focusing on classification [@Zhang2021][@DunlopGray2016][@Biquard2022] and reconstruction [@BioucasDias2007][@Yuan2016][@Miao2019][@Chan2016][@Ardi2018] of the observed scene.
 All these algorithms rely on a precise knowledge of the spatial and spectral information contained in the compressed measurements, which is directly related to the optical system characteristics and calibration.
 However, the image formation process of a CASSI system is complex, and the calibration of these instruments is a tedious process.
 
