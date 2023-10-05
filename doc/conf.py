@@ -22,7 +22,9 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.viewcode',
     'sphinx.ext.napoleon',
-    'sphinxcontrib.bibtex'
+    'sphinxcontrib.bibtex',
+    'sphinx.ext.githubpages',
+    'sphinx_markdown_builder',
 ]
 
 templates_path = ['_templates']
