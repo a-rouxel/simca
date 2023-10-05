@@ -12,8 +12,8 @@ tags:
 authors:
   - name: Antoine Rouxel
     orcid: 0000-0003-4784-7244
-    corresponding: true # (This is how to denote the corresponding author)
-    affiliation: "1" # (Multiple affiliations must be quoted)
+    corresponding: true 
+    affiliation: 1
   - name: Léo Paillet
     affiliation: 1
   - name: Valentin Portmann
@@ -72,17 +72,20 @@ The core of the code is a ray-tracing model of the optical system allowing for p
 It includes various physical effects that are often neglected in the literature, such as optical distortions, optical misalignments, etc...
 
 Available propagation models are:
-* Higher-Order from [@Arguello2013]
-* Ray-tracing (first implementation in [@Hemsley2020])
+
+- Higher-Order from [@Arguello2013]
+- Ray-tracing (first implementation in [@Hemsley2020])
 
 Available system architectures are:
-* Single-Disperser CASSI
-* Double-Disperser CASSI
+
+- Single-Disperser CASSI
+- Double-Disperser CASSI
 
 Available optical components and related caracteristics are:
-* Lens (params: focal length)
-* Prism (params : apex angle, glass type, orientation misalignments)
-* Grating (params : groove density, orientation misalignments)
+
+- Lens (params: focal length)
+- Prism (params : apex angle, glass type, orientation misalignments)
+- Grating (params : groove density, orientation misalignments)
 
 ## Coded-Aperture generation
 
