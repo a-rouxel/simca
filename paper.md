@@ -44,15 +44,15 @@ The underlying model takes into account spatial filtering, spectral dispersion, 
 ![Working principle of a Double-Disperser CASSI.\label{fig:DD-CASSI}](DD-CASSI.png){width="70%"}
 
 
-Spectral imaging has been considerably renewed by the advent of coded aperture imagers, known as CASSI ("Coded-aperture Spectral Snapshot Imager" [Wagadarikar2008]). 
+Spectral imaging has been considerably renewed by the advent of coded aperture imagers, known as CASSI ("Coded-aperture Spectral Snapshot Imager" [@Wagadarikar2008]). 
 These computational imaging systems reduce the number of acquisitions required to interpret High-Dimensional data such as hyperspectral scenes, they remove the need for mechanical scanning, and they allow for exploration of optimal optical processing in regard of a given task (classification, unmixing, target detection, reconstruction, etc...) 
 
 
-In order to interpret these multiplexed measurements, various algorithms have been proposed, mainly focusing on classification [Zhang2021][Dunlop-Gray2016][Biquard2022] and reconstruction [BioucasDias2007] [Yuan2016] [Mao2019] [Chan2016] [Ardi2018] of the observed scene.
+In order to interpret these multiplexed measurements, various algorithms have been proposed, mainly focusing on classification [@Zhang2021][@Dunlop-Gray2016][@Biquard2022] and reconstruction [@BioucasDias2007] [@Yuan2016] [@Mao2019] [@Chan2016] [@Ardi2018] of the observed scene.
 All these algorithms rely on a precise knowledge of the spatial and spectral information contained in the compressed measurements, which is directly related to the optical system caracteristics and calibration.
 However, the image formation process is complex, and the calibration of these instruments is a tedious process.
 
-A ray-tracing based parametric propagation model, associated to interpolation methods whose relevance was underlined in [Arguello2013], is used to simulate the image formation process in CASSI systems.
+A ray-tracing based parametric propagation model, associated to interpolation methods whose relevance was underlined in [@Arguello2013], is used to simulate the image formation process in CASSI systems.
 Our tool allows for a comparison of various system architectures, optical components and coded-aperture patterns.
 In addition, this same model can be used to calibrate a real instrument, build a virtual prototype for testing and training, and explore the optical processing of the compressed measurements in regard of a given task.
 
@@ -72,8 +72,8 @@ The core of the code is a ray-tracing model of the optical system allowing for p
 It includes various physical effects that are often neglected in the literature, such as optical distortions, optical misalignments, etc...
 
 Available propagation models are:
-* Higher-Order from [Arguello2013]
-* Ray-tracing (first implementation in [Hemsley2020])
+* Higher-Order from [@Arguello2013]
+* Ray-tracing (first implementation in [@Hemsley2020])
 
 Available system architectures are:
 * Single-Disperser CASSI
@@ -90,7 +90,7 @@ The generation of coded-apertures is a key step in the design of CASSI systems.
 We provide a sample of coded-aperture generation methods, including:
 * Random with various ratios of open/closed coded aperture pixels
 * Two types of blue-noise random patterns
-* LN-Random [Hemsley2022,Hemsley2020a] patterns
+* LN-Random [@Hemsley2022][@Hemsley2020a] patterns
 
 None of these methods require prior-knowledge of the scene.
 
@@ -111,4 +111,3 @@ We acknowledge multiple discussions, testing and fruitful comments from Maud Biq
 
 
 # References
-TODO???
