@@ -75,6 +75,8 @@ For more detailed information about each feature and further instructions, pleas
 
 If you wish to run tests on the simca package functionnalities: 
 
+**Attention** : Please note that you need a dataset to test acquisition-related tests
+
 1. Run the tests.py script:
 
 ```bash

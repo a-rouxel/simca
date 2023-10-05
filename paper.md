@@ -39,15 +39,16 @@ bibliography: paper.bib
 The image formation in coded-aperture spectral snapshot imagers (CASSI) is key information to process the acquired compressed data, and the optical system design and calibration of these instruments require great care.  
 `SIMCA` is a Python-based tool built upon ray-tracing equations of each optical component to produce realist measurements of various CASSI systems.
 The underlying model takes into account spatial filtering, spectral dispersion, optical distortions, PSF, sampling effects, and optical misalignments.
+It can be easily interfaced with image processing algorithms to assess CASSI systems performances regarding various tasks.
 
 # Statement of need
 ![Working principle of a Double-Disperser CASSI.\label{fig:DD-CASSI}](DD-CASSI.png){width="70%"}
 
-Spectral imaging has been considerably renewed by the advent of CASSI systems ("Coded-aperture Spectral Snapshot Imager") [@Wagadarikar2008]). 
+Spectral imaging has been considerably renewed by the advent of CASSI systems ("Coded-aperture Spectral Snapshot Imager") [@Wagadarikar2008]. 
 These computational imaging systems reduce the number of acquisitions required to interpret high-dimensional hyperspectral scenes, remove the need for mechanical scanning, and allow for exploration of optimal processing for a given task (classification, unmixing, target detection, reconstruction, etc.) 
 
 
-In order to interpret these multiplexed measurements, various algorithms have been proposed, mainly focusing on classification [@Zhang2021][@DunlopGray2016][@Biquard2022] and reconstruction [@BioucasDias2007] [@Yuan2016] [@Miao2019] [@Chan2016] [@Ardi2018] of the observed scene.
+In order to interpret these multiplexed measurements, various algorithms have been proposed, mainly focusing on classification [@Zhang2021,@DunlopGray2016,@Biquard2022] and reconstruction [@BioucasDias2007,@Yuan2016,@Miao2019,@Chan2016,@Ardi2018] of the observed scene.
 All these algorithms rely on a precise knowledge of the spatial and spectral information contained in the compressed measurements, which is directly related to the optical system characteristics and calibration.
 However, the image formation process of a CASSI system is complex, and the calibration of these instruments is a tedious process.
 
@@ -106,6 +107,6 @@ Interpolation between these multiple (none-structured) projections and the (stru
 
 # Acknowledgements
 
-We acknowledge multiple discussions, testing and fruitful comments from Maud Biquard, Hervé Carfantan, Valentin Portmann, Trung Tin Dinh
+We acknowledge multiple discussions, testing and fruitful comments from Maud Biquard, Hervé Carfantan, Valentin Portmann, Trung Tin Dinh.
 
 # References
