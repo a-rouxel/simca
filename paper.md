@@ -73,8 +73,8 @@ It includes various physical effects that are often neglected in the literature,
 
 Available propagation models are:
 
-- Higher-Order from [@Arguello2013]
-- Ray-tracing (first implementation in [@Hemsley2020])
+- **Higher-Order** from [@Arguello2013]
+- **Ray-tracing** (first implementation in [@Hemsley2020])
 
 Available system architectures are:
 
