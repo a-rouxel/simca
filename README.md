@@ -111,7 +111,7 @@ xdg-open _build/html/index.html
 
 ## License
 
-SIMCA is licensed under the [MIT License](https://www.mit.edu/~amini/LICENSE.md).
+SIMCA is licensed under the [GNU General Public License](https://www.gnu.org/licenses/gpl-3.0.en.html).
 
 ## Contact
 
