@@ -113,7 +113,7 @@ xdg-open _build/html/index.html
 
 ## License
 
-SIMCA is licensed under the `GNU General Public License <https://www.gnu.org/licenses/gpl-3.0.en.html>`_.
+SIMCA is licensed under the [GNU General Public License](https://www.gnu.org/licenses/gpl-3.0.en.html).
 
 
 ## Contact
