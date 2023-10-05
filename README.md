@@ -69,7 +69,17 @@ SIMCA includes four main features:
 
 - **Acquisition Coded Images**: This module is used to encode and acquire images.
 
-For more detailed information about each feature and further instructions, please visit our [documentation website](https://arouxel.gitlab.io/simca-documentation/).
+For more detailed information about each feature and further instructions, please visit our [documentation website](https://a-rouxel.github.io/simca/).
+
+## Testing the package
+
+If you wish to run tests on the simca package functionnalities: 
+
+1. Run the tests.py script:
+
+```bash
+python tests.py
+```
 
 ## Building Documentation
 
