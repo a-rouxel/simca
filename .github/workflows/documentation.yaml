@@ -6,19 +6,21 @@ jobs:
   docs:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v2
       - uses: actions/setup-python@v3
       - name: Install dependencies
         run: |
           pip install sphinx sphinx_rtd_theme sphinxcontrib-bibtex
+          sphinxcontrib-bibtex --use-cache
       - name: Sphinx build
         run: |
-          sphinx-build doc _build
+          cd doc
+          make html
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
         with:
           publish_branch: gh-pages
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: _build/
+          publish_dir: doc/_build/html
           force_orphan: true
