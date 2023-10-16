@@ -64,7 +64,6 @@ def generate_dd_measurement(scene, filtering_cube,chunk_size):
 
 
 
-
 def match_dataset_to_instrument(dataset, filtering_cube):
     """
     Match the size of the dataset to the size of the filtering cube. Either by padding or by cropping
@@ -85,14 +84,21 @@ def match_dataset_to_instrument(dataset, filtering_cube):
         if dataset.shape[1] < filtering_cube.shape[1]:
             dataset = np.pad(dataset, ((0, 0), (0, filtering_cube.shape[1] - dataset.shape[1]), (0, 0)), mode="constant")
         scene = dataset[0:filtering_cube.shape[0], 0:filtering_cube.shape[1], :]
-        print("Filtering cube and scene must have the same lines and columns")
+        print("Dataset Spatial Cropping : Filtering cube and scene must have the same nubmer of lines and columns")
+        
+    else:
+    	scene = dataset
 
-    if len(filtering_cube.shape) == 3:
-        if filtering_cube.shape[2] != dataset.shape[2]:
+    if len(filtering_cube.shape) == 3 and filtering_cube.shape[2] != dataset.shape[2]:
             scene = dataset[:, :, 0:filtering_cube.shape[2]]
-            print("Filtering cube and scene must have the same number of wavelengths")
+            print("Dataset Spectral Cropping : Filtering cube and scene must have the same number of wavelengths")	
     else:
         scene = dataset
+        
+    try:
+    	scene
+    except:
+    	print("Please load a scene first")
 
     return scene
 
