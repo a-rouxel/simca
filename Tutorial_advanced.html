@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tutorial - Advanced (only script) &mdash; simca 1.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=f2a433a1"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="API Reference" href="simca.html" />
+    <link rel="prev" title="Tutorial - Basics (with GUI)" href="Tutorial_with_GUI.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            simca
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorial_with_GUI.html">Tutorial - Basics (with GUI)</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Tutorial - Advanced (only script)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#single-acquisition">Single acquisition</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#setup">Setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#initialize-the-cassisystem">Initialize the CassiSystem</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#load-the-hyperspectral-dataset">Load the Hyperspectral dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#generate-the-coded-aperture-pattern">Generate the Coded Aperture Pattern</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#propagate-the-coded-aperture-grid">Propagate the Coded Aperture Grid</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#generate-the-filtering-cube">Generate the Filtering Cube</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#optional-generate-the-psf">(Optional) Generate the PSF</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#simulate-the-acquisition">Simulate the Acquisition</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#save-the-acquisition">Save the Acquisition</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#multiple-acquisitions">Multiple acquisitions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id2">Initialize the CassiSystem</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id3">Load the Hyperspectral dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#generate-multiple-patterns-for-acquisition">Generate Multiple Patterns for Acquisition</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id4">Propagate the Coded Aperture Grid</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#generate-multiple-filtering-cubes">Generate Multiple Filtering Cubes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#simulate-multiple-acquisitions">Simulate Multiple Acquisitions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id5">Save the Acquisition</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="simca.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">simca</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Tutorial - Advanced (only script)</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/Tutorial_advanced.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="tutorial-advanced-only-script">
+<h1>Tutorial - Advanced (only script)<a class="headerlink" href="#tutorial-advanced-only-script" title="Link to this heading"></a></h1>
+<section id="single-acquisition">
+<h2>Single acquisition<a class="headerlink" href="#single-acquisition" title="Link to this heading"></a></h2>
+<p>This tutorial walks you through the process of running a simple acquisition using the <cite>CassiSystem</cite> class from the <code class="code docutils literal notranslate"><span class="pre">simca</span></code> package.</p>
+<section id="setup">
+<h3>Setup<a class="headerlink" href="#setup" title="Link to this heading"></a></h3>
+<p>First, make sure to import the necessary modules:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">simca</span> <span class="kn">import</span> <span class="n">CassiSystem</span><span class="p">,</span> <span class="n">load_yaml_config</span>
+</pre></div>
+</div>
+<p>Next, load the configuration files:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">config_dataset</span> <span class="o">=</span> <span class="n">load_yaml_config</span><span class="p">(</span><span class="s2">&quot;simca/configs/dataset.yml&quot;</span><span class="p">)</span>
+<span class="n">config_system</span> <span class="o">=</span> <span class="n">load_yaml_config</span><span class="p">(</span><span class="s2">&quot;simca/configs/cassi_system.yml&quot;</span><span class="p">)</span>
+<span class="n">config_patterns</span> <span class="o">=</span> <span class="n">load_yaml_config</span><span class="p">(</span><span class="s2">&quot;simca/configs/pattern.yml&quot;</span><span class="p">)</span>
+<span class="n">config_acquisition</span> <span class="o">=</span> <span class="n">load_yaml_config</span><span class="p">(</span><span class="s2">&quot;simca/configs/acquisition.yml&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Then, set the name of the dataset of interest:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">dataset_name</span> <span class="o">=</span> <span class="s2">&quot;indian_pines&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="initialize-the-cassisystem">
+<h3>Initialize the CassiSystem<a class="headerlink" href="#initialize-the-cassisystem" title="Link to this heading"></a></h3>
+<p>Initialize the <cite>CassiSystem</cite>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cassi_system</span> <span class="o">=</span> <span class="n">CassiSystem</span><span class="p">(</span><span class="n">system_config</span><span class="o">=</span><span class="n">config_system</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="load-the-hyperspectral-dataset">
+<h3>Load the Hyperspectral dataset<a class="headerlink" href="#load-the-hyperspectral-dataset" title="Link to this heading"></a></h3>
+<p>Load the hyperspectral dataset:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cassi_system</span><span class="o">.</span><span class="n">load_dataset</span><span class="p">(</span><span class="n">dataset_name</span><span class="p">,</span> <span class="n">config_dataset</span><span class="p">[</span><span class="s2">&quot;datasets directory&quot;</span><span class="p">])</span>
+</pre></div>
+</div>
+</section>
+<section id="generate-the-coded-aperture-pattern">
+<h3>Generate the Coded Aperture Pattern<a class="headerlink" href="#generate-the-coded-aperture-pattern" title="Link to this heading"></a></h3>
+<p>Generate the coded aperture pattern:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cassi_system</span><span class="o">.</span><span class="n">generate_2D_pattern</span><span class="p">(</span><span class="n">config_patterns</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="propagate-the-coded-aperture-grid">
+<h3>Propagate the Coded Aperture Grid<a class="headerlink" href="#propagate-the-coded-aperture-grid" title="Link to this heading"></a></h3>
+<p>Propagate the coded aperture grid to the detector plane:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cassi_system</span><span class="o">.</span><span class="n">propagate_coded_aperture_grid</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="generate-the-filtering-cube">
+<h3>Generate the Filtering Cube<a class="headerlink" href="#generate-the-filtering-cube" title="Link to this heading"></a></h3>
+<p>Generate the filtering cube:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cassi_system</span><span class="o">.</span><span class="n">generate_filtering_cube</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="optional-generate-the-psf">
+<h3>(Optional) Generate the PSF<a class="headerlink" href="#optional-generate-the-psf" title="Link to this heading"></a></h3>
+<p>Generate the PSF of the optical system:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cassi_system</span><span class="o">.</span><span class="n">optical_model</span><span class="o">.</span><span class="n">generate_psf</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;Gaussian&quot;</span><span class="p">,</span><span class="n">radius</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="simulate-the-acquisition">
+<h3>Simulate the Acquisition<a class="headerlink" href="#simulate-the-acquisition" title="Link to this heading"></a></h3>
+<p>Simulate the acquisition (with PSF in this case):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cassi_system</span><span class="o">.</span><span class="n">image_acquisition</span><span class="p">(</span><span class="n">use_psf</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">chunck_size</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="save-the-acquisition">
+<h3>Save the Acquisition<a class="headerlink" href="#save-the-acquisition" title="Link to this heading"></a></h3>
+<p>Finally, save the acquisition:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cassi_system</span><span class="o">.</span><span class="n">save_acquisition</span><span class="p">(</span><span class="n">config_patterns</span><span class="p">,</span> <span class="n">config_acquisition</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>And that’s it! You’ve successfully run an acquisition using the <cite>CassiSystem</cite> class from the <code class="code docutils literal notranslate"><span class="pre">simca</span></code> package.</p>
+</section>
+</section>
+<section id="multiple-acquisitions">
+<h2>Multiple acquisitions<a class="headerlink" href="#multiple-acquisitions" title="Link to this heading"></a></h2>
+<p>This tutorial walks you through the process of running multiple acquisitions using the <cite>CassiSystem</cite> class from the <code class="code docutils literal notranslate"><span class="pre">simca</span></code> package.</p>
+<section id="id1">
+<h3>Setup<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<p>First, make sure to import the necessary modules and configurations:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">simca</span> <span class="kn">import</span> <span class="n">CassiSystem</span>
+<span class="kn">from</span> <span class="nn">simca.functions_general_purpose</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="n">config_dataset</span> <span class="o">=</span> <span class="n">load_yaml_config</span><span class="p">(</span><span class="s2">&quot;simca/configs/dataset.yml&quot;</span><span class="p">)</span>
+<span class="n">config_system</span> <span class="o">=</span> <span class="n">load_yaml_config</span><span class="p">(</span><span class="s2">&quot;simca/configs/cassi_system.yml&quot;</span><span class="p">)</span>
+<span class="n">config_patterns</span> <span class="o">=</span> <span class="n">load_yaml_config</span><span class="p">(</span><span class="s2">&quot;simca/configs/pattern.yml&quot;</span><span class="p">)</span>
+<span class="n">config_acquisition</span> <span class="o">=</span> <span class="n">load_yaml_config</span><span class="p">(</span><span class="s2">&quot;simca/configs/acquisition.yml&quot;</span><span class="p">)</span>
+
+<span class="n">dataset_name</span> <span class="o">=</span> <span class="s2">&quot;indian_pines&quot;</span>
+<span class="n">results_directory</span> <span class="o">=</span> <span class="s2">&quot;./data/results/lego_test_1&quot;</span>
+<span class="n">nb_of_acq</span> <span class="o">=</span> <span class="mi">10</span>
+</pre></div>
+</div>
+</section>
+<section id="id2">
+<h3>Initialize the CassiSystem<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<p>Initialize the <cite>CassiSystem</cite>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cassi_system</span> <span class="o">=</span> <span class="n">CassiSystem</span><span class="p">(</span><span class="n">system_config</span><span class="o">=</span><span class="n">config_system</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="id3">
+<h3>Load the Hyperspectral dataset<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
+<p>Load the hyperspectral dataset:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cassi_system</span><span class="o">.</span><span class="n">load_dataset</span><span class="p">(</span><span class="n">dataset_name</span><span class="p">,</span> <span class="n">config_dataset</span><span class="p">[</span><span class="s2">&quot;datasets directory&quot;</span><span class="p">])</span>
+</pre></div>
+</div>
+</section>
+<section id="generate-multiple-patterns-for-acquisition">
+<h3>Generate Multiple Patterns for Acquisition<a class="headerlink" href="#generate-multiple-patterns-for-acquisition" title="Link to this heading"></a></h3>
+<p>Generate multiple coded aperture patterns:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cassi_system</span><span class="o">.</span><span class="n">generate_multiple_patterns</span><span class="p">(</span><span class="n">config_patterns</span><span class="p">,</span> <span class="n">nb_of_acq</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="id4">
+<h3>Propagate the Coded Aperture Grid<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
+<p>Propagate the coded aperture grid to the detector plane:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cassi_system</span><span class="o">.</span><span class="n">propagate_coded_aperture_grid</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="generate-multiple-filtering-cubes">
+<h3>Generate Multiple Filtering Cubes<a class="headerlink" href="#generate-multiple-filtering-cubes" title="Link to this heading"></a></h3>
+<p>Generate the multiple filtering cubes:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cassi_system</span><span class="o">.</span><span class="n">generate_multiple_filtering_cubes</span><span class="p">(</span><span class="n">nb_of_acq</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="simulate-multiple-acquisitions">
+<h3>Simulate Multiple Acquisitions<a class="headerlink" href="#simulate-multiple-acquisitions" title="Link to this heading"></a></h3>
+<p>Simulate multiple acquisitions:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cassi_system</span><span class="o">.</span><span class="n">multiple_image_acquisitions</span><span class="p">(</span><span class="n">use_psf</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">nb_of_filtering_cubes</span><span class="o">=</span><span class="n">nb_of_acq</span><span class="p">,</span> <span class="n">chunck_size</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="id5">
+<h3>Save the Acquisition<a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
+<p>Set up the results directory and save the acquisition:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cassi_system</span><span class="o">.</span><span class="n">result_directory</span> <span class="o">=</span> <span class="n">results_directory</span>
+<span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">results_directory</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">save_config_file</span><span class="p">(</span><span class="s2">&quot;config_system&quot;</span><span class="p">,</span> <span class="n">cassi_system</span><span class="o">.</span><span class="n">system_config</span><span class="p">,</span> <span class="n">cassi_system</span><span class="o">.</span><span class="n">result_directory</span><span class="p">)</span>
+<span class="n">save_config_file</span><span class="p">(</span><span class="s2">&quot;config_pattern&quot;</span><span class="p">,</span> <span class="n">config_patterns</span><span class="p">,</span> <span class="n">cassi_system</span><span class="o">.</span><span class="n">result_directory</span><span class="p">)</span>
+<span class="n">save_config_file</span><span class="p">(</span><span class="s2">&quot;config_acquisition&quot;</span><span class="p">,</span> <span class="n">config_acquisition</span><span class="p">,</span> <span class="n">cassi_system</span><span class="o">.</span><span class="n">result_directory</span><span class="p">)</span>
+<span class="n">save_data_in_hdf5</span><span class="p">(</span><span class="s2">&quot;interpolated_scene&quot;</span><span class="p">,</span> <span class="n">cassi_system</span><span class="o">.</span><span class="n">interpolated_scene</span><span class="p">,</span> <span class="n">cassi_system</span><span class="o">.</span><span class="n">result_directory</span><span class="p">)</span>
+<span class="n">save_data_in_hdf5</span><span class="p">(</span><span class="s2">&quot;panchro&quot;</span><span class="p">,</span> <span class="n">cassi_system</span><span class="o">.</span><span class="n">panchro</span><span class="p">,</span> <span class="n">cassi_system</span><span class="o">.</span><span class="n">result_directory</span><span class="p">)</span>
+<span class="n">save_data_in_hdf5</span><span class="p">(</span><span class="s2">&quot;wavelengths&quot;</span><span class="p">,</span> <span class="n">cassi_system</span><span class="o">.</span><span class="n">optical_model</span><span class="o">.</span><span class="n">system_wavelengths</span><span class="p">,</span> <span class="n">cassi_system</span><span class="o">.</span><span class="n">result_directory</span><span class="p">)</span>
+<span class="n">save_data_in_hdf5</span><span class="p">(</span><span class="s2">&quot;list_of_compressed_measurements&quot;</span><span class="p">,</span> <span class="n">cassi_system</span><span class="o">.</span><span class="n">list_of_measurements</span><span class="p">,</span> <span class="n">cassi_system</span><span class="o">.</span><span class="n">result_directory</span><span class="p">)</span>
+<span class="n">save_data_in_hdf5</span><span class="p">(</span><span class="s2">&quot;list_of_filtering_cubes&quot;</span><span class="p">,</span> <span class="n">cassi_system</span><span class="o">.</span><span class="n">list_of_filtering_cubes</span><span class="p">,</span> <span class="n">cassi_system</span><span class="o">.</span><span class="n">result_directory</span><span class="p">)</span>
+<span class="n">save_data_in_hdf5</span><span class="p">(</span><span class="s2">&quot;list_of_patterns&quot;</span><span class="p">,</span> <span class="n">cassi_system</span><span class="o">.</span><span class="n">list_of_patterns</span><span class="p">,</span> <span class="n">cassi_system</span><span class="o">.</span><span class="n">result_directory</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Congratulations! You’ve successfully performed and saved multiple acquisitions using the <cite>CassiSystem</cite> class from the <code class="code docutils literal notranslate"><span class="pre">simca</span></code> package.</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Tutorial_with_GUI.html" class="btn btn-neutral float-left" title="Tutorial - Basics (with GUI)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="simca.html" class="btn btn-neutral float-right" title="API Reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Antoine Rouxel.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

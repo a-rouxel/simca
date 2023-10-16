@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>simca.functions_acquisition &mdash; simca 1.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=f2a433a1"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            simca
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Tutorial_with_GUI.html">Tutorial - Basics (with GUI)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Tutorial_advanced.html">Tutorial - Advanced (only script)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../simca.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">simca</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">simca.functions_acquisition</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for simca.functions_acquisition</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">griddata</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">import</span> <span class="nn">multiprocessing</span> <span class="k">as</span> <span class="nn">mp</span>
+<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">Pool</span>
+
+
+<div class="viewcode-block" id="generate_sd_measurement_cube">
+<a class="viewcode-back" href="../../simca.html#simca.functions_acquisition.generate_sd_measurement_cube">[docs]</a>
+<span class="k">def</span> <span class="nf">generate_sd_measurement_cube</span><span class="p">(</span><span class="n">filtered_scene</span><span class="p">,</span><span class="n">X_input</span><span class="p">,</span> <span class="n">Y_input</span><span class="p">,</span> <span class="n">X_target</span><span class="p">,</span> <span class="n">Y_target</span><span class="p">,</span><span class="n">grid_type</span><span class="p">,</span><span class="n">interp_method</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate SD measurement cube from the coded aperture and the scene.</span>
+<span class="sd">    For Single-Disperser CASSI systems, the scene is filtered then propagated in the detector plane.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        filtered_scene (numpy.ndarray): filtered scene (shape = R x C x W)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        numpy.ndarray: SD measurement cube (shape = R x C x W)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;--- Generating SD measurement cube ---- &quot;</span><span class="p">)</span>
+
+    <span class="n">measurement_sd</span> <span class="o">=</span> <span class="n">interpolate_data_on_grid_positions</span><span class="p">(</span><span class="n">filtered_scene</span><span class="p">,</span>
+                                                             <span class="n">X_input</span><span class="p">,</span>
+                                                             <span class="n">Y_input</span><span class="p">,</span>
+                                                             <span class="n">X_target</span><span class="p">,</span>
+                                                             <span class="n">Y_target</span><span class="p">,</span>
+                                                             <span class="n">grid_type</span><span class="o">=</span><span class="n">grid_type</span><span class="p">,</span>
+                                                             <span class="n">interp_method</span><span class="o">=</span><span class="n">interp_method</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">measurement_sd</span></div>
+
+<div class="viewcode-block" id="generate_dd_measurement">
+<a class="viewcode-back" href="../../simca.html#simca.functions_acquisition.generate_dd_measurement">[docs]</a>
+<span class="k">def</span> <span class="nf">generate_dd_measurement</span><span class="p">(</span><span class="n">scene</span><span class="p">,</span> <span class="n">filtering_cube</span><span class="p">,</span><span class="n">chunk_size</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate DD-CASSI type system measurement from a scene and a filtering cube. ref : &quot;Single-shot compressive spectral imaging with a dual-disperser architecture&quot;, M.Gehm et al., Optics Express, 2007</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        scene (numpy.ndarray): observed scene (shape = R  x C x W)</span>
+<span class="sd">        filtering_cube (numpy.ndarray):   filtering cube of the instrument for a given pattern (shape = R x C x W)</span>
+<span class="sd">        chunk_size (int) : size of the spatial chunks in which the Hadamard product is performed</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        numpy.ndarray: filtered scene (shape = R x C x W)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Initialize an empty array for the result</span>
+    <span class="n">filtered_scene</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">filtering_cube</span><span class="p">)</span>
+
+    <span class="c1"># Calculate total iterations for tqdm</span>
+    <span class="n">total_iterations</span> <span class="o">=</span> <span class="p">(</span><span class="n">filtering_cube</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">//</span> <span class="n">chunk_size</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">filtering_cube</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">//</span> <span class="n">chunk_size</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">total</span><span class="o">=</span><span class="n">total_iterations</span><span class="p">)</span> <span class="k">as</span> <span class="n">pbar</span><span class="p">:</span>
+        <span class="c1"># Perform the multiplication in chunks</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">filtering_cube</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">chunk_size</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">filtering_cube</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">chunk_size</span><span class="p">):</span>
+                <span class="n">filtered_scene</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span> <span class="o">+</span> <span class="n">chunk_size</span><span class="p">,</span> <span class="n">j</span><span class="p">:</span><span class="n">j</span> <span class="o">+</span> <span class="n">chunk_size</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">filtering_cube</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span> <span class="o">+</span> <span class="n">chunk_size</span><span class="p">,</span>
+                                                                           <span class="n">j</span><span class="p">:</span><span class="n">j</span> <span class="o">+</span> <span class="n">chunk_size</span><span class="p">,</span> <span class="p">:]</span> <span class="o">*</span> <span class="n">scene</span><span class="p">[</span>
+                                                                                                  <span class="n">i</span><span class="p">:</span><span class="n">i</span> <span class="o">+</span> <span class="n">chunk_size</span><span class="p">,</span>
+                                                                                                  <span class="n">j</span><span class="p">:</span><span class="n">j</span> <span class="o">+</span> <span class="n">chunk_size</span><span class="p">,</span>
+                                                                                                  <span class="p">:]</span>
+                <span class="n">pbar</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+
+    <span class="n">filtered_scene</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">filtered_scene</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">filtered_scene</span></div>
+
+
+
+
+
+<div class="viewcode-block" id="match_dataset_to_instrument">
+<a class="viewcode-back" href="../../simca.html#simca.functions_acquisition.match_dataset_to_instrument">[docs]</a>
+<span class="k">def</span> <span class="nf">match_dataset_to_instrument</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">filtering_cube</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Match the size of the dataset to the size of the filtering cube. Either by padding or by cropping</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        dataset (numpy.ndarray): dataset</span>
+<span class="sd">        filtering_cube (numpy.ndarray):  filtering cube of the instrument</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        numpy.ndarray: observed scene (shape = R  x C x W)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+
+
+    <span class="k">if</span> <span class="n">filtering_cube</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">or</span> <span class="n">filtering_cube</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">dataset</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">filtering_cube</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="n">dataset</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="n">filtering_cube</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">dataset</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)),</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;constant&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">dataset</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">filtering_cube</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="n">dataset</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">filtering_cube</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">dataset</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)),</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;constant&quot;</span><span class="p">)</span>
+        <span class="n">scene</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">filtering_cube</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">:</span><span class="n">filtering_cube</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="p">:]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Dataset Spatial Cropping : Filtering cube and scene must have the same nubmer of lines and columns&quot;</span><span class="p">)</span>
+        
+    <span class="k">else</span><span class="p">:</span>
+    	<span class="n">scene</span> <span class="o">=</span> <span class="n">dataset</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">filtering_cube</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">filtering_cube</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">!=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span>
+            <span class="n">scene</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">:</span><span class="n">filtering_cube</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Dataset Spectral Cropping : Filtering cube and scene must have the same number of wavelengths&quot;</span><span class="p">)</span>	
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">scene</span> <span class="o">=</span> <span class="n">dataset</span>
+        
+    <span class="k">try</span><span class="p">:</span>
+    	<span class="n">scene</span>
+    <span class="k">except</span><span class="p">:</span>
+    	<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Please load a scene first&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">scene</span></div>
+
+
+<div class="viewcode-block" id="match_dataset_labels_to_instrument">
+<a class="viewcode-back" href="../../simca.html#simca.functions_acquisition.match_dataset_labels_to_instrument">[docs]</a>
+<span class="k">def</span> <span class="nf">match_dataset_labels_to_instrument</span><span class="p">(</span><span class="n">dataset_labels</span><span class="p">,</span> <span class="n">filtering_cube</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Match the size of the dataset labels to the size of the filtering cube. Either by padding or by cropping</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        dataset_labels (numpy.ndarray): dataset labels (shape = R_dts  x C_dts)</span>
+<span class="sd">        filtering_cube (numpy.ndarray): filtering cube of the instrument</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        numpy.ndarray: scene labels (shape = R  x C)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">filtering_cube</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">dataset_labels</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">or</span> <span class="n">filtering_cube</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">dataset_labels</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">dataset_labels</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">filtering_cube</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="n">dataset_labels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">dataset_labels</span><span class="p">,</span> <span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="n">filtering_cube</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">dataset_labels</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])),</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;constant&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">dataset_labels</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">filtering_cube</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="n">dataset_labels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">dataset_labels</span><span class="p">,</span> <span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">filtering_cube</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">dataset_labels</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])),</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;constant&quot;</span><span class="p">)</span>
+        <span class="n">dataset_labels</span> <span class="o">=</span> <span class="n">dataset_labels</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">filtering_cube</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">:</span><span class="n">filtering_cube</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Filtering cube and scene must have the same lines and columns&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">dataset_labels</span></div>
+
+
+<div class="viewcode-block" id="crop_center">
+<a class="viewcode-back" href="../../simca.html#simca.functions_acquisition.crop_center">[docs]</a>
+<span class="k">def</span> <span class="nf">crop_center</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">nb_of_pixels_along_x</span><span class="p">,</span> <span class="n">nb_of_pixels_along_y</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Crop the given array to the given size, centered on the array</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        array (numpy.ndarray): 2D array to be cropped</span>
+<span class="sd">        nb_of_pixels_along_x (int): number of samples to keep along the X axis</span>
+<span class="sd">        nb_of_pixels_along_y (int): number of samples to keep along the Y axis</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        numpy.ndarray: cropped array</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">y_len</span><span class="p">,</span> <span class="n">x_len</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span>
+
+    <span class="n">x_start</span> <span class="o">=</span> <span class="n">x_len</span><span class="o">//</span><span class="mi">2</span> <span class="o">-</span> <span class="n">nb_of_pixels_along_x</span><span class="o">//</span><span class="mi">2</span>
+    <span class="n">x_end</span> <span class="o">=</span> <span class="n">x_start</span> <span class="o">+</span> <span class="n">nb_of_pixels_along_x</span>
+
+    <span class="n">y_start</span> <span class="o">=</span> <span class="n">y_len</span><span class="o">//</span><span class="mi">2</span> <span class="o">-</span> <span class="n">nb_of_pixels_along_y</span><span class="o">//</span><span class="mi">2</span>
+    <span class="n">y_end</span> <span class="o">=</span> <span class="n">y_start</span> <span class="o">+</span> <span class="n">nb_of_pixels_along_y</span>
+
+    <span class="k">if</span> <span class="n">nb_of_pixels_along_x</span><span class="o">&lt;</span><span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="n">array</span> <span class="o">=</span> <span class="n">array</span><span class="p">[:,</span> <span class="n">x_start</span><span class="p">:</span><span class="n">x_end</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">nb_of_pixels_along_y</span><span class="o">&lt;</span><span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+        <span class="n">array</span> <span class="o">=</span> <span class="n">array</span><span class="p">[</span><span class="n">y_start</span><span class="p">:</span><span class="n">y_end</span><span class="p">,</span> <span class="p">:]</span>
+
+    <span class="k">return</span> <span class="n">array</span></div>
+
+
+
+
+
+<div class="viewcode-block" id="interpolate_data_on_grid_positions">
+<a class="viewcode-back" href="../../simca.html#simca.functions_acquisition.interpolate_data_on_grid_positions">[docs]</a>
+<span class="k">def</span> <span class="nf">interpolate_data_on_grid_positions</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">X_init</span><span class="p">,</span> <span class="n">Y_init</span><span class="p">,</span> <span class="n">X_target</span><span class="p">,</span> <span class="n">Y_target</span><span class="p">,</span> <span class="n">grid_type</span><span class="o">=</span><span class="s2">&quot;unstructured&quot;</span><span class="p">,</span> <span class="n">interp_method</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Interpolate data on a single 2D grid defined by X_target and Y_target</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data (numpy.ndarray): data to interpolate (3D or 2D)</span>
+<span class="sd">        X_init (numpy.ndarray): X coordinates of the initial grid (3D)</span>
+<span class="sd">        Y_init (numpy.ndarray): Y coordinates of the initial grid (3D)</span>
+<span class="sd">        X_target (numpy.ndarray): X coordinates of the target grid (2D)</span>
+<span class="sd">        Y_target (numpy.ndarray): Y coordinates of the target grid (2D)</span>
+<span class="sd">        grid_type (str): type of the target grid (default = &quot;unstructured&quot;, other option = &quot;regular&quot;)</span>
+<span class="sd">        interp_method (str): interpolation method (default = &quot;linear&quot;)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        numpy.ndarray: 3D data interpolated on the target grid</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">interpolated_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">X_target</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">X_target</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">X_init</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+    <span class="n">nb_of_grids</span> <span class="o">=</span> <span class="n">X_init</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">grid_type</span> <span class="o">==</span> <span class="s2">&quot;unstructured&quot;</span><span class="p">:</span>
+        <span class="n">worker</span> <span class="o">=</span> <span class="n">worker_unstructured</span>
+    <span class="k">elif</span> <span class="n">grid_type</span> <span class="o">==</span> <span class="s2">&quot;regular&quot;</span><span class="p">:</span>
+        <span class="n">worker</span> <span class="o">=</span> <span class="n">worker_regulargrid</span>
+
+    <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">nb_of_grids</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="n">Pool</span><span class="p">(</span><span class="n">mp</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">())</span> <span class="k">as</span> <span class="n">p</span><span class="p">:</span>
+
+        <span class="n">tasks</span> <span class="o">=</span> <span class="p">[(</span><span class="n">X_init</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">i</span><span class="p">],</span> <span class="n">Y_init</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">i</span><span class="p">],</span> <span class="n">data</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">i</span><span class="p">],</span> <span class="n">X_target</span><span class="p">,</span> <span class="n">Y_target</span><span class="p">,</span> <span class="n">interp_method</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span>
+                 <span class="nb">range</span><span class="p">(</span><span class="n">nb_of_grids</span><span class="p">)]</span>
+
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">zi</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">enumerate</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">imap</span><span class="p">(</span><span class="n">worker</span><span class="p">,</span> <span class="n">tasks</span><span class="p">)),</span> <span class="n">total</span><span class="o">=</span><span class="n">nb_of_grids</span><span class="p">,</span>
+                              <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Interpolate 3D data on grid positions&#39;</span><span class="p">):</span>
+            <span class="n">interpolated_data</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">zi</span>
+
+    <span class="n">interpolated_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">interpolated_data</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">interpolated_data</span></div>
+
+
+
+<div class="viewcode-block" id="worker_unstructured">
+<a class="viewcode-back" href="../../simca.html#simca.functions_acquisition.worker_unstructured">[docs]</a>
+<span class="k">def</span> <span class="nf">worker_unstructured</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Process to parallellize the unstructured griddata interpolation between the propagated grid (mask and the detector grid</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        args (tuple): containing the following elements: X_init_2D, Y_init_2D, data_2D, X_target_2D, Y_target_2D</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        numpy.ndarray: 2D array of the data interpolated on the target grid</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">X_init_2D</span><span class="p">,</span> <span class="n">Y_init_2D</span><span class="p">,</span> <span class="n">data_2D</span><span class="p">,</span> <span class="n">X_target_2D</span><span class="p">,</span> <span class="n">Y_target_2D</span><span class="p">,</span> <span class="n">interp_method</span> <span class="o">=</span> <span class="n">args</span>
+
+    <span class="n">interpolated_data</span> <span class="o">=</span> <span class="n">griddata</span><span class="p">((</span><span class="n">X_init_2D</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span>
+                                  <span class="n">Y_init_2D</span><span class="o">.</span><span class="n">flatten</span><span class="p">()),</span>
+                                 <span class="n">data_2D</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span>
+                                 <span class="p">(</span><span class="n">X_target_2D</span><span class="p">,</span> <span class="n">Y_target_2D</span><span class="p">),</span>
+                                 <span class="n">method</span><span class="o">=</span><span class="n">interp_method</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">interpolated_data</span></div>
+
+
+<div class="viewcode-block" id="worker_regulargrid">
+<a class="viewcode-back" href="../../simca.html#simca.functions_acquisition.worker_regulargrid">[docs]</a>
+<span class="k">def</span> <span class="nf">worker_regulargrid</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Process to parallellize the structured griddata interpolation between the propagated grid (mask and the detector grid</span>
+<span class="sd">    Note : For now it is identical to the unstructured method but it could be faster ...</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        args (tuple): containing the following elements: X_init_2D, Y_init_2D, data_2D, X_target_2D, Y_target_2D</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        numpy.ndarray: 2D array of the data interpolated on the target grid</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">X_init_2D</span><span class="p">,</span> <span class="n">Y_init_2D</span><span class="p">,</span> <span class="n">data_2D</span><span class="p">,</span> <span class="n">X_target_2D</span><span class="p">,</span> <span class="n">Y_target_2D</span><span class="p">,</span> <span class="n">interp_method</span> <span class="o">=</span> <span class="n">args</span>
+
+    <span class="n">interpolated_data</span> <span class="o">=</span> <span class="n">griddata</span><span class="p">((</span><span class="n">X_init_2D</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span>
+                                  <span class="n">Y_init_2D</span><span class="o">.</span><span class="n">flatten</span><span class="p">()),</span>
+                                 <span class="n">data_2D</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span>
+                                 <span class="p">(</span><span class="n">X_target_2D</span><span class="p">,</span> <span class="n">Y_target_2D</span><span class="p">),</span>
+                                 <span class="n">method</span><span class="o">=</span><span class="n">interp_method</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">interpolated_data</span></div>
+
+
+
+
+
+
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Antoine Rouxel.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

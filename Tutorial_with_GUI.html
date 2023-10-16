@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tutorial - Basics (with GUI) &mdash; simca 1.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=f2a433a1"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Tutorial - Advanced (only script)" href="Tutorial_advanced.html" />
+    <link rel="prev" title="Getting started" href="getting_started.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            simca
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting started</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Tutorial - Basics (with GUI)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#discover-main-features">Discover Main Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#feature-a-dataset-analysis">Feature A : Dataset Analysis</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#settings">1. Settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#load-dataset-button">2. Load dataset button</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#display-windows">3. Display windows</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#hyperspectral-cube">Hyperspectral cube</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#compare-spectra">Compare Spectra</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#labelisation-map">Labelisation map</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#labelisation-histogram">Labelisation Histogram</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#feature-b-optical-design">Feature B : Optical Design</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#system-settings">1. System Settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#run-simulation-button">2. Run Simulation button</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#display">3. Display</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#coded-aperture-grid">Coded aperture grid</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#propagated-coded-aperture-grid">Propagated coded aperture grid</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#distortion-maps">Distortion maps</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#feature-c-pattern-generation">Feature C : Pattern generation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#patterns-settings">1. Patterns Settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#generate-pattern">2. Generate pattern</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#generate-filtering-cube-button">3. Generate Filtering Cube button</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#display-pattern-and-filtering-cube">4. Display Pattern and Filtering Cube</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pattern">Pattern</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#filtering-cube-slice-by-slice">Filtering Cube, slice by slice</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#feature-d-acquisition">Feature D : Acquisition</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1">1. Settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#run-acquisition-button">2. Run Acquisition button</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#display-measurements">3. Display measurements</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#compressed-measurements">compressed measurements</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spectral-images">Spectral images</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#panchromatic-image">Panchromatic image</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorial_advanced.html">Tutorial - Advanced (only script)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="simca.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">simca</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Tutorial - Basics (with GUI)</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/Tutorial_with_GUI.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="tutorial-basics-with-gui">
+<h1>Tutorial - Basics (with GUI)<a class="headerlink" href="#tutorial-basics-with-gui" title="Link to this heading"></a></h1>
+<section id="discover-main-features">
+<h2>Discover Main Features<a class="headerlink" href="#discover-main-features" title="Link to this heading"></a></h2>
+<p>The are 4 main features included in the application. These modules are not completely independent, using them sequentially is recommended for first usages.</p>
+<ul class="simple">
+<li><p><strong>Dataset Analysis</strong> (only with GUI): for analyzing multi- or hyper-spectral datasets. It includes vizualization of data slices, spectrum analysis, and dataset labeling.</p></li>
+<li><p><strong>Optical Design</strong>: for evaluating and comparing the performances of various optical systems.</p></li>
+<li><p><strong>Coded Aperture</strong>: for generating various patterns and corresponding filtering cubes.</p></li>
+<li><p><strong>Acquisition</strong>: for simulating the acquisition process of coded images</p></li>
+</ul>
+<img alt="Docusaurus logo" src="_images/layout_general.svg" /></section>
+<section id="feature-a-dataset-analysis">
+<h2>Feature A : Dataset Analysis<a class="headerlink" href="#feature-a-dataset-analysis" title="Link to this heading"></a></h2>
+<p>The Dataset analysis tab is used to <strong>load &amp; display datasets characteristics</strong>.</p>
+<img alt="layout dataset tab" src="_images/layout_dataset_tab.svg" /><section id="settings">
+<h3>1. Settings<a class="headerlink" href="#settings" title="Link to this heading"></a></h3>
+<p>Located on the left side of the application window.</p>
+<p>Includes:</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt><cite>datasets directory</cite><span class="classifier">path to the datasets directory. All datasets be stored here.</span></dt><dd><p><strong>ATTENTION</strong> : click on the <cite>reload datasets</cite> button if you change the datasets directory path</p>
+</dd>
+</dl>
+</li>
+<li><p><strong>dataset name : a ComboBox displaying the datasets available in the selected directory</strong></p></li>
+<li><dl class="simple">
+<dt><cite>loaded dataset dimensions</cite><span class="classifier">These values are displayed once the dataset is loaded</span></dt><dd><ul>
+<li><p><cite>dimension along X</cite> : dimension of the dataset in the X direction (main spectral dispersion direction)</p></li>
+<li><p><cite>dimension along Y</cite> : dimension of the dataset in the Y direction (perpendicular to spectral dispersion direction)</p></li>
+<li><p><cite>number of spectral bands</cite> : number of spectral bands in the loaded dataset</p></li>
+<li><p><cite>minimum wavelength</cite> : minimum wavelength, usually corresponds to the spectral band n°0</p></li>
+<li><p><cite>maximum wavelength</cite> : maximum wavelength, usually corresponds to the last spectral band</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</section>
+<section id="load-dataset-button">
+<h3>2. Load dataset button<a class="headerlink" href="#load-dataset-button" title="Link to this heading"></a></h3>
+<p>By clicking on this button, the dataset selected in the <cite>dataset name</cite> ComboBox is loaded by the application.</p>
+</section>
+<section id="display-windows">
+<h3>3. Display windows<a class="headerlink" href="#display-windows" title="Link to this heading"></a></h3>
+<p>Located on the right side of the application window.</p>
+<p><strong>Once a dataset is loaded</strong>, one can inspect the spatial and spectral content of the dataset.</p>
+<section id="hyperspectral-cube">
+<h4>Hyperspectral cube<a class="headerlink" href="#hyperspectral-cube" title="Link to this heading"></a></h4>
+<p>By moving the slider, you choose the spectral plane to be displayed.</p>
+<img alt="dataset layout 2" src="_images/layout_dataset_2.svg" /></section>
+<section id="compare-spectra">
+<h4>Compare Spectra<a class="headerlink" href="#compare-spectra" title="Link to this heading"></a></h4>
+<img alt="dataset layout 2" src="_images/layout_dataset_3.svg" /></section>
+<section id="labelisation-map">
+<h4>Labelisation map<a class="headerlink" href="#labelisation-map" title="Link to this heading"></a></h4>
+<img alt="dataset layout 2" src="_images/layout_dataset_4.svg" /></section>
+<section id="labelisation-histogram">
+<h4>Labelisation Histogram<a class="headerlink" href="#labelisation-histogram" title="Link to this heading"></a></h4>
+<img alt="dataset layout 2" src="_images/layout_dataset_5.svg" /></section>
+</section>
+</section>
+<section id="feature-b-optical-design">
+<h2>Feature B : Optical Design<a class="headerlink" href="#feature-b-optical-design" title="Link to this heading"></a></h2>
+<p>The Optical Design tab is used for quick evaluation of the optical system characteristics (spectral dispersion &amp; distortions).</p>
+<img alt="layout dataset tab" src="_images/layout_optical_design_tab.svg" /><section id="system-settings">
+<h3>1. System Settings<a class="headerlink" href="#system-settings" title="Link to this heading"></a></h3>
+<img alt="Docusaurus logo" src="_images/mask_to_detector.svg" /><p>Located on the left side of the application window.</p>
+<p>Includes:</p>
+<ul>
+<li><dl class="simple">
+<dt><strong>infos</strong>:</dt><dd><ul class="simple">
+<li><p><em>system name</em>: name of the studied system</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p><strong>system architecture</strong>: All parameters that define the optical system and thus the spatial/spectral filtering</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><em>system type</em></p></li>
+<li><p><em>propagation type</em> : model used for evaluating the spatial/spectral filtering</p></li>
+<li><p><em>focal lens F</em> [in micrometers]</p></li>
+<li><dl class="simple">
+<dt><em>dispersive element</em>:</dt><dd><ul>
+<li><p><em>type</em>: Prism or Grating</p></li>
+<li><p><em>A (only when prism is selected)</em>: apex angle of the prism [in degrees]</p></li>
+<li><p><em>m (only when grating is selected)</em>: considered order of diffraction [no units]</p></li>
+<li><p><em>G (only when grating is selected)</em>: grating lines density [lines/mm]</p></li>
+<li><p><em>delta alpha c</em> [in degrees]</p></li>
+<li><p><em>delta beta c</em> [in degrees]</p></li>
+<li><p><em>wavelength center</em> [in nm]</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p><strong>detector</strong>: parameters that define the detector grid</p></li>
+<li><p><strong>SLM</strong>: parameters that define the mask grid</p></li>
+<li><p><strong>spectral range</strong>: the spectral boundaries of the system and the number of spectral bands to consider</p></li>
+</ul>
+</section>
+<section id="run-simulation-button">
+<h3>2. Run Simulation button<a class="headerlink" href="#run-simulation-button" title="Link to this heading"></a></h3>
+<p>For each considered wavelength, the mask grid points coordinates is propagated onto the detector.</p>
+</section>
+<section id="display">
+<h3>3. Display<a class="headerlink" href="#display" title="Link to this heading"></a></h3>
+<p>Located on the right side of the application window. It can be used to analyse the mask grid object and its images in the detector plane.</p>
+<section id="coded-aperture-grid">
+<h4>Coded aperture grid<a class="headerlink" href="#coded-aperture-grid" title="Link to this heading"></a></h4>
+<img alt="Docusaurus logo" src="_images/input_grid.svg" /></section>
+<section id="propagated-coded-aperture-grid">
+<h4>Propagated coded aperture grid<a class="headerlink" href="#propagated-coded-aperture-grid" title="Link to this heading"></a></h4>
+<p>Spectral images of the input coded aperture grid for the minimum, maximum, and center wavelength.</p>
+<p><strong>ATTENTION</strong>: center wavelength (605 nm on the given example) is different from the system architecture center wavelength</p>
+<img alt="Docusaurus logo" src="_images/propagated_grids.svg" /></section>
+<section id="distortion-maps">
+<h4>Distortion maps<a class="headerlink" href="#distortion-maps" title="Link to this heading"></a></h4>
+<p>Get qualitative and quantitative distortion data:</p>
+<img alt="Docusaurus logo" src="_images/distortion_maps.svg" /></section>
+</section>
+</section>
+<section id="feature-c-pattern-generation">
+<h2>Feature C : Pattern generation<a class="headerlink" href="#feature-c-pattern-generation" title="Link to this heading"></a></h2>
+<p>The Coded Aperture tab is used for designing patterns and generating associated filtering cube.</p>
+<img alt="Coded Aperture design tab" src="_images/layout_coded_aperture.svg" /><section id="patterns-settings">
+<h3>1. Patterns Settings<a class="headerlink" href="#patterns-settings" title="Link to this heading"></a></h3>
+<p>Located on the left side of the application window.</p>
+<p>The patterns characteristics depend on the chosen pattern type.</p>
+<p>Available patterns:</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt><strong>slit</strong>:<em>only one column of the coded aperture is open (perpendicular to the spectral dispersion), thus generating a spectral gradient type filter.</em></dt><dd><ul>
+<li><p><em>slit position</em>: relative to the center column between -100 and 100 coded aperture elements</p></li>
+<li><p><em>slit width</em>: between 1 and 30 coded aperture elements.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p><strong>random</strong>: random noise pattern with a normal law</p></li>
+<li><p><strong>blue noise</strong>: random noise pattern with boosted high frequencies</p></li>
+<li><p><strong>custon h5 pattern</strong>: custom pattern that should be a h5 file with a container named “pattern”. Once loaded, the pattern is cropped to fit SLM dimensions</p></li>
+</ul>
+</section>
+<section id="generate-pattern">
+<h3>2. Generate pattern<a class="headerlink" href="#generate-pattern" title="Link to this heading"></a></h3>
+<p>By clicking on this button, a 2D array representing a coded aperture pattern is generated through pattern generation functions contained in the <cite>functions_patterns_generation.py</cite> file.</p>
+</section>
+<section id="generate-filtering-cube-button">
+<h3>3. Generate Filtering Cube button<a class="headerlink" href="#generate-filtering-cube-button" title="Link to this heading"></a></h3>
+<p>By clicking on this button, a <cite>CassiSystem</cite> instance is creating the filtering cube corresponding to the <strong>detector dimensions along X and Y</strong> and the <strong>number of spectral bands</strong>.</p>
+<p>Each slice of the filtering contains the projection of the coded aperture pattern on the detector grid.</p>
+<p><strong>ATTENTION</strong> : The spectral sampling of the filtering cube is not the same as the dataset’s sampling. It is defined in the spectral range section of the Optical Design tab. The wavelengths are equally spaced between “minimum wavelength” and “maximum wavelength”.</p>
+</section>
+<section id="display-pattern-and-filtering-cube">
+<h3>4. Display Pattern and Filtering Cube<a class="headerlink" href="#display-pattern-and-filtering-cube" title="Link to this heading"></a></h3>
+<p>Located on the right side of the application window.</p>
+<section id="pattern">
+<h4>Pattern<a class="headerlink" href="#pattern" title="Link to this heading"></a></h4>
+<p>Shows the generated (or loaded) pattern:</p>
+<img alt="Pattern" src="_images/pattern_display.svg" /></section>
+<section id="filtering-cube-slice-by-slice">
+<h4>Filtering Cube, slice by slice<a class="headerlink" href="#filtering-cube-slice-by-slice" title="Link to this heading"></a></h4>
+<p>Shows the corresponding filtering cube. By moving the slider, one can inspect the filtering cube slice by slice:</p>
+<img alt="filtering cube" src="_images/filtering-cube.svg" /></section>
+</section>
+</section>
+<section id="feature-d-acquisition">
+<h2>Feature D : Acquisition<a class="headerlink" href="#feature-d-acquisition" title="Link to this heading"></a></h2>
+<p>The Acquisition tab is used to generate compressed measurements given: a <strong>dataset</strong> and a <strong>filtering cube</strong>.</p>
+<p>Note that the dataset is:</p>
+<ul class="simple">
+<li><p>cropped in the spatial dimensions to fit the filtering cube sampling (detector dimensions).</p></li>
+<li><p>interpolated in the spectral dimension according to the filtering cube sampling.</p></li>
+</ul>
+<img alt="layout scene tab" src="_images/acquisition_tab.svg" /><section id="id1">
+<h3>1. Settings<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<p>For now, the GUI only includes one mode: single acquisition.</p>
+<p>A Point-spread-function (PSF) can be added for more realism. For now, each slice of the filtered scene is convolved by the same kernel. A wavelength-dependent PSF will be added in the future.</p>
+</section>
+<section id="run-acquisition-button">
+<h3>2. Run Acquisition button<a class="headerlink" href="#run-acquisition-button" title="Link to this heading"></a></h3>
+<p>By clicking on this button:</p>
+<ul class="simple">
+<li><p>First, the dataset cube is cropped in the spatial dimensions and interpolated in the spectral dimension.</p></li>
+<li><p>Second, a point by point multiplication is performed between the filtering cube and the reinterpolated scene.</p></li>
+</ul>
+</section>
+<section id="display-measurements">
+<h3>3. Display measurements<a class="headerlink" href="#display-measurements" title="Link to this heading"></a></h3>
+<section id="compressed-measurements">
+<h4>compressed measurements<a class="headerlink" href="#compressed-measurements" title="Link to this heading"></a></h4>
+<p>The image as measured by the detector.</p>
+<img alt="layout scene tab" src="_images/layout_acquisition_1.svg" /></section>
+<section id="spectral-images">
+<h4>Spectral images<a class="headerlink" href="#spectral-images" title="Link to this heading"></a></h4>
+<p>Each slice of the filtered scene.</p>
+<img alt="layout scene tab" src="_images/layout_acquisition_2.svg" /></section>
+<section id="panchromatic-image">
+<h4>Panchromatic image<a class="headerlink" href="#panchromatic-image" title="Link to this heading"></a></h4>
+<p>No spatial/spectral filtering, the interpolated scene is simply summed along its spectral dimension.</p>
+<img alt="layout scene tab" src="_images/layout_acquisition_3.svg" /></section>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="getting_started.html" class="btn btn-neutral float-left" title="Getting started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Tutorial_advanced.html" class="btn btn-neutral float-right" title="Tutorial - Advanced (only script)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Antoine Rouxel.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

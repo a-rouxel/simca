@@ -1,0 +1,1372 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>API Reference &mdash; simca 1.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=f2a433a1"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Tutorial - Advanced (only script)" href="Tutorial_advanced.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            simca
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorial_with_GUI.html">Tutorial - Basics (with GUI)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorial_advanced.html">Tutorial - Advanced (only script)</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-simca.CassiSystem">classes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#simca.CassiSystem.CassiSystem"><code class="docutils literal notranslate"><span class="pre">CassiSystem</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#simca.CassiSystem.CassiSystem.apply_psf"><code class="docutils literal notranslate"><span class="pre">CassiSystem.apply_psf()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#simca.CassiSystem.CassiSystem.create_coordinates_grid"><code class="docutils literal notranslate"><span class="pre">CassiSystem.create_coordinates_grid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#simca.CassiSystem.CassiSystem.generate_2D_pattern"><code class="docutils literal notranslate"><span class="pre">CassiSystem.generate_2D_pattern()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#simca.CassiSystem.CassiSystem.generate_filtering_cube"><code class="docutils literal notranslate"><span class="pre">CassiSystem.generate_filtering_cube()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#simca.CassiSystem.CassiSystem.generate_multiple_filtering_cubes"><code class="docutils literal notranslate"><span class="pre">CassiSystem.generate_multiple_filtering_cubes()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#simca.CassiSystem.CassiSystem.generate_multiple_patterns"><code class="docutils literal notranslate"><span class="pre">CassiSystem.generate_multiple_patterns()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#simca.CassiSystem.CassiSystem.image_acquisition"><code class="docutils literal notranslate"><span class="pre">CassiSystem.image_acquisition()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#simca.CassiSystem.CassiSystem.interpolate_dataset_along_wavelengths"><code class="docutils literal notranslate"><span class="pre">CassiSystem.interpolate_dataset_along_wavelengths()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#simca.CassiSystem.CassiSystem.load_dataset"><code class="docutils literal notranslate"><span class="pre">CassiSystem.load_dataset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#simca.CassiSystem.CassiSystem.multiple_image_acquisitions"><code class="docutils literal notranslate"><span class="pre">CassiSystem.multiple_image_acquisitions()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#simca.CassiSystem.CassiSystem.propagate_coded_aperture_grid"><code class="docutils literal notranslate"><span class="pre">CassiSystem.propagate_coded_aperture_grid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#simca.CassiSystem.CassiSystem.save_acquisition"><code class="docutils literal notranslate"><span class="pre">CassiSystem.save_acquisition()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#simca.CassiSystem.CassiSystem.set_up_system"><code class="docutils literal notranslate"><span class="pre">CassiSystem.set_up_system()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#simca.CassiSystem.CassiSystem.update_config"><code class="docutils literal notranslate"><span class="pre">CassiSystem.update_config()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#simca.OpticalModel.OpticalModel"><code class="docutils literal notranslate"><span class="pre">OpticalModel</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#simca.OpticalModel.OpticalModel.calculate_alpha_c"><code class="docutils literal notranslate"><span class="pre">OpticalModel.calculate_alpha_c()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#simca.OpticalModel.OpticalModel.calculate_central_dispersion"><code class="docutils literal notranslate"><span class="pre">OpticalModel.calculate_central_dispersion()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#simca.OpticalModel.OpticalModel.calculate_minimum_deviation"><code class="docutils literal notranslate"><span class="pre">OpticalModel.calculate_minimum_deviation()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#simca.OpticalModel.OpticalModel.check_if_sampling_is_sufficiant"><code class="docutils literal notranslate"><span class="pre">OpticalModel.check_if_sampling_is_sufficiant()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#simca.OpticalModel.OpticalModel.generate_2D_gaussian"><code class="docutils literal notranslate"><span class="pre">OpticalModel.generate_2D_gaussian()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#simca.OpticalModel.OpticalModel.generate_psf"><code class="docutils literal notranslate"><span class="pre">OpticalModel.generate_psf()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#simca.OpticalModel.OpticalModel.get_incident_angle_min_dev"><code class="docutils literal notranslate"><span class="pre">OpticalModel.get_incident_angle_min_dev()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#simca.OpticalModel.OpticalModel.model_Grating_angle_to_angle"><code class="docutils literal notranslate"><span class="pre">OpticalModel.model_Grating_angle_to_angle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#simca.OpticalModel.OpticalModel.model_Lens_angle_to_position"><code class="docutils literal notranslate"><span class="pre">OpticalModel.model_Lens_angle_to_position()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#simca.OpticalModel.OpticalModel.model_Lens_pos_to_angle"><code class="docutils literal notranslate"><span class="pre">OpticalModel.model_Lens_pos_to_angle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#simca.OpticalModel.OpticalModel.model_Prism_angle_to_angle"><code class="docutils literal notranslate"><span class="pre">OpticalModel.model_Prism_angle_to_angle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#simca.OpticalModel.OpticalModel.propagate_through_arm"><code class="docutils literal notranslate"><span class="pre">OpticalModel.propagate_through_arm()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#simca.OpticalModel.OpticalModel.propagation_with_distorsions"><code class="docutils literal notranslate"><span class="pre">OpticalModel.propagation_with_distorsions()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#simca.OpticalModel.OpticalModel.propagation_with_no_distorsions"><code class="docutils literal notranslate"><span class="pre">OpticalModel.propagation_with_no_distorsions()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#simca.OpticalModel.OpticalModel.sellmeier"><code class="docutils literal notranslate"><span class="pre">OpticalModel.sellmeier()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#simca.OpticalModel.OpticalModel.set_optical_config"><code class="docutils literal notranslate"><span class="pre">OpticalModel.set_optical_config()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#simca.OpticalModel.OpticalModel.set_wavelengths"><code class="docutils literal notranslate"><span class="pre">OpticalModel.set_wavelengths()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#simca.OpticalModel.OpticalModel.simplified_grating_in_out"><code class="docutils literal notranslate"><span class="pre">OpticalModel.simplified_grating_in_out()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#simca.OpticalModel.OpticalModel.update_config"><code class="docutils literal notranslate"><span class="pre">OpticalModel.update_config()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#functions">functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#simca.functions_scenes.explore_spectrums"><code class="docutils literal notranslate"><span class="pre">explore_spectrums()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#simca.functions_scenes.get_dataset"><code class="docutils literal notranslate"><span class="pre">get_dataset()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#simca.functions_scenes.interpolate_data_along_wavelength"><code class="docutils literal notranslate"><span class="pre">interpolate_data_along_wavelength()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#simca.functions_scenes.palette_init"><code class="docutils literal notranslate"><span class="pre">palette_init()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#simca.functions_patterns_generation.FindLargestVoid"><code class="docutils literal notranslate"><span class="pre">FindLargestVoid()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#simca.functions_patterns_generation.FindTightestCluster"><code class="docutils literal notranslate"><span class="pre">FindTightestCluster()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#simca.functions_patterns_generation.GetVoidAndClusterBlueNoise"><code class="docutils literal notranslate"><span class="pre">GetVoidAndClusterBlueNoise()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#simca.functions_patterns_generation.generate_blue_noise_type_1_pattern"><code class="docutils literal notranslate"><span class="pre">generate_blue_noise_type_1_pattern()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#simca.functions_patterns_generation.generate_blue_noise_type_2_pattern"><code class="docutils literal notranslate"><span class="pre">generate_blue_noise_type_2_pattern()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#simca.functions_patterns_generation.generate_ln_orthogonal_pattern"><code class="docutils literal notranslate"><span class="pre">generate_ln_orthogonal_pattern()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#simca.functions_patterns_generation.generate_orthogonal_pattern"><code class="docutils literal notranslate"><span class="pre">generate_orthogonal_pattern()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#simca.functions_patterns_generation.generate_random_pattern"><code class="docutils literal notranslate"><span class="pre">generate_random_pattern()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#simca.functions_patterns_generation.generate_slit_pattern"><code class="docutils literal notranslate"><span class="pre">generate_slit_pattern()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#simca.functions_patterns_generation.load_custom_list_of_patterns"><code class="docutils literal notranslate"><span class="pre">load_custom_list_of_patterns()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#simca.functions_patterns_generation.load_custom_pattern"><code class="docutils literal notranslate"><span class="pre">load_custom_pattern()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#simca.functions_acquisition.crop_center"><code class="docutils literal notranslate"><span class="pre">crop_center()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#simca.functions_acquisition.generate_dd_measurement"><code class="docutils literal notranslate"><span class="pre">generate_dd_measurement()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#simca.functions_acquisition.generate_sd_measurement_cube"><code class="docutils literal notranslate"><span class="pre">generate_sd_measurement_cube()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#simca.functions_acquisition.interpolate_data_on_grid_positions"><code class="docutils literal notranslate"><span class="pre">interpolate_data_on_grid_positions()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#simca.functions_acquisition.match_dataset_labels_to_instrument"><code class="docutils literal notranslate"><span class="pre">match_dataset_labels_to_instrument()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#simca.functions_acquisition.match_dataset_to_instrument"><code class="docutils literal notranslate"><span class="pre">match_dataset_to_instrument()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#simca.functions_acquisition.worker_regulargrid"><code class="docutils literal notranslate"><span class="pre">worker_regulargrid()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#simca.functions_acquisition.worker_unstructured"><code class="docutils literal notranslate"><span class="pre">worker_unstructured()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#simca.functions_general_purpose.initialize_acquisitions_directory"><code class="docutils literal notranslate"><span class="pre">initialize_acquisitions_directory()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#simca.functions_general_purpose.load_yaml_config"><code class="docutils literal notranslate"><span class="pre">load_yaml_config()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#simca.functions_general_purpose.rotation_x"><code class="docutils literal notranslate"><span class="pre">rotation_x()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#simca.functions_general_purpose.rotation_y"><code class="docutils literal notranslate"><span class="pre">rotation_y()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#simca.functions_general_purpose.rotation_z"><code class="docutils literal notranslate"><span class="pre">rotation_z()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#simca.functions_general_purpose.save_config_file"><code class="docutils literal notranslate"><span class="pre">save_config_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#simca.functions_general_purpose.save_data_in_hdf5"><code class="docutils literal notranslate"><span class="pre">save_data_in_hdf5()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">simca</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">API Reference</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/simca.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="api-reference">
+<h1>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading"></a></h1>
+<div class="toctree-wrapper compound">
+</div>
+<p>The <code class="code docutils literal notranslate"><span class="pre">simca</span></code> package is based on the work <span id="id1">[<a class="reference internal" href="index.html#id6" title="Antoine Rouxel. Étude d'un imageur hyperspectral adaptatif dans un contexte d'observation de la terre. Theses, INSA de Toulouse, June 2022. URL: https://theses.hal.science/tel-03997931.">Rou22</a>]</span></p>
+<section id="module-simca.CassiSystem">
+<span id="classes"></span><h2>classes<a class="headerlink" href="#module-simca.CassiSystem" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="simca.CassiSystem.CassiSystem">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">simca.CassiSystem.</span></span><span class="sig-name descname"><span class="pre">CassiSystem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">system_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">system_config_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/CassiSystem.html#CassiSystem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.CassiSystem.CassiSystem" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class that contains the cassi system main attributes and methods</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="simca.CassiSystem.CassiSystem.apply_psf">
+<span class="sig-name descname"><span class="pre">apply_psf</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/CassiSystem.html#CassiSystem.apply_psf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.CassiSystem.CassiSystem.apply_psf" title="Link to this definition"></a></dt>
+<dd><p>Apply the PSF to the last measurement</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>last measurement cube convolved with by PSF (shape= R x C x W). Each slice of the 3D filtered scene is convolved with the PSF</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="simca.CassiSystem.CassiSystem.create_coordinates_grid">
+<span class="sig-name descname"><span class="pre">create_coordinates_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nb_of_pixels_along_x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_of_pixels_along_y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/CassiSystem.html#CassiSystem.create_coordinates_grid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.CassiSystem.CassiSystem.create_coordinates_grid" title="Link to this definition"></a></dt>
+<dd><p>Create a coordinates grid for a given number of samples along X and Y axis and a given pixel size</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nb_of_pixels_along_x</strong> (<em>int</em>) – number of samples along X axis</p></li>
+<li><p><strong>nb_of_pixels_along_y</strong> (<em>int</em>) – number of samples along Y axis</p></li>
+<li><p><strong>delta_x</strong> (<em>float</em>) – pixel size along X axis</p></li>
+<li><p><strong>delta_y</strong> (<em>float</em>) – pixel size along Y axis</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>X coordinates grid (numpy.ndarray) and Y coordinates grid (numpy.ndarray)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="simca.CassiSystem.CassiSystem.generate_2D_pattern">
+<span class="sig-name descname"><span class="pre">generate_2D_pattern</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_pattern</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/CassiSystem.html#CassiSystem.generate_2D_pattern"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.CassiSystem.CassiSystem.generate_2D_pattern" title="Link to this definition"></a></dt>
+<dd><p>Generate the coded aperture 2D pattern based on the “pattern” configuration file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>config_pattern</strong> (<em>dict</em>) – coded-aperture pattern configuration</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>coded-aperture 2D pattern based on the configuration file (shape = H x L)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="simca.CassiSystem.CassiSystem.generate_filtering_cube">
+<span class="sig-name descname"><span class="pre">generate_filtering_cube</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/CassiSystem.html#CassiSystem.generate_filtering_cube"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.CassiSystem.CassiSystem.generate_filtering_cube" title="Link to this definition"></a></dt>
+<dd><p>Generate filtering cube : each slice of the cube is a propagated pattern interpolated on the detector grid</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>filtering cube generated according to the optical system &amp; the pattern configuration (R x C x W)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="simca.CassiSystem.CassiSystem.generate_multiple_filtering_cubes">
+<span class="sig-name descname"><span class="pre">generate_multiple_filtering_cubes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">number_of_patterns</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/CassiSystem.html#CassiSystem.generate_multiple_filtering_cubes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.CassiSystem.CassiSystem.generate_multiple_filtering_cubes" title="Link to this definition"></a></dt>
+<dd><p>Generate multiple filtering cubes, each cube corresponds to a pattern, and for each pattern, each slice is a propagated coded apertureinterpolated on the detector grid</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>number_of_patterns</strong> (<em>int</em>) – number of patterns to generate</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>filtering cubes generated according to the current optical system and the pattern configuration</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="simca.CassiSystem.CassiSystem.generate_multiple_patterns">
+<span class="sig-name descname"><span class="pre">generate_multiple_patterns</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_pattern</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_patterns</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/CassiSystem.html#CassiSystem.generate_multiple_patterns"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.CassiSystem.CassiSystem.generate_multiple_patterns" title="Link to this definition"></a></dt>
+<dd><p>Generate a list of coded aperture patterns based on the “pattern” configuration file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config_pattern</strong> (<em>dict</em>) – pattern configuration</p></li>
+<li><p><strong>number_of_patterns</strong> (<em>int</em>) – number of patterns to generate</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>coded aperture patterns (numpy.ndarray) generated according to the configuration file</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="simca.CassiSystem.CassiSystem.image_acquisition">
+<span class="sig-name descname"><span class="pre">image_acquisition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">use_psf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunck_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/CassiSystem.html#CassiSystem.image_acquisition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.CassiSystem.CassiSystem.image_acquisition" title="Link to this definition"></a></dt>
+<dd><p>Run the acquisition/measurement process depending on the cassi system type</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>chunck_size</strong> (<em>int</em>) – default block size for the interpolation</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>compressed measurement (R x C)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="simca.CassiSystem.CassiSystem.interpolate_dataset_along_wavelengths">
+<span class="sig-name descname"><span class="pre">interpolate_dataset_along_wavelengths</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_wavelengths_sampling</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunk_size</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/CassiSystem.html#CassiSystem.interpolate_dataset_along_wavelengths"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.CassiSystem.CassiSystem.interpolate_dataset_along_wavelengths" title="Link to this definition"></a></dt>
+<dd><p>Interpolate the dataset cube along the wavelength axis to match the system sampling</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>new_wavelengths_sampling</strong> (<em>numpy.ndarray</em>) – new wavelengths on which to interpolate the dataset (shape = W)</p></li>
+<li><p><strong>chunk_size</strong> (<em>int</em>) – chunk size for the multiprocessing</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>interpolated dataset cube along the wavelength axis (shape = R_dts x C_dts x W)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="simca.CassiSystem.CassiSystem.load_dataset">
+<span class="sig-name descname"><span class="pre">load_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/CassiSystem.html#CassiSystem.load_dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.CassiSystem.CassiSystem.load_dataset" title="Link to this definition"></a></dt>
+<dd><p>Loading the dataset and related attributes</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>directory</strong> (<em>str</em>) – name of the directory containing the dataset</p></li>
+<li><p><strong>dataset_name</strong> (<em>str</em>) – dataset name</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a list containing the dataset (shape= R_dts x C_dts x W_dts), the corresponding wavelengths (shape= W_dts), the labeled dataset, the label names and the ignored labels</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="simca.CassiSystem.CassiSystem.multiple_image_acquisitions">
+<span class="sig-name descname"><span class="pre">multiple_image_acquisitions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">use_psf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_of_filtering_cubes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunck_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/CassiSystem.html#CassiSystem.multiple_image_acquisitions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.CassiSystem.CassiSystem.multiple_image_acquisitions" title="Link to this definition"></a></dt>
+<dd><p>Run the acquisition process depending on the cassi system type</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>chunck_size</strong> (<em>int</em>) – default block size for the dataset</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>list of compressed measurements (list of numpy.ndarray of size R x C)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="simca.CassiSystem.CassiSystem.propagate_coded_aperture_grid">
+<span class="sig-name descname"><span class="pre">propagate_coded_aperture_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X_input_grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y_input_grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/CassiSystem.html#CassiSystem.propagate_coded_aperture_grid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.CassiSystem.CassiSystem.propagate_coded_aperture_grid" title="Link to this definition"></a></dt>
+<dd><p>Propagate the coded_aperture pattern through one CASSI system</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X_input_grid</strong> (<em>numpy.ndarray</em>) – x coordinates grid</p></li>
+<li><p><strong>Y_input_grid</strong> (<em>numpy.ndarray</em>) – y coordinates grid</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>propagated coded aperture x coordinates grid in the detector plane (3D numpy.ndarray), propagated coded aperture y coordinates grid in the detector plane (3D numpy.ndarray), 1D array of propagated coded aperture x coordinates (numpy.ndarray), 1D array of system wavelengths (numpy.ndarray)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="simca.CassiSystem.CassiSystem.save_acquisition">
+<span class="sig-name descname"><span class="pre">save_acquisition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_pattern</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config_acquisition</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/CassiSystem.html#CassiSystem.save_acquisition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.CassiSystem.CassiSystem.save_acquisition" title="Link to this definition"></a></dt>
+<dd><p>Save the all data related to an acquisition</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config_pattern</strong> (<em>dict</em>) – configuration dictionary related to pattern generation</p></li>
+<li><p><strong>config_acquisition</strong> (<em>dict</em>) – configuration dictionary related to acquisition parameters</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="simca.CassiSystem.CassiSystem.set_up_system">
+<span class="sig-name descname"><span class="pre">set_up_system</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">system_config_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">system_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/CassiSystem.html#CassiSystem.set_up_system"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.CassiSystem.CassiSystem.set_up_system" title="Link to this definition"></a></dt>
+<dd><p>Loading system config &amp; initializing the grids coordinates for the coded aperture and the detector</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>system_config_path</strong> (<em>str</em>) – path to the configs file</p></li>
+<li><p><strong>system_config</strong> (<em>dict</em>) – system configuration</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="simca.CassiSystem.CassiSystem.update_config">
+<span class="sig-name descname"><span class="pre">update_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">system_config_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">system_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/CassiSystem.html#CassiSystem.update_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.CassiSystem.CassiSystem.update_config" title="Link to this definition"></a></dt>
+<dd><p>Update the system configuration file and re-initialize the grids for the coded aperture and the detector</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>system_config_path</strong> (<em>str</em>) – path to the configs file</p></li>
+<li><p><strong>system_config</strong> (<em>dict</em>) – system configuration</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>updated system configuration</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class" id="module-simca.OpticalModel">
+<dt class="sig sig-object py" id="simca.OpticalModel.OpticalModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">simca.OpticalModel.</span></span><span class="sig-name descname"><span class="pre">OpticalModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">system_config</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/OpticalModel.html#OpticalModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.OpticalModel.OpticalModel" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class that contains the optical model caracteristics and propagation models</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="simca.OpticalModel.OpticalModel.calculate_alpha_c">
+<span class="sig-name descname"><span class="pre">calculate_alpha_c</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/OpticalModel.html#OpticalModel.calculate_alpha_c"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.OpticalModel.OpticalModel.calculate_alpha_c" title="Link to this definition"></a></dt>
+<dd><p>Calculate the relative angle of incidence between the lenses and the dispersive element</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>angle of incidence</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="simca.OpticalModel.OpticalModel.calculate_central_dispersion">
+<span class="sig-name descname"><span class="pre">calculate_central_dispersion</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/OpticalModel.html#OpticalModel.calculate_central_dispersion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.OpticalModel.OpticalModel.calculate_central_dispersion" title="Link to this definition"></a></dt>
+<dd><p>Calculate the dispersion related to the central pixel of the coded aperture</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>spectral dispersion of the central pixel of the coded aperture</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="simca.OpticalModel.OpticalModel.calculate_minimum_deviation">
+<span class="sig-name descname"><span class="pre">calculate_minimum_deviation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">A</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/OpticalModel.html#OpticalModel.calculate_minimum_deviation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.OpticalModel.OpticalModel.calculate_minimum_deviation" title="Link to this definition"></a></dt>
+<dd><p>minimum deviation angle of a prism of index n and apex angle A</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n</strong> (<em>float</em><em> or </em><em>numpy.ndarray</em>) – index of the prism – no units</p></li>
+<li><p><strong>A</strong> (<em>float</em>) – apex angle of the prism – in radians</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>minimum deviation angle – in radians</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float or numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="simca.OpticalModel.OpticalModel.check_if_sampling_is_sufficiant">
+<span class="sig-name descname"><span class="pre">check_if_sampling_is_sufficiant</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/OpticalModel.html#OpticalModel.check_if_sampling_is_sufficiant"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.OpticalModel.OpticalModel.check_if_sampling_is_sufficiant" title="Link to this definition"></a></dt>
+<dd><p>Check if the sampling is sufficiant to avoid aliasing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>number of sample points per pixel</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="simca.OpticalModel.OpticalModel.generate_2D_gaussian">
+<span class="sig-name descname"><span class="pre">generate_2D_gaussian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_size_x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_size_y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_of_samples</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/OpticalModel.html#OpticalModel.generate_2D_gaussian"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.OpticalModel.OpticalModel.generate_2D_gaussian" title="Link to this definition"></a></dt>
+<dd><p>Generate a 2D Gaussian of a given radius</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>radius</strong> (<em>float</em>) – radius of the Gaussian</p></li>
+<li><p><strong>sample_size_x</strong> (<em>float</em>) – size of each sample along the X axis</p></li>
+<li><p><strong>sample_size_y</strong> (<em>float</em>) – size of each sample along the Y axis</p></li>
+<li><p><strong>nb_of_samples</strong> (<em>int</em>) – number of samples along each axis</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>2D Gaussian shape array</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="simca.OpticalModel.OpticalModel.generate_psf">
+<span class="sig-name descname"><span class="pre">generate_psf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/OpticalModel.html#OpticalModel.generate_psf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.OpticalModel.OpticalModel.generate_psf" title="Link to this definition"></a></dt>
+<dd><p>Generate a PSF</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>type</strong> (<em>str</em>) – type of PSF to generate</p></li>
+<li><p><strong>radius</strong> (<em>float</em>) – radius of the PSF</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>PSF generated (shape = R x C)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="simca.OpticalModel.OpticalModel.get_incident_angle_min_dev">
+<span class="sig-name descname"><span class="pre">get_incident_angle_min_dev</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">A</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">D_m</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/OpticalModel.html#OpticalModel.get_incident_angle_min_dev"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.OpticalModel.OpticalModel.get_incident_angle_min_dev" title="Link to this definition"></a></dt>
+<dd><p>Calculate the angle of incidence corresponding to the minimum deviation angle</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>A</strong> (<em>float</em>) – apex angle of the prism – in radians</p></li>
+<li><p><strong>D_m</strong> (<em>float</em>) – minimum deviation angle – in radians</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>angle of incidence corresponding to minimum of deviation – in radians</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="simca.OpticalModel.OpticalModel.model_Grating_angle_to_angle">
+<span class="sig-name descname"><span class="pre">model_Grating_angle_to_angle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">k_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lba</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">G</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/OpticalModel.html#OpticalModel.model_Grating_angle_to_angle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.OpticalModel.OpticalModel.model_Grating_angle_to_angle" title="Link to this definition"></a></dt>
+<dd><p>Model of the grating</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>k_in</strong> (<em>numpy.ndarray</em>) – wave vector of the incident ray (shape = 3 x N)</p></li>
+<li><p><strong>lba</strong> (<em>numpy.ndarray</em>) – wavelengths (shape = N) – in nm</p></li>
+<li><p><strong>m</strong> (<em>float</em>) – diffraction order of the grating – no units</p></li>
+<li><p><strong>G</strong> (<em>float</em>) – lines density of the grating – in lines/mm</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>wave vector of the outgoing ray (shape = 3 x N)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="simca.OpticalModel.OpticalModel.model_Lens_angle_to_position">
+<span class="sig-name descname"><span class="pre">model_Lens_angle_to_position</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">k_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">F</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/OpticalModel.html#OpticalModel.model_Lens_angle_to_position"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.OpticalModel.OpticalModel.model_Lens_angle_to_position" title="Link to this definition"></a></dt>
+<dd><p>Model of the lens : angle to position</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>k_in</strong> (<em>numpy.ndarray</em>) – wave vector of the incident ray (shape = 3 x N)</p></li>
+<li><p><strong>F</strong> (<em>float</em>) – focal length of the lens – in um</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>position in the image plane (X,Y) – in um</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="simca.OpticalModel.OpticalModel.model_Lens_pos_to_angle">
+<span class="sig-name descname"><span class="pre">model_Lens_pos_to_angle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">F</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/OpticalModel.html#OpticalModel.model_Lens_pos_to_angle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.OpticalModel.OpticalModel.model_Lens_pos_to_angle" title="Link to this definition"></a></dt>
+<dd><p>Model of the lens : position to angle</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x_obj</strong> (<em>numpy.ndarray</em>) – position X in the image plane (shape = N) – in um</p></li>
+<li><p><strong>y_obj</strong> (<em>numpy.ndarray</em>) – position Y in the image plane (shape = N) – in um</p></li>
+<li><p><strong>F</strong> (<em>float</em>) – focal length of the lens – in um</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>wave vector of the outgoing ray (shape = 3 x N)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="simca.OpticalModel.OpticalModel.model_Prism_angle_to_angle">
+<span class="sig-name descname"><span class="pre">model_Prism_angle_to_angle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">k0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">A</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/OpticalModel.html#OpticalModel.model_Prism_angle_to_angle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.OpticalModel.OpticalModel.model_Prism_angle_to_angle" title="Link to this definition"></a></dt>
+<dd><p>Ray tracing through the prism</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>k0</strong> (<em>numpy.ndarray</em>) – wave vector of the incident ray (shape = 3 x N)</p></li>
+<li><p><strong>n</strong> (<em>numpy.ndarray</em>) – refractive index of the prism (shape = N)</p></li>
+<li><p><strong>A</strong> (<em>float</em>) – angle of the prism – in radians</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>wave vector of the outgoing ray (shape = 3 x N)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="simca.OpticalModel.OpticalModel.propagate_through_arm">
+<span class="sig-name descname"><span class="pre">propagate_through_arm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X_vec_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y_vec_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lba</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/OpticalModel.html#OpticalModel.propagate_through_arm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.OpticalModel.OpticalModel.propagate_through_arm" title="Link to this definition"></a></dt>
+<dd><p>Propagate the light through one system arm : (lens + dispersive element + lens)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X_vec_in</strong> (<em>numpy.ndarray</em>) – X coordinates of the coded aperture pixels (1D array)</p></li>
+<li><p><strong>Y_vec_in</strong> (<em>numpy.ndarray</em>) – Y coordinates of the coded aperture pixels (1D array)</p></li>
+<li><p><strong>n</strong> (<em>numpy.ndarray</em>) – refractive indexes of the system (at the corresponding wavelength)</p></li>
+<li><p><strong>lba</strong> (<em>numpy.ndarray</em>) – wavelengths</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>flatten arrays corresponding to the propagated X and Y coordinates</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="simca.OpticalModel.OpticalModel.propagation_with_distorsions">
+<span class="sig-name descname"><span class="pre">propagation_with_distorsions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X_input_grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y_input_grid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/OpticalModel.html#OpticalModel.propagation_with_distorsions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.OpticalModel.OpticalModel.propagation_with_distorsions" title="Link to this definition"></a></dt>
+<dd><p>Propagate the coded aperture coded_aperture through one CASSI system</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X_input_grid</strong> (<em>numpy.ndarray</em>) – x coordinates grid</p></li>
+<li><p><strong>Y_input_grid</strong> (<em>numpy.ndarray</em>) – y coordinates grid</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>X coordinates of the propagated coded aperture grids, Y coordinates of the propagated coded aperture grids</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="simca.OpticalModel.OpticalModel.propagation_with_no_distorsions">
+<span class="sig-name descname"><span class="pre">propagation_with_no_distorsions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X_input_grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y_input_grid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/OpticalModel.html#OpticalModel.propagation_with_no_distorsions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.OpticalModel.OpticalModel.propagation_with_no_distorsions" title="Link to this definition"></a></dt>
+<dd><p>Vanilla Propagation model used in most cassi acquisitions simulation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X_input_grid</strong> (<em>numpy.ndarray</em>) – X coordinates of the grid to be propagated (2D)</p></li>
+<li><p><strong>Y_input_grid</strong> (<em>numpy.ndarray</em>) – Y coordinates of the grid to be propagated (2D)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>X coordinates grids of the propagated coded apertures, Y coordinates grids of the propagated coded apertures</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="simca.OpticalModel.OpticalModel.sellmeier">
+<span class="sig-name descname"><span class="pre">sellmeier</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lambda_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">glass_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'BK7'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/OpticalModel.html#OpticalModel.sellmeier"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.OpticalModel.OpticalModel.sellmeier" title="Link to this definition"></a></dt>
+<dd><p>Evaluating the refractive index value of a prism for a given lambda based on Sellmeier equation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>lambda</strong> (<em>numpy.ndarray</em><em> of </em><em>float</em>) – wavelength in nm</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>index value corresponding to the input wavelength</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray of float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="simca.OpticalModel.OpticalModel.set_optical_config">
+<span class="sig-name descname"><span class="pre">set_optical_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/OpticalModel.html#OpticalModel.set_optical_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.OpticalModel.OpticalModel.set_optical_config" title="Link to this definition"></a></dt>
+<dd><p>Set the optical model configuration</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>config</strong> (<em>dict</em>) – configuration file</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="simca.OpticalModel.OpticalModel.set_wavelengths">
+<span class="sig-name descname"><span class="pre">set_wavelengths</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wavelength_min</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wavelength_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_of_spectral_samples</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/OpticalModel.html#OpticalModel.set_wavelengths"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.OpticalModel.OpticalModel.set_wavelengths" title="Link to this definition"></a></dt>
+<dd><p>Set the wavelengths range of the optical system</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>wavelength_min</strong> (<em>float</em>) – minimum wavelength of the system</p></li>
+<li><p><strong>wavelength_max</strong> (<em>float</em>) – maximum wavelength of the system</p></li>
+<li><p><strong>nb_of_spectral_samples</strong> (<em>int</em>) – number of spectral samples of the system</p></li>
+</ul>
+</dd>
+</dl>
+<p>Returns:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="simca.OpticalModel.OpticalModel.simplified_grating_in_out">
+<span class="sig-name descname"><span class="pre">simplified_grating_in_out</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lba</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">G</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/OpticalModel.html#OpticalModel.simplified_grating_in_out"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.OpticalModel.OpticalModel.simplified_grating_in_out" title="Link to this definition"></a></dt>
+<dd><p>Model 1D of the grating in the dispersion direction</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>alpha</strong> (<em>numpy.ndarray</em><em> or </em><em>float</em>) – angle of the incident ray (shape = N) – in radians</p></li>
+<li><p><strong>lba</strong> (<em>numpy.ndarray</em><em> or </em><em>float</em>) – wavelengths (shape = N) – in nm</p></li>
+<li><p><strong>m</strong> (<em>float</em>) – diffraction order of the grating – no units</p></li>
+<li><p><strong>G</strong> (<em>float</em>) – lines density of the grating – in lines/mm</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>angle of the outgoing ray (shape = N) – in radians</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="simca.OpticalModel.OpticalModel.update_config">
+<span class="sig-name descname"><span class="pre">update_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_config</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/OpticalModel.html#OpticalModel.update_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.OpticalModel.OpticalModel.update_config" title="Link to this definition"></a></dt>
+<dd><p>Update the optical model configuration</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>new_config</strong> (<em>dict</em>) – new configuration</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="functions">
+<h2>functions<a class="headerlink" href="#functions" title="Link to this heading"></a></h2>
+<blockquote>
+<div><dl class="py function" id="module-simca.functions_scenes">
+<dt class="sig sig-object py" id="simca.functions_scenes.explore_spectrums">
+<span class="sig-prename descclassname"><span class="pre">simca.functions_scenes.</span></span><span class="sig-name descname"><span class="pre">explore_spectrums</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">complete_gt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignored_labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/functions_scenes.html#explore_spectrums"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.functions_scenes.explore_spectrums" title="Link to this definition"></a></dt>
+<dd><p>Plot sampled spectrums with mean + std for each class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>img</strong> – 3D hyperspectral image</p></li>
+<li><p><strong>complete_gt</strong> – 2D array of labels</p></li>
+<li><p><strong>class_names</strong> – list of class names</p></li>
+<li><p><strong>ignored_labels</strong> (<em>optional</em>) – list of labels to ignore</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict of mean spectrum by class</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>mean_spectrums</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="simca.functions_scenes.get_dataset">
+<span class="sig-prename descclassname"><span class="pre">simca.functions_scenes.</span></span><span class="sig-name descname"><span class="pre">get_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">folder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'./datasets/'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/functions_scenes.html#get_dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.functions_scenes.get_dataset" title="Link to this definition"></a></dt>
+<dd><p>Gets the dataset specified by name and return the related components.
+:param dataset_name: the name of the dataset
+:type dataset_name: str
+:param folder: folder where the datasets are stored, defaults to “./datasets/”
+:type folder: str</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>3D hyperspectral image (WxHxB)
+numpy.ndarray: 2D array of labels (integers)
+list: list of class names
+ignored_labels: list of int classes to ignore</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="simca.functions_scenes.interpolate_data_along_wavelength">
+<span class="sig-prename descclassname"><span class="pre">simca.functions_scenes.</span></span><span class="sig-name descname"><span class="pre">interpolate_data_along_wavelength</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">current_sampling</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_sampling</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunk_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/functions_scenes.html#interpolate_data_along_wavelength"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.functions_scenes.interpolate_data_along_wavelength" title="Link to this definition"></a></dt>
+<dd><p>Interpolate the input 3D data along a new sampling in the third axis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>numpy.ndarray</em>) – 3D data to interpolate</p></li>
+<li><p><strong>current_sampling</strong> (<em>numpy.ndarray</em>) – current sampling for the 3rd axis</p></li>
+<li><p><strong>new_sampling</strong> (<em>numpy.ndarray</em>) – new sampling for the 3rd axis</p></li>
+<li><p><strong>chunk_size</strong> (<em>int</em>) – size of the chunks to use for the interpolation</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="simca.functions_scenes.palette_init">
+<span class="sig-prename descclassname"><span class="pre">simca.functions_scenes.</span></span><span class="sig-name descname"><span class="pre">palette_init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label_values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/functions_scenes.html#palette_init"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.functions_scenes.palette_init" title="Link to this definition"></a></dt>
+<dd><p>Creates a palette for the classes</p>
+</dd></dl>
+
+</div></blockquote>
+<dl class="py function" id="module-simca.functions_patterns_generation">
+<dt class="sig sig-object py" id="simca.functions_patterns_generation.FindLargestVoid">
+<span class="sig-prename descclassname"><span class="pre">simca.functions_patterns_generation.</span></span><span class="sig-name descname"><span class="pre">FindLargestVoid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">BinaryPattern</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">StandardDeviation</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/functions_patterns_generation.html#FindLargestVoid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.functions_patterns_generation.FindLargestVoid" title="Link to this definition"></a></dt>
+<dd><dl>
+<dt>This function returns the indices of the largest void in the given binary</dt><dd><blockquote>
+<div><p>pattern as defined by Ulichney.</p>
+</div></blockquote>
+<dl class="simple">
+<dt>param BinaryPattern A boolean array (should be two-dimensional although the</dt><dd><p>implementation works in arbitrary dimensions).</p>
+</dd>
+<dt>param StandardDeviation The standard deviation used for the Gaussian filter</dt><dd><p>in pixels. This can be a single float for an isotropic Gaussian or a
+tuple with one float per dimension for an anisotropic Gaussian.</p>
+</dd>
+</dl>
+</dd>
+<dt>eturn A flat index i such that BinaryPattern.flat[i] corresponds to the</dt><dd><blockquote>
+<div><p>largest void. By definition this is a majority pixel.</p>
+</div></blockquote>
+<p>sa GetVoidAndClusterBlueNoise</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="simca.functions_patterns_generation.FindTightestCluster">
+<span class="sig-prename descclassname"><span class="pre">simca.functions_patterns_generation.</span></span><span class="sig-name descname"><span class="pre">FindTightestCluster</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">BinaryPattern</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">StandardDeviation</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/functions_patterns_generation.html#FindTightestCluster"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.functions_patterns_generation.FindTightestCluster" title="Link to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Like FindLargestVoid() but finds the tightest cluster which is a minority</dt><dd><p>pixel by definition.</p>
+</dd>
+</dl>
+<p>sa GetVoidAndClusterBlueNoise</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="simca.functions_patterns_generation.GetVoidAndClusterBlueNoise">
+<span class="sig-prename descclassname"><span class="pre">simca.functions_patterns_generation.</span></span><span class="sig-name descname"><span class="pre">GetVoidAndClusterBlueNoise</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">OutputShape</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">StandardDeviation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">InitialSeedFraction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/functions_patterns_generation.html#GetVoidAndClusterBlueNoise"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.functions_patterns_generation.GetVoidAndClusterBlueNoise" title="Link to this definition"></a></dt>
+<dd><dl>
+<dt>Generates a blue noise dither array of the given shape using the method</dt><dd><blockquote>
+<div><p>proposed by Ulichney [1993] in “The void-and-cluster method for dither array
+generation” published in Proc. SPIE 1913.</p>
+</div></blockquote>
+<dl class="simple">
+<dt>param OutputShape The shape of the output array. This function works in</dt><dd><p>arbitrary dimension, i.e. OutputShape can have arbitrary length. Though
+it is only tested for the 2D case where you should pass a tuple
+(Height,Width).</p>
+</dd>
+<dt>param StandardDeviation The standard deviation in pixels used for the</dt><dd><p>Gaussian filter defining largest voids and tightest clusters. Larger
+values lead to more low-frequency content but better isotropy. Small
+values lead to more ordered patterns with less low-frequency content.
+Ulichney proposes to use a value of 1.5. If you want an anisotropic
+Gaussian, you can pass a tuple of length len(OutputShape) with one
+standard deviation per dimension.</p>
+</dd>
+<dt>param InitialSeedFraction The only non-deterministic step in the algorithm</dt><dd><p>marks a small number of pixels in the grid randomly. This parameter
+defines the fraction of such points. It has to be positive but less
+than 0.5. Very small values lead to ordered patterns, beyond that there
+is little change.</p>
+</dd>
+</dl>
+</dd>
+<dt>eturn An integer array of shape OutputShape containing each integer from 0</dt><dd><p>to np.prod(OutputShape)-1 exactly once.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="simca.functions_patterns_generation.generate_blue_noise_type_1_pattern">
+<span class="sig-prename descclassname"><span class="pre">simca.functions_patterns_generation.</span></span><span class="sig-name descname"><span class="pre">generate_blue_noise_type_1_pattern</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shape</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/functions_patterns_generation.html#generate_blue_noise_type_1_pattern"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.functions_patterns_generation.generate_blue_noise_type_1_pattern" title="Link to this definition"></a></dt>
+<dd><p>Generate blue noise (high frequency pseudo-random) type pattern</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>shape</strong> (<em>tuple</em><em> of </em><em>int</em>) – shape of the pattern</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>binary blue noise type pattern</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="simca.functions_patterns_generation.generate_blue_noise_type_2_pattern">
+<span class="sig-prename descclassname"><span class="pre">simca.functions_patterns_generation.</span></span><span class="sig-name descname"><span class="pre">generate_blue_noise_type_2_pattern</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shape</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">std</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_seed_fraction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/functions_patterns_generation.html#generate_blue_noise_type_2_pattern"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.functions_patterns_generation.generate_blue_noise_type_2_pattern" title="Link to this definition"></a></dt>
+<dd><p>Generate blue noise pattern according to the void-and-cluster method proposed by Ulichney [1993] in “The void-and-cluster method for dither array generation” published in Proc. SPIE 1913.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>shape</strong> (<em>tuple</em>) – size of the pattern</p></li>
+<li><p><strong>std</strong> (<em>float</em>) – standard deviation in pixels used for the Gaussian filter</p></li>
+<li><p><strong>initial_seed_fraction</strong> (<em>float</em>) – Initial fraction of marked pixels in the grid. Has to be less than 0.5.
+Very small values lead to ordered patterns</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>float blue noise pattern</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="simca.functions_patterns_generation.generate_ln_orthogonal_pattern">
+<span class="sig-prename descclassname"><span class="pre">simca.functions_patterns_generation.</span></span><span class="sig-name descname"><span class="pre">generate_ln_orthogonal_pattern</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">W</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/functions_patterns_generation.html#generate_ln_orthogonal_pattern"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.functions_patterns_generation.generate_ln_orthogonal_pattern" title="Link to this definition"></a></dt>
+<dd><p>Generate a Length-N orthogonal pattern according to <a class="reference external" href="https://hal.laas.fr/hal-02993037">https://hal.laas.fr/hal-02993037</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>size</strong> (<em>tuple</em>) – size of the pattern</p></li>
+<li><p><strong>W</strong> (<em>int</em>) – number of wavelengths in the scene</p></li>
+<li><p><strong>N</strong> (<em>int</em>) – number of acquisitions</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>length-N orthogonal pattern of shape = size[0] x (size[1]+W-1) x N):</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="simca.functions_patterns_generation.generate_orthogonal_pattern">
+<span class="sig-prename descclassname"><span class="pre">simca.functions_patterns_generation.</span></span><span class="sig-name descname"><span class="pre">generate_orthogonal_pattern</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">W</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/functions_patterns_generation.html#generate_orthogonal_pattern"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.functions_patterns_generation.generate_orthogonal_pattern" title="Link to this definition"></a></dt>
+<dd><p>Generate an orthogonal pattern according to <a class="reference external" href="https://hal.laas.fr/hal-02993037">https://hal.laas.fr/hal-02993037</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>size</strong> (<em>list</em><em> of </em><em>int</em>) – size of the pattern</p></li>
+<li><p><strong>W</strong> (<em>int</em>) – number of wavelengths in the scene</p></li>
+<li><p><strong>N</strong> (<em>int</em>) – number of acquisitions</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>orthogonal pattern :  shape =  size[0] x (size[1]+W-1) x N):</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="simca.functions_patterns_generation.generate_random_pattern">
+<span class="sig-prename descclassname"><span class="pre">simca.functions_patterns_generation.</span></span><span class="sig-name descname"><span class="pre">generate_random_pattern</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shape</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ROM</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/functions_patterns_generation.html#generate_random_pattern"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.functions_patterns_generation.generate_random_pattern" title="Link to this definition"></a></dt>
+<dd><p>Generate a random pattern with a given rate of open/close mirrors</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>shape</strong> (<em>tuple</em><em> of </em><em>int</em>) – shape of the pattern</p></li>
+<li><p><strong>ROM</strong> (<em>float</em>) – ratio of open mirrors</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>random pattern</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="simca.functions_patterns_generation.generate_slit_pattern">
+<span class="sig-prename descclassname"><span class="pre">simca.functions_patterns_generation.</span></span><span class="sig-name descname"><span class="pre">generate_slit_pattern</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shape</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slit_position</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slit_width</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/functions_patterns_generation.html#generate_slit_pattern"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.functions_patterns_generation.generate_slit_pattern" title="Link to this definition"></a></dt>
+<dd><p>Generate a slit pattern that starts at the center of the image and goes to the right as slit position increases.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>shape</strong> (<em>tuple</em>) – shape of the pattern</p></li>
+<li><p><strong>slit_position</strong> (<em>int</em>) – position of the slit in relation to the central column</p></li>
+<li><p><strong>slit_width</strong> (<em>int</em>) – width of the slit in pixels</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>slit pattern</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="simca.functions_patterns_generation.load_custom_list_of_patterns">
+<span class="sig-prename descclassname"><span class="pre">simca.functions_patterns_generation.</span></span><span class="sig-name descname"><span class="pre">load_custom_list_of_patterns</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shape</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">patterns_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/functions_patterns_generation.html#load_custom_list_of_patterns"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.functions_patterns_generation.load_custom_list_of_patterns" title="Link to this definition"></a></dt>
+<dd><p>Load custom list of patterns from h5 file. If the patterns are not the same size as the coded aperture, crop from the center of the loaded patterns.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>shape</strong> (<em>tuple</em>) – size of the pattern</p></li>
+<li><p><strong>patterns_path</strong> (<em>str</em>) – path to the h5 file containing the patterns</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>list of patterns</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="simca.functions_patterns_generation.load_custom_pattern">
+<span class="sig-prename descclassname"><span class="pre">simca.functions_patterns_generation.</span></span><span class="sig-name descname"><span class="pre">load_custom_pattern</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shape</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pattern_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/functions_patterns_generation.html#load_custom_pattern"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.functions_patterns_generation.load_custom_pattern" title="Link to this definition"></a></dt>
+<dd><p>Load custom pattern from h5 file. If the pattern is not the same size as the coded aperture, crop from the center of the loaded pattern.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>shape</strong> (<em>tuple</em>) – size of the pattern</p></li>
+<li><p><strong>pattern_path</strong> (<em>str</em>) – path to the h5 file containing the pattern</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>float blue noise pattern</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function" id="module-simca.functions_acquisition">
+<dt class="sig sig-object py" id="simca.functions_acquisition.crop_center">
+<span class="sig-prename descclassname"><span class="pre">simca.functions_acquisition.</span></span><span class="sig-name descname"><span class="pre">crop_center</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_of_pixels_along_x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_of_pixels_along_y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/functions_acquisition.html#crop_center"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.functions_acquisition.crop_center" title="Link to this definition"></a></dt>
+<dd><p>Crop the given array to the given size, centered on the array</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>array</strong> (<em>numpy.ndarray</em>) – 2D array to be cropped</p></li>
+<li><p><strong>nb_of_pixels_along_x</strong> (<em>int</em>) – number of samples to keep along the X axis</p></li>
+<li><p><strong>nb_of_pixels_along_y</strong> (<em>int</em>) – number of samples to keep along the Y axis</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>cropped array</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="simca.functions_acquisition.generate_dd_measurement">
+<span class="sig-prename descclassname"><span class="pre">simca.functions_acquisition.</span></span><span class="sig-name descname"><span class="pre">generate_dd_measurement</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scene</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filtering_cube</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunk_size</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/functions_acquisition.html#generate_dd_measurement"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.functions_acquisition.generate_dd_measurement" title="Link to this definition"></a></dt>
+<dd><p>Generate DD-CASSI type system measurement from a scene and a filtering cube. ref : “Single-shot compressive spectral imaging with a dual-disperser architecture”, M.Gehm et al., Optics Express, 2007</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>scene</strong> (<em>numpy.ndarray</em>) – observed scene (shape = R  x C x W)</p></li>
+<li><p><strong>filtering_cube</strong> (<em>numpy.ndarray</em>) – filtering cube of the instrument for a given pattern (shape = R x C x W)</p></li>
+<li><p><strong>chunk_size</strong> (<em>int</em>) – size of the spatial chunks in which the Hadamard product is performed</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>filtered scene (shape = R x C x W)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="simca.functions_acquisition.generate_sd_measurement_cube">
+<span class="sig-prename descclassname"><span class="pre">simca.functions_acquisition.</span></span><span class="sig-name descname"><span class="pre">generate_sd_measurement_cube</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filtered_scene</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_input</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y_input</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y_target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interp_method</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/functions_acquisition.html#generate_sd_measurement_cube"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.functions_acquisition.generate_sd_measurement_cube" title="Link to this definition"></a></dt>
+<dd><p>Generate SD measurement cube from the coded aperture and the scene.
+For Single-Disperser CASSI systems, the scene is filtered then propagated in the detector plane.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>filtered_scene</strong> (<em>numpy.ndarray</em>) – filtered scene (shape = R x C x W)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>SD measurement cube (shape = R x C x W)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="simca.functions_acquisition.interpolate_data_on_grid_positions">
+<span class="sig-prename descclassname"><span class="pre">simca.functions_acquisition.</span></span><span class="sig-name descname"><span class="pre">interpolate_data_on_grid_positions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_init</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y_init</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y_target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'unstructured'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interp_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/functions_acquisition.html#interpolate_data_on_grid_positions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.functions_acquisition.interpolate_data_on_grid_positions" title="Link to this definition"></a></dt>
+<dd><p>Interpolate data on a single 2D grid defined by X_target and Y_target</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>numpy.ndarray</em>) – data to interpolate (3D or 2D)</p></li>
+<li><p><strong>X_init</strong> (<em>numpy.ndarray</em>) – X coordinates of the initial grid (3D)</p></li>
+<li><p><strong>Y_init</strong> (<em>numpy.ndarray</em>) – Y coordinates of the initial grid (3D)</p></li>
+<li><p><strong>X_target</strong> (<em>numpy.ndarray</em>) – X coordinates of the target grid (2D)</p></li>
+<li><p><strong>Y_target</strong> (<em>numpy.ndarray</em>) – Y coordinates of the target grid (2D)</p></li>
+<li><p><strong>grid_type</strong> (<em>str</em>) – type of the target grid (default = “unstructured”, other option = “regular”)</p></li>
+<li><p><strong>interp_method</strong> (<em>str</em>) – interpolation method (default = “linear”)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>3D data interpolated on the target grid</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="simca.functions_acquisition.match_dataset_labels_to_instrument">
+<span class="sig-prename descclassname"><span class="pre">simca.functions_acquisition.</span></span><span class="sig-name descname"><span class="pre">match_dataset_labels_to_instrument</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset_labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filtering_cube</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/functions_acquisition.html#match_dataset_labels_to_instrument"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.functions_acquisition.match_dataset_labels_to_instrument" title="Link to this definition"></a></dt>
+<dd><p>Match the size of the dataset labels to the size of the filtering cube. Either by padding or by cropping</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataset_labels</strong> (<em>numpy.ndarray</em>) – dataset labels (shape = R_dts  x C_dts)</p></li>
+<li><p><strong>filtering_cube</strong> (<em>numpy.ndarray</em>) – filtering cube of the instrument</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>scene labels (shape = R  x C)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="simca.functions_acquisition.match_dataset_to_instrument">
+<span class="sig-prename descclassname"><span class="pre">simca.functions_acquisition.</span></span><span class="sig-name descname"><span class="pre">match_dataset_to_instrument</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filtering_cube</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/functions_acquisition.html#match_dataset_to_instrument"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.functions_acquisition.match_dataset_to_instrument" title="Link to this definition"></a></dt>
+<dd><p>Match the size of the dataset to the size of the filtering cube. Either by padding or by cropping</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataset</strong> (<em>numpy.ndarray</em>) – dataset</p></li>
+<li><p><strong>filtering_cube</strong> (<em>numpy.ndarray</em>) – filtering cube of the instrument</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>observed scene (shape = R  x C x W)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="simca.functions_acquisition.worker_regulargrid">
+<span class="sig-prename descclassname"><span class="pre">simca.functions_acquisition.</span></span><span class="sig-name descname"><span class="pre">worker_regulargrid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/functions_acquisition.html#worker_regulargrid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.functions_acquisition.worker_regulargrid" title="Link to this definition"></a></dt>
+<dd><p>Process to parallellize the structured griddata interpolation between the propagated grid (mask and the detector grid
+Note : For now it is identical to the unstructured method but it could be faster …</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>args</strong> (<em>tuple</em>) – containing the following elements: X_init_2D, Y_init_2D, data_2D, X_target_2D, Y_target_2D</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>2D array of the data interpolated on the target grid</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="simca.functions_acquisition.worker_unstructured">
+<span class="sig-prename descclassname"><span class="pre">simca.functions_acquisition.</span></span><span class="sig-name descname"><span class="pre">worker_unstructured</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/functions_acquisition.html#worker_unstructured"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.functions_acquisition.worker_unstructured" title="Link to this definition"></a></dt>
+<dd><p>Process to parallellize the unstructured griddata interpolation between the propagated grid (mask and the detector grid</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>args</strong> (<em>tuple</em>) – containing the following elements: X_init_2D, Y_init_2D, data_2D, X_target_2D, Y_target_2D</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>2D array of the data interpolated on the target grid</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function" id="module-simca.functions_general_purpose">
+<dt class="sig sig-object py" id="simca.functions_general_purpose.initialize_acquisitions_directory">
+<span class="sig-prename descclassname"><span class="pre">simca.functions_general_purpose.</span></span><span class="sig-name descname"><span class="pre">initialize_acquisitions_directory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/functions_general_purpose.html#initialize_acquisitions_directory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.functions_general_purpose.initialize_acquisitions_directory" title="Link to this definition"></a></dt>
+<dd><p>Initialize the directory where the results of the acquisition will be stored</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>config</strong> (<em>dict</em>) – a configuration dictionary containing storing information</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>path to the directory where the results will be stored</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="simca.functions_general_purpose.load_yaml_config">
+<span class="sig-prename descclassname"><span class="pre">simca.functions_general_purpose.</span></span><span class="sig-name descname"><span class="pre">load_yaml_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/functions_general_purpose.html#load_yaml_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.functions_general_purpose.load_yaml_config" title="Link to this definition"></a></dt>
+<dd><p>Load a YAML configuration file as a dictionary</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>file_path</strong> (<em>str</em>) – path to the YAML configuration file</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>configuration dictionary</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="simca.functions_general_purpose.rotation_x">
+<span class="sig-prename descclassname"><span class="pre">simca.functions_general_purpose.</span></span><span class="sig-name descname"><span class="pre">rotation_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/functions_general_purpose.html#rotation_x"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.functions_general_purpose.rotation_x" title="Link to this definition"></a></dt>
+<dd><p>Rotate 3D matrix around the X axis</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>theta</strong> (<em>float</em>) – Input angle (in rad)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>2D rotation matrix</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="simca.functions_general_purpose.rotation_y">
+<span class="sig-prename descclassname"><span class="pre">simca.functions_general_purpose.</span></span><span class="sig-name descname"><span class="pre">rotation_y</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/functions_general_purpose.html#rotation_y"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.functions_general_purpose.rotation_y" title="Link to this definition"></a></dt>
+<dd><p>Rotate 3D matrix around the Y axis</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>theta</strong> (<em>float</em>) – Input angle (in rad)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>2D rotation matrix</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="simca.functions_general_purpose.rotation_z">
+<span class="sig-prename descclassname"><span class="pre">simca.functions_general_purpose.</span></span><span class="sig-name descname"><span class="pre">rotation_z</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/functions_general_purpose.html#rotation_z"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.functions_general_purpose.rotation_z" title="Link to this definition"></a></dt>
+<dd><p>Rotate 3D matrix around the Z axis</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>theta</strong> (<em>float</em>) – Input angle (in rad)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>2D rotation matrix</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="simca.functions_general_purpose.save_config_file">
+<span class="sig-prename descclassname"><span class="pre">simca.functions_general_purpose.</span></span><span class="sig-name descname"><span class="pre">save_config_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_file_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">result_directory</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/functions_general_purpose.html#save_config_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.functions_general_purpose.save_config_file" title="Link to this definition"></a></dt>
+<dd><p>Save a configuration file in a YAML file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config_file_name</strong> (<em>str</em>) – name of the file</p></li>
+<li><p><strong>config_file</strong> (<em>dict</em>) – configuration file to save</p></li>
+<li><p><strong>result_directory</strong> (<em>str</em>) – path to the directory where the results will be stored</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="simca.functions_general_purpose.save_data_in_hdf5">
+<span class="sig-prename descclassname"><span class="pre">simca.functions_general_purpose.</span></span><span class="sig-name descname"><span class="pre">save_data_in_hdf5</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">result_directory</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simca/functions_general_purpose.html#save_data_in_hdf5"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#simca.functions_general_purpose.save_data_in_hdf5" title="Link to this definition"></a></dt>
+<dd><p>Save a dataset in a HDF5 file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file_name</strong> (<em>str</em>) – name of the file</p></li>
+<li><p><strong>data</strong> (<em>any type</em>) – data to save</p></li>
+<li><p><strong>result_directory</strong> (<em>str</em>) – path to the directory where the results will be stored</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Tutorial_advanced.html" class="btn btn-neutral float-left" title="Tutorial - Advanced (only script)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Antoine Rouxel.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>simca.functions_patterns_generation &mdash; simca 1.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=f2a433a1"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            simca
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Tutorial_with_GUI.html">Tutorial - Basics (with GUI)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Tutorial_advanced.html">Tutorial - Advanced (only script)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../simca.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">simca</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">simca.functions_patterns_generation</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for simca.functions_patterns_generation</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">fftpack</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">ndimage</span>
+<span class="kn">import</span> <span class="nn">h5py</span>
+<div class="viewcode-block" id="generate_blue_noise_type_1_pattern">
+<a class="viewcode-back" href="../../simca.html#simca.functions_patterns_generation.generate_blue_noise_type_1_pattern">[docs]</a>
+<span class="k">def</span> <span class="nf">generate_blue_noise_type_1_pattern</span><span class="p">(</span><span class="n">shape</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate blue noise (high frequency pseudo-random) type pattern</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        shape (tuple of int): shape of the pattern</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        numpy.ndarray: binary blue noise type pattern</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">N</span> <span class="o">=</span> <span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">()</span>
+    <span class="n">noise</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">standard_normal</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
+    <span class="n">noise</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">noise</span><span class="p">,</span> <span class="n">shape</span><span class="p">)</span>
+
+    <span class="n">f_x</span> <span class="o">=</span> <span class="n">fftpack</span><span class="o">.</span><span class="n">fftfreq</span><span class="p">(</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">f_y</span> <span class="o">=</span> <span class="n">fftpack</span><span class="o">.</span><span class="n">fftfreq</span><span class="p">(</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">f_x_shift</span> <span class="o">=</span> <span class="n">fftpack</span><span class="o">.</span><span class="n">fftshift</span><span class="p">(</span><span class="n">f_x</span><span class="p">)</span>
+    <span class="n">f_y_shift</span> <span class="o">=</span> <span class="n">fftpack</span><span class="o">.</span><span class="n">fftshift</span><span class="p">(</span><span class="n">f_y</span><span class="p">)</span>
+    <span class="n">f_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">f_x_shift</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">f_y_shift</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="n">spectrum</span> <span class="o">=</span> <span class="n">fftpack</span><span class="o">.</span><span class="n">fftshift</span><span class="p">(</span><span class="n">fftpack</span><span class="o">.</span><span class="n">fft2</span><span class="p">(</span><span class="n">noise</span><span class="p">))</span>
+    <span class="n">filtered_spectrum</span> <span class="o">=</span> <span class="n">spectrum</span> <span class="o">*</span> <span class="n">f_matrix</span>
+    <span class="n">filtered_noise</span> <span class="o">=</span> <span class="n">fftpack</span><span class="o">.</span><span class="n">ifft2</span><span class="p">(</span><span class="n">fftpack</span><span class="o">.</span><span class="n">ifftshift</span><span class="p">(</span><span class="n">filtered_spectrum</span><span class="p">))</span><span class="o">.</span><span class="n">real</span>
+
+    <span class="c1"># Make the pattern binary</span>
+    <span class="n">threshold</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">filtered_noise</span><span class="p">)</span>
+    <span class="n">binary_pattern</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">filtered_noise</span> <span class="o">&gt;</span> <span class="n">threshold</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">binary_pattern</span></div>
+
+
+<div class="viewcode-block" id="generate_orthogonal_pattern">
+<a class="viewcode-back" href="../../simca.html#simca.functions_patterns_generation.generate_orthogonal_pattern">[docs]</a>
+<span class="k">def</span> <span class="nf">generate_orthogonal_pattern</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">N</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate an orthogonal pattern according to https://hal.laas.fr/hal-02993037</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        size (list of int): size of the pattern</span>
+<span class="sd">        W (int): number of wavelengths in the scene</span>
+<span class="sd">        N (int): number of acquisitions</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        numpy.ndarray: orthogonal pattern :  shape =  size[0] x (size[1]+W-1) x N):</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">C</span><span class="p">,</span> <span class="n">R</span> <span class="o">=</span> <span class="n">size</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">size</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="c1"># Number of columns, number of rows</span>
+
+    <span class="n">K</span> <span class="o">=</span> <span class="n">C</span> <span class="o">+</span> <span class="n">W</span> <span class="o">-</span> <span class="mi">1</span> <span class="c1"># Number of columns in H</span>
+    <span class="n">M</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">W</span><span class="o">/</span><span class="n">N</span><span class="p">))</span> <span class="c1"># Number of open mirrors</span>
+    <span class="n">H_model</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">R</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">N</span><span class="p">))</span> <span class="c1"># Periodic model</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">R</span><span class="p">):</span>
+        <span class="n">available_pos</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">W</span><span class="p">))</span> <span class="c1"># Positions of possible mirrors to open</span>
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">available_pos</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">available_pos</span><span class="p">)</span><span class="o">&gt;=</span><span class="n">M</span><span class="p">):</span>
+                    <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">available_pos</span><span class="p">),</span> <span class="n">M</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="c1"># Indices of the N positions among the available ones</span>
+                    <span class="n">pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">available_pos</span><span class="p">)[</span><span class="n">ind</span><span class="p">]</span> <span class="c1"># N mirrors to open</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">ind</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">available_pos</span><span class="p">)))</span>
+                    <span class="n">pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">available_pos</span><span class="p">)</span>
+                <span class="n">H_model</span><span class="p">[</span><span class="n">line</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># Open the mirrors</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+                    <span class="n">available_pos</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="c1"># Remove the positions of already opened mirrors</span>
+
+    <span class="n">pattern</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">H_model</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">K</span><span class="o">/</span><span class="n">W</span><span class="p">)),</span> <span class="mi">1</span><span class="p">])[:,</span> <span class="p">:</span><span class="n">K</span><span class="p">,</span> <span class="p">:]</span> <span class="c1"># Repeat the model periodically</span>
+
+    <span class="k">return</span> <span class="n">pattern</span></div>
+
+
+<div class="viewcode-block" id="generate_ln_orthogonal_pattern">
+<a class="viewcode-back" href="../../simca.html#simca.functions_patterns_generation.generate_ln_orthogonal_pattern">[docs]</a>
+<span class="k">def</span> <span class="nf">generate_ln_orthogonal_pattern</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">N</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate a Length-N orthogonal pattern according to https://hal.laas.fr/hal-02993037</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        size (tuple): size of the pattern</span>
+<span class="sd">        W (int): number of wavelengths in the scene</span>
+<span class="sd">        N (int): number of acquisitions</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        numpy.ndarray : length-N orthogonal pattern of shape = size[0] x (size[1]+W-1) x N):</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">C</span><span class="p">,</span> <span class="n">R</span> <span class="o">=</span> <span class="n">size</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="c1"># Number of columns, number of rows</span>
+
+    <span class="n">K</span> <span class="o">=</span> <span class="n">C</span> <span class="o">+</span> <span class="n">W</span> <span class="o">-</span> <span class="mi">1</span> <span class="c1"># Number of columns in H</span>
+    <span class="n">M</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">W</span><span class="o">/</span><span class="n">N</span><span class="p">))</span> <span class="c1"># Number of open mirrors</span>
+    <span class="n">H_model</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">R</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">N</span><span class="p">))</span> <span class="c1"># Periodic model</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">R</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">M</span><span class="p">):</span>
+            <span class="n">available</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">m</span><span class="o">*</span><span class="n">N</span><span class="p">,</span> <span class="n">m</span><span class="o">*</span><span class="n">N</span><span class="o">+</span><span class="n">N</span><span class="p">))</span> <span class="c1"># Positions of possible mirrors to open</span>
+            <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+                <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">available</span><span class="p">))</span> <span class="c1"># Randomly choose a mirror among the possible ones</span>
+                <span class="n">H_model</span><span class="p">[</span><span class="n">line</span><span class="p">,</span> <span class="n">available</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># Open the mirror</span>
+                <span class="n">available</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span> <span class="c1"># Remove the mirror from the list of possible ones</span>
+        <span class="n">available</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">M</span><span class="o">*</span><span class="n">N</span><span class="p">,</span> <span class="n">W</span><span class="p">))</span> <span class="c1"># List of positions where we can&#39;t apply the Length-N method (if W%N != 0)</span>
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">W</span><span class="o">-</span><span class="p">(</span><span class="n">M</span><span class="o">*</span><span class="n">N</span><span class="p">)):</span>
+            <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">available</span><span class="p">))</span> <span class="c1"># Randomly open those mirrors among the remaining positions</span>
+            <span class="n">H_model</span><span class="p">[</span><span class="n">line</span><span class="p">,</span> <span class="n">available</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">available</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
+    <span class="n">pattern</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">H_model</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">K</span><span class="o">/</span><span class="n">W</span><span class="p">)),</span> <span class="mi">1</span><span class="p">])[:,</span> <span class="p">:</span><span class="n">K</span><span class="p">,</span> <span class="p">:]</span>
+
+    <span class="n">list_of_patterns</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">pattern</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]):</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">pattern</span><span class="p">[:,</span> <span class="p">:</span><span class="o">-</span><span class="p">(</span><span class="n">W</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">i</span><span class="p">]</span>
+        <span class="n">list_of_patterns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">list_of_patterns</span></div>
+
+
+<div class="viewcode-block" id="generate_random_pattern">
+<a class="viewcode-back" href="../../simca.html#simca.functions_patterns_generation.generate_random_pattern">[docs]</a>
+<span class="k">def</span> <span class="nf">generate_random_pattern</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">ROM</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate a random pattern with a given rate of open/close mirrors</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        shape (tuple of int): shape of the pattern</span>
+<span class="sd">        ROM (float): ratio of open mirrors</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        numpy.ndarray: random pattern</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">pattern</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span> <span class="o">-</span> <span class="n">ROM</span><span class="p">,</span> <span class="n">ROM</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">pattern</span></div>
+
+
+<div class="viewcode-block" id="generate_slit_pattern">
+<a class="viewcode-back" href="../../simca.html#simca.functions_patterns_generation.generate_slit_pattern">[docs]</a>
+<span class="k">def</span> <span class="nf">generate_slit_pattern</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">slit_position</span><span class="p">,</span><span class="n">slit_width</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate a slit pattern that starts at the center of the image and goes to the right as slit position increases.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        shape (tuple): shape of the pattern</span>
+<span class="sd">        slit_position (int): position of the slit in relation to the central column</span>
+<span class="sd">        slit_width (int): width of the slit in pixels</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        numpy.ndarray: slit pattern</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">size_y</span><span class="p">,</span> <span class="n">size_x</span> <span class="o">=</span> <span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">slit_position</span> <span class="o">=</span> <span class="n">size_x</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">slit_position</span>
+    <span class="n">slit_width</span> <span class="o">=</span> <span class="n">slit_width</span>
+    <span class="n">pattern</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">size_y</span><span class="p">,</span><span class="n">size_x</span><span class="p">))</span>
+
+    <span class="n">pattern</span><span class="p">[:,</span> <span class="n">slit_position</span> <span class="o">-</span> <span class="n">slit_width</span> <span class="o">//</span> <span class="mi">2</span><span class="p">:</span><span class="n">slit_position</span> <span class="o">+</span> <span class="n">slit_width</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="k">return</span> <span class="n">pattern</span></div>
+
+
+<span class="c1"># Source of blue noise codes: https://momentsingraphics.de/BlueNoise.html</span>
+<div class="viewcode-block" id="FindLargestVoid">
+<a class="viewcode-back" href="../../simca.html#simca.functions_patterns_generation.FindLargestVoid">[docs]</a>
+<span class="k">def</span> <span class="nf">FindLargestVoid</span><span class="p">(</span><span class="n">BinaryPattern</span><span class="p">,</span><span class="n">StandardDeviation</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This function returns the indices of the largest void in the given binary</span>
+<span class="sd">       pattern as defined by Ulichney.</span>
+<span class="sd">      \param BinaryPattern A boolean array (should be two-dimensional although the</span>
+<span class="sd">             implementation works in arbitrary dimensions).</span>
+<span class="sd">      \param StandardDeviation The standard deviation used for the Gaussian filter</span>
+<span class="sd">             in pixels. This can be a single float for an isotropic Gaussian or a</span>
+<span class="sd">             tuple with one float per dimension for an anisotropic Gaussian.</span>
+<span class="sd">      \return A flat index i such that BinaryPattern.flat[i] corresponds to the</span>
+<span class="sd">              largest void. By definition this is a majority pixel.</span>
+<span class="sd">      \sa GetVoidAndClusterBlueNoise&quot;&quot;&quot;</span>
+    <span class="c1"># The minority value is always True for convenience</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">count_nonzero</span><span class="p">(</span><span class="n">BinaryPattern</span><span class="p">)</span><span class="o">*</span><span class="mi">2</span><span class="o">&gt;=</span><span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">BinaryPattern</span><span class="p">)):</span>
+        <span class="n">BinaryPattern</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">logical_not</span><span class="p">(</span><span class="n">BinaryPattern</span><span class="p">)</span>
+    <span class="c1"># Apply the Gaussian. We do not want to cut off the Gaussian at all because even</span>
+    <span class="c1"># the tiniest difference can change the ranking. Therefore we apply the Gaussian</span>
+    <span class="c1"># through a fast Fourier transform by means of the convolution theorem.</span>
+    <span class="n">FilteredArray</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">ifftn</span><span class="p">(</span><span class="n">ndimage</span><span class="o">.</span><span class="n">fourier_gaussian</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftn</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">BinaryPattern</span><span class="p">,</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">)),</span><span class="n">StandardDeviation</span><span class="p">))</span><span class="o">.</span><span class="n">real</span>
+    <span class="c1"># Find the largest void</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">BinaryPattern</span><span class="p">,</span><span class="mf">2.0</span><span class="p">,</span><span class="n">FilteredArray</span><span class="p">))</span></div>
+
+
+<span class="c1"># Source of blue noise codes: https://momentsingraphics.de/BlueNoise.html</span>
+<div class="viewcode-block" id="FindTightestCluster">
+<a class="viewcode-back" href="../../simca.html#simca.functions_patterns_generation.FindTightestCluster">[docs]</a>
+<span class="k">def</span> <span class="nf">FindTightestCluster</span><span class="p">(</span><span class="n">BinaryPattern</span><span class="p">,</span><span class="n">StandardDeviation</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Like FindLargestVoid() but finds the tightest cluster which is a minority</span>
+<span class="sd">       pixel by definition.</span>
+<span class="sd">      \sa GetVoidAndClusterBlueNoise&quot;&quot;&quot;</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">count_nonzero</span><span class="p">(</span><span class="n">BinaryPattern</span><span class="p">)</span><span class="o">*</span><span class="mi">2</span><span class="o">&gt;=</span><span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">BinaryPattern</span><span class="p">)):</span>
+        <span class="n">BinaryPattern</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">logical_not</span><span class="p">(</span><span class="n">BinaryPattern</span><span class="p">)</span>
+    <span class="n">FilteredArray</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">ifftn</span><span class="p">(</span><span class="n">ndimage</span><span class="o">.</span><span class="n">fourier_gaussian</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftn</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">BinaryPattern</span><span class="p">,</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">)),</span><span class="n">StandardDeviation</span><span class="p">))</span><span class="o">.</span><span class="n">real</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">BinaryPattern</span><span class="p">,</span><span class="n">FilteredArray</span><span class="p">,</span><span class="o">-</span><span class="mf">1.0</span><span class="p">))</span></div>
+
+
+<span class="c1"># Source of blue noise codes: https://momentsingraphics.de/BlueNoise.html</span>
+<div class="viewcode-block" id="GetVoidAndClusterBlueNoise">
+<a class="viewcode-back" href="../../simca.html#simca.functions_patterns_generation.GetVoidAndClusterBlueNoise">[docs]</a>
+<span class="k">def</span> <span class="nf">GetVoidAndClusterBlueNoise</span><span class="p">(</span><span class="n">OutputShape</span><span class="p">,</span><span class="n">StandardDeviation</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span><span class="n">InitialSeedFraction</span><span class="o">=</span><span class="mf">0.1</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generates a blue noise dither array of the given shape using the method</span>
+<span class="sd">       proposed by Ulichney [1993] in &quot;The void-and-cluster method for dither array</span>
+<span class="sd">       generation&quot; published in Proc. SPIE 1913.</span>
+<span class="sd">      \param OutputShape The shape of the output array. This function works in</span>
+<span class="sd">             arbitrary dimension, i.e. OutputShape can have arbitrary length. Though</span>
+<span class="sd">             it is only tested for the 2D case where you should pass a tuple</span>
+<span class="sd">             (Height,Width).</span>
+<span class="sd">      \param StandardDeviation The standard deviation in pixels used for the</span>
+<span class="sd">             Gaussian filter defining largest voids and tightest clusters. Larger</span>
+<span class="sd">             values lead to more low-frequency content but better isotropy. Small</span>
+<span class="sd">             values lead to more ordered patterns with less low-frequency content.</span>
+<span class="sd">             Ulichney proposes to use a value of 1.5. If you want an anisotropic</span>
+<span class="sd">             Gaussian, you can pass a tuple of length len(OutputShape) with one</span>
+<span class="sd">             standard deviation per dimension.</span>
+<span class="sd">      \param InitialSeedFraction The only non-deterministic step in the algorithm</span>
+<span class="sd">             marks a small number of pixels in the grid randomly. This parameter</span>
+<span class="sd">             defines the fraction of such points. It has to be positive but less</span>
+<span class="sd">             than 0.5. Very small values lead to ordered patterns, beyond that there</span>
+<span class="sd">             is little change.</span>
+<span class="sd">      \return An integer array of shape OutputShape containing each integer from 0</span>
+<span class="sd">              to np.prod(OutputShape)-1 exactly once.&quot;&quot;&quot;</span>
+    <span class="n">nRank</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">OutputShape</span><span class="p">)</span>
+    <span class="c1"># Generate the initial binary pattern with a prescribed number of ones</span>
+    <span class="n">nInitialOne</span><span class="o">=</span><span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="nb">min</span><span class="p">(</span><span class="nb">int</span><span class="p">((</span><span class="n">nRank</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span><span class="nb">int</span><span class="p">(</span><span class="n">nRank</span><span class="o">*</span><span class="n">InitialSeedFraction</span><span class="p">)))</span>
+    <span class="c1"># Start from white noise (this is the only randomized step)</span>
+    <span class="n">InitialBinaryPattern</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">OutputShape</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+    <span class="n">InitialBinaryPattern</span><span class="o">.</span><span class="n">flat</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">permutation</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">nRank</span><span class="p">))</span><span class="o">&lt;</span><span class="n">nInitialOne</span>
+    <span class="c1"># Swap ones from tightest clusters to largest voids iteratively until convergence</span>
+    <span class="k">while</span><span class="p">(</span><span class="kc">True</span><span class="p">):</span>
+        <span class="n">iTightestCluster</span><span class="o">=</span><span class="n">FindTightestCluster</span><span class="p">(</span><span class="n">InitialBinaryPattern</span><span class="p">,</span><span class="n">StandardDeviation</span><span class="p">)</span>
+        <span class="n">InitialBinaryPattern</span><span class="o">.</span><span class="n">flat</span><span class="p">[</span><span class="n">iTightestCluster</span><span class="p">]</span><span class="o">=</span><span class="kc">False</span>
+        <span class="n">iLargestVoid</span><span class="o">=</span><span class="n">FindLargestVoid</span><span class="p">(</span><span class="n">InitialBinaryPattern</span><span class="p">,</span><span class="n">StandardDeviation</span><span class="p">)</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">iLargestVoid</span><span class="o">==</span><span class="n">iTightestCluster</span><span class="p">):</span>
+            <span class="n">InitialBinaryPattern</span><span class="o">.</span><span class="n">flat</span><span class="p">[</span><span class="n">iTightestCluster</span><span class="p">]</span><span class="o">=</span><span class="kc">True</span>
+            <span class="c1"># Nothing has changed, so we have converged</span>
+            <span class="k">break</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">InitialBinaryPattern</span><span class="o">.</span><span class="n">flat</span><span class="p">[</span><span class="n">iLargestVoid</span><span class="p">]</span><span class="o">=</span><span class="kc">True</span>
+    <span class="c1"># Rank all pixels</span>
+    <span class="n">DitherArray</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">OutputShape</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="c1"># Phase 1: Rank minority pixels in the initial binary pattern</span>
+    <span class="n">BinaryPattern</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">InitialBinaryPattern</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">Rank</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nInitialOne</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">iTightestCluster</span><span class="o">=</span><span class="n">FindTightestCluster</span><span class="p">(</span><span class="n">BinaryPattern</span><span class="p">,</span><span class="n">StandardDeviation</span><span class="p">)</span>
+        <span class="n">BinaryPattern</span><span class="o">.</span><span class="n">flat</span><span class="p">[</span><span class="n">iTightestCluster</span><span class="p">]</span><span class="o">=</span><span class="kc">False</span>
+        <span class="n">DitherArray</span><span class="o">.</span><span class="n">flat</span><span class="p">[</span><span class="n">iTightestCluster</span><span class="p">]</span><span class="o">=</span><span class="n">Rank</span>
+    <span class="c1"># Phase 2: Rank the remainder of the first half of all pixels</span>
+    <span class="n">BinaryPattern</span><span class="o">=</span><span class="n">InitialBinaryPattern</span>
+    <span class="k">for</span> <span class="n">Rank</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nInitialOne</span><span class="p">,</span><span class="nb">int</span><span class="p">((</span><span class="n">nRank</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)):</span>
+        <span class="n">iLargestVoid</span><span class="o">=</span><span class="n">FindLargestVoid</span><span class="p">(</span><span class="n">BinaryPattern</span><span class="p">,</span><span class="n">StandardDeviation</span><span class="p">)</span>
+        <span class="n">BinaryPattern</span><span class="o">.</span><span class="n">flat</span><span class="p">[</span><span class="n">iLargestVoid</span><span class="p">]</span><span class="o">=</span><span class="kc">True</span>
+        <span class="n">DitherArray</span><span class="o">.</span><span class="n">flat</span><span class="p">[</span><span class="n">iLargestVoid</span><span class="p">]</span><span class="o">=</span><span class="n">Rank</span>
+    <span class="c1"># Phase 3: Rank the last half of pixels</span>
+    <span class="k">for</span> <span class="n">Rank</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">int</span><span class="p">((</span><span class="n">nRank</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span><span class="n">nRank</span><span class="p">):</span>
+        <span class="n">iTightestCluster</span><span class="o">=</span><span class="n">FindTightestCluster</span><span class="p">(</span><span class="n">BinaryPattern</span><span class="p">,</span><span class="n">StandardDeviation</span><span class="p">)</span>
+        <span class="n">BinaryPattern</span><span class="o">.</span><span class="n">flat</span><span class="p">[</span><span class="n">iTightestCluster</span><span class="p">]</span><span class="o">=</span><span class="kc">True</span>
+        <span class="n">DitherArray</span><span class="o">.</span><span class="n">flat</span><span class="p">[</span><span class="n">iTightestCluster</span><span class="p">]</span><span class="o">=</span><span class="n">Rank</span>
+    <span class="k">return</span> <span class="n">DitherArray</span></div>
+
+
+<div class="viewcode-block" id="generate_blue_noise_type_2_pattern">
+<a class="viewcode-back" href="../../simca.html#simca.functions_patterns_generation.generate_blue_noise_type_2_pattern">[docs]</a>
+<span class="k">def</span> <span class="nf">generate_blue_noise_type_2_pattern</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">std</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">initial_seed_fraction</span><span class="o">=</span><span class="mf">0.1</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate blue noise pattern according to the void-and-cluster method proposed by Ulichney [1993] in &quot;The void-and-cluster method for dither array generation&quot; published in Proc. SPIE 1913.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        shape (tuple): size of the pattern</span>
+<span class="sd">        std (float): standard deviation in pixels used for the Gaussian filter</span>
+<span class="sd">        initial_seed_fraction (float): Initial fraction of marked pixels in the grid. Has to be less than 0.5.</span>
+<span class="sd">                                         Very small values lead to ordered patterns</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        numpy.ndarray: float blue noise pattern</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">texture</span><span class="o">=</span><span class="n">GetVoidAndClusterBlueNoise</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span><span class="n">std</span><span class="p">,</span> <span class="n">initial_seed_fraction</span><span class="p">)</span>
+    <span class="n">pattern</span> <span class="o">=</span> <span class="p">(</span><span class="n">texture</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">texture</span><span class="p">))</span> <span class="c1"># Float value between 0 and 1</span>
+
+    <span class="k">return</span> <span class="n">pattern</span></div>
+
+
+<div class="viewcode-block" id="load_custom_pattern">
+<a class="viewcode-back" href="../../simca.html#simca.functions_patterns_generation.load_custom_pattern">[docs]</a>
+<span class="k">def</span> <span class="nf">load_custom_pattern</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span><span class="n">pattern_path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Load custom pattern from h5 file. If the pattern is not the same size as the coded aperture, crop from the center of the loaded pattern.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        shape (tuple): size of the pattern</span>
+<span class="sd">        pattern_path (str): path to the h5 file containing the pattern</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        numpy.ndarray: float blue noise pattern</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">size_y</span><span class="p">,</span> <span class="n">size_x</span> <span class="o">=</span> <span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">pattern_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Please provide h5 file path for custom pattern.&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">pattern_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">pattern</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;pattern&#39;</span><span class="p">][:]</span>
+
+        <span class="n">coded_aperture_sampling_y</span> <span class="o">=</span> <span class="n">size_y</span>
+        <span class="n">coded_aperture_sampling_x</span> <span class="o">=</span> <span class="n">size_x</span>
+
+        <span class="k">if</span> <span class="n">pattern</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">coded_aperture_sampling_y</span> <span class="ow">or</span> <span class="n">pattern</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">coded_aperture_sampling_x</span><span class="p">:</span>
+            <span class="c1"># Find center point of the pattern</span>
+            <span class="n">center_y</span><span class="p">,</span> <span class="n">center_x</span> <span class="o">=</span> <span class="n">pattern</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="n">pattern</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">//</span> <span class="mi">2</span>
+
+            <span class="c1"># Determine starting and ending indices for the crop</span>
+            <span class="n">start_y</span> <span class="o">=</span> <span class="n">center_y</span> <span class="o">-</span> <span class="n">coded_aperture_sampling_y</span> <span class="o">//</span> <span class="mi">2</span>
+            <span class="n">end_y</span> <span class="o">=</span> <span class="n">start_y</span> <span class="o">+</span> <span class="n">coded_aperture_sampling_y</span>
+            <span class="n">start_x</span> <span class="o">=</span> <span class="n">center_x</span> <span class="o">-</span> <span class="n">coded_aperture_sampling_x</span> <span class="o">//</span> <span class="mi">2</span>
+            <span class="n">end_x</span> <span class="o">=</span> <span class="n">start_x</span> <span class="o">+</span> <span class="n">coded_aperture_sampling_x</span>
+
+            <span class="c1"># Crop the pattern</span>
+            <span class="n">pattern</span> <span class="o">=</span> <span class="n">pattern</span><span class="p">[</span><span class="n">start_y</span><span class="p">:</span><span class="n">end_y</span><span class="p">,</span> <span class="n">start_x</span><span class="p">:</span><span class="n">end_x</span><span class="p">]</span>
+
+            <span class="c1"># Confirm the pattern is the correct shape</span>
+            <span class="k">if</span> <span class="n">pattern</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">coded_aperture_sampling_y</span> <span class="ow">or</span> <span class="n">pattern</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">coded_aperture_sampling_x</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Error cropping the pattern, its shape does not match the coded aperture sampling.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">pattern</span></div>
+
+<div class="viewcode-block" id="load_custom_list_of_patterns">
+<a class="viewcode-back" href="../../simca.html#simca.functions_patterns_generation.load_custom_list_of_patterns">[docs]</a>
+<span class="k">def</span> <span class="nf">load_custom_list_of_patterns</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span><span class="n">patterns_path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Load custom list of patterns from h5 file. If the patterns are not the same size as the coded aperture, crop from the center of the loaded patterns.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        shape (tuple): size of the pattern</span>
+<span class="sd">        patterns_path (str): path to the h5 file containing the patterns</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list: list of patterns</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+
+    <span class="n">list_of_coded_aperture_masks</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">size_y</span><span class="p">,</span> <span class="n">size_x</span> <span class="o">=</span> <span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">patterns_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Please provide h5 file path for custom mask.&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">patterns_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">list_of_masks</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;list_of_masks&#39;</span><span class="p">][:]</span>
+
+        <span class="k">for</span> <span class="n">mask</span> <span class="ow">in</span> <span class="n">list_of_masks</span><span class="p">:</span>
+
+
+            <span class="k">if</span> <span class="n">mask</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">size_y</span> <span class="ow">or</span> <span class="n">mask</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">size_x</span><span class="p">:</span>
+                <span class="c1"># Find center point of the mask</span>
+                <span class="n">center_y</span><span class="p">,</span> <span class="n">center_x</span> <span class="o">=</span> <span class="n">mask</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="n">mask</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">//</span> <span class="mi">2</span>
+
+                <span class="c1"># Determine starting and ending indices for the crop</span>
+                <span class="n">start_y</span> <span class="o">=</span> <span class="n">center_y</span> <span class="o">-</span> <span class="n">size_y</span> <span class="o">//</span> <span class="mi">2</span>
+                <span class="n">end_y</span> <span class="o">=</span> <span class="n">start_y</span> <span class="o">+</span> <span class="n">size_y</span>
+                <span class="n">start_x</span> <span class="o">=</span> <span class="n">center_x</span> <span class="o">-</span> <span class="n">size_x</span> <span class="o">//</span> <span class="mi">2</span>
+                <span class="n">end_x</span> <span class="o">=</span> <span class="n">start_x</span> <span class="o">+</span> <span class="n">size_x</span>
+
+                <span class="c1"># Crop the mask</span>
+                <span class="n">mask</span> <span class="o">=</span> <span class="n">mask</span><span class="p">[</span><span class="n">start_y</span><span class="p">:</span><span class="n">end_y</span><span class="p">,</span> <span class="n">start_x</span><span class="p">:</span><span class="n">end_x</span><span class="p">]</span>
+
+                <span class="c1"># Confirm the mask is the correct shape</span>
+                <span class="k">if</span> <span class="n">mask</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">size_y</span> <span class="ow">or</span> <span class="n">mask</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">size_x</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Error cropping the mask, its shape does not match the coded aperture sampling.&quot;</span><span class="p">)</span>
+            <span class="n">list_of_coded_aperture_masks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">list_of_coded_aperture_masks</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Antoine Rouxel.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
