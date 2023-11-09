@@ -17,7 +17,7 @@ authors:
   - name: Léo Paillet
     affiliation: 1
   - name: Valentin Portmann
-    affiliation: 1,2
+    affiliation: "1,2"
   - name: Antoine Monmayrant
     affiliation: 1
   - name: Simon Lacroix
