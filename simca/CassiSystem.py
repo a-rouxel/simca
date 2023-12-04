@@ -442,7 +442,7 @@ class CassiSystem():
 
         return X_input_grid, Y_input_grid
 
-    def propagate_coded_aperture_grid(self, X_input_grid=None, Y_input_grid=None):
+    def propagate_coded_aperture_grid(self, X_input_grid=None, Y_input_grid=None,use_torch=False):
         """
         Propagate the coded_aperture pattern through one CASSI system
 
@@ -461,8 +461,11 @@ class CassiSystem():
 
         propagation_type = self.system_config["system architecture"]["propagation type"]
 
-        if propagation_type == "simca":
+        if propagation_type == "simca" and use_torch == False:
             self.X_coordinates_propagated_coded_aperture, self.Y_coordinates_propagated_coded_aperture = self.optical_model.propagation_with_distorsions(X_input_grid, Y_input_grid)
+
+        if propagation_type == "simca" and use_torch == True:
+            self.X_coordinates_propagated_coded_aperture, self.Y_coordinates_propagated_coded_aperture = self.optical_model.propagation_with_distorsions_torch(X_input_grid, Y_input_grid)
 
         if propagation_type == "higher-order":
             self.X_coordinates_propagated_coded_aperture, self.Y_coordinates_propagated_coded_aperture = self.optical_model.propagation_with_no_distorsions(X_input_grid, Y_input_grid)

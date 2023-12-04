@@ -1,5 +1,6 @@
 from simca.functions_general_purpose import *
-
+import snoop
+import torch
 class OpticalModel:
     """
     Class that contains the optical model caracteristics and propagation models
@@ -79,6 +80,34 @@ class OpticalModel:
             Y_coordinates_propagated_coded_aperture[:,:,idx] = Y_propagated_coded_aperture.reshape(Y_input_grid.shape)
 
         return X_coordinates_propagated_coded_aperture, Y_coordinates_propagated_coded_aperture
+
+    @snoop
+    def propagation_with_distorsions_torch(self, X_input_grid, Y_input_grid):
+        """
+        Propagate the coded aperture coded_aperture through one CASSI system
+
+        Args:
+            X_input_grid (numpy.ndarray): x coordinates grid
+            Y_input_grid (numpy.ndarray): y coordinates grid
+
+        Returns:
+            tuple: X coordinates of the propagated coded aperture grids, Y coordinates of the propagated coded aperture grids
+        """
+
+        self.calculate_central_dispersion()
+
+        X_input_grid = torch.from_numpy(X_input_grid) if isinstance(X_input_grid, np.ndarray) else X_input_grid
+        Y_input_grid = torch.from_numpy(Y_input_grid) if isinstance(Y_input_grid, np.ndarray) else Y_input_grid
+        wavelength_vec = torch.from_numpy(self.system_wavelengths) if isinstance(self.system_wavelengths, np.ndarray) else self.system_wavelengths
+
+        X_input_grid_3D = X_input_grid[:,:,None].repeat(1, 1,self.nb_of_spectral_samples)
+        Y_input_grid_3D = Y_input_grid[:,:,None].repeat(1, 1,self.nb_of_spectral_samples)
+        lba_3D = wavelength_vec[None,None,:].repeat(X_input_grid.shape[0], X_input_grid.shape[1],1)
+        n_tensor = self.sellmeier(lba_3D)
+
+        self.propagate_through_arm_torch(X_input_grid_3D,Y_input_grid_3D,n=lba_3D,lba=n_tensor)
+
+        return 0, 0
 
     def propagation_with_no_distorsions(self, X_input_grid, Y_input_grid):
         """
@@ -239,6 +268,96 @@ class OpticalModel:
 
         return X_vec_out, Y_vec_out
 
+    @snoop
+    def propagate_through_arm_torch(self, X_tensor_in, Y_tensor_in, n, lba):
+
+        """
+        Propagate the light through one system arm : (lens + dispersive element + lens)
+
+        Args:
+            X_tensor_in (torch.tensor) : X coordinates of the coded aperture pixels (3D array)
+            Y_tensor_in (torch.tensor) : Y coordinates of the coded aperture pixels (3D array)
+            n (torch.tensor) : refractive indexes of the system (at the corresponding wavelength)
+            lba (torch.tensor) : wavelengths
+
+        Returns:
+            tuple: tensors corresponding to the propagated X and Y coordinates
+        """
+
+        dispersive_element_type = self.dispersive_element_type
+        A = self.A
+        G = self.G
+        m = self.m
+        F = self.F
+        delta_alpha_c = self.delta_alpha_c
+        delta_beta_c = self.delta_beta_c
+        alpha_c = self.alpha_c
+        alpha_c_transmis = self.alpha_c_transmis
+
+
+        if dispersive_element_type == "prism":
+
+            angle_with_P1 = alpha_c - A / 2 + delta_alpha_c
+            angle_with_P2 = alpha_c_transmis - A / 2 - delta_alpha_c
+
+            k = self.model_Lens_pos_to_angle_torch(X_tensor_in, Y_tensor_in, F)
+            # Rotation in relation to P1 around the Y axis
+
+            k_1 = rotation_y(angle_with_P1) @ k[:, 0, :]
+            # Rotation in relation to P1 around the X axis
+            k_2 = rotation_x(delta_beta_c) @ k_1
+            # Rotation of P1 in relation to frame_in along the new Y axis
+            k_3 = rotation_y(A / 2) @ k_2
+
+            norm_k = np.sqrt(k_3[0] ** 2 + k_3[1] ** 2 + k_3[2] ** 2)
+            k_3 /= norm_k
+
+            k_out_p = self.model_Prism_angle_to_angle(k_3, n, A)
+            k_out_p = k_out_p * norm_k
+
+            k_3_bis = np.dot(rotation_y(A / 2), k_out_p)
+        #
+        #     # Rotation in relation to P2 around the X axis
+        #     k_2_bis = np.dot(rotation_x(-delta_beta_c), k_3_bis)
+        #     # Rotation in relation to P2 around the Y axis
+        #     k_1_bis = np.dot(rotation_y(angle_with_P2), k_2_bis)
+        #
+        #     X_vec_out, Y_vec_out = self.model_Lens_angle_to_position(k_1_bis, F)
+        #
+        #
+        # elif dispersive_element_type == "grating":
+        #
+        #     angle_with_P1 = alpha_c - delta_alpha_c
+        #     angle_with_P2 = alpha_c_transmis + delta_alpha_c
+        #
+        #     k = self.model_Lens_pos_to_angle(X_vec_in, Y_vec_in, F)
+        #     # Rotation in relation to P1 around the Y axis
+        #
+        #     k_1 = rotation_y(angle_with_P1) @ k[:, 0, :]
+        #     # Rotation in relation to P1 around the X axis
+        #     k_2 = rotation_x(delta_beta_c) @ k_1
+        #
+        #     k_3 = rotation_y(0) @ k_2
+        #     norm_k = np.sqrt(k_3[0] ** 2 + k_3[1] ** 2 + k_3[2] ** 2)
+        #     k_3 /= norm_k
+        #
+        #     k_out_p = self.model_Grating_angle_to_angle(k_3, lba, m, G)
+        #     k_out_p = k_out_p * norm_k
+        #
+        #     k_3_bis = np.dot(rotation_y(0), k_out_p)
+        #
+        #     # Rotation in relation to P2 around the X axis
+        #     k_2_bis = np.dot(rotation_x(-delta_beta_c), k_3_bis)
+        #     # Rotation in relation to P2 around the Y axis
+        #     k_1_bis = np.dot(rotation_y(angle_with_P2), k_2_bis)
+        #
+        #     X_vec_out, Y_vec_out = self.model_Lens_angle_to_position(k_1_bis, F)
+        #
+        # else:
+        #     raise Exception("dispersive_element_type should be prism or grating")
+        #
+        # return X_vec_out, Y_vec_out
+
     def model_Grating_angle_to_angle(self,k_in, lba, m, G):
         """
         Model of the grating
@@ -350,6 +469,37 @@ class OpticalModel:
         k_out = np.array([[np.sin(alpha) * np.cos(beta)],
                        [np.sin(beta)*np.cos(alpha)],
                        [np.cos(alpha) * np.cos(beta)]])
+
+        return k_out
+
+    def model_Lens_pos_to_angle_torch(self,x_obj, y_obj, F):
+        """
+        Model of the lens : position to angle
+
+        Args:
+            x_obj (torch.tensor) : position X in the image plane -- in um
+            y_obj (torch.tensor) : position Y in the image plane  -- in um
+            F (torch.tensor) : focal length of the lens -- in um
+
+        Returns:
+            torch.tensor: wave vector of the outgoing ray
+
+        """
+
+        alpha = -1 * torch.atan(x_obj / F)
+        beta = -1 * torch.atan(y_obj / F)
+
+        # Adjusting the dimension for k_out to make it a 4D tensor
+        sin_alpha = torch.sin(alpha).unsqueeze(-1)
+        cos_alpha = torch.cos(alpha).unsqueeze(-1)
+        sin_beta = torch.sin(beta).unsqueeze(-1)
+        cos_beta = torch.cos(beta).unsqueeze(-1)
+
+        k_out = torch.cat([
+            sin_alpha * cos_beta,
+            sin_beta * cos_alpha,
+            cos_alpha * cos_beta
+        ], dim=-1)
 
         return k_out
 
