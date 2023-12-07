@@ -4,6 +4,7 @@ import os
 import numpy as np
 from datetime import datetime
 import h5py
+import torch
 
 
 def load_yaml_config(file_path):
@@ -82,6 +83,22 @@ def rotation_z(theta):
 
     return r
 
+def rotation_z_torch(theta):
+    """
+    Rotate 3D matrix around the Z axis using PyTorch
+
+    Args:
+        theta (torch.tensor): Input angle (in rad)
+
+    Returns:
+        torch.Tensor: 3D rotation matrix
+    """
+    r = torch.tensor([[torch.cos(theta), -torch.sin(theta), 0],
+                      [torch.sin(theta), torch.cos(theta), 0],
+                      [0, 0, 1]], dtype=torch.float64)
+
+    return r
+
 
 def rotation_y(theta):
     """
@@ -101,6 +118,23 @@ def rotation_y(theta):
 
     return r
 
+def rotation_y_torch(theta):
+    """
+    Rotate 3D matrix around the Y axis using PyTorch
+
+    Args:
+        theta (tensor.torch): Input angle (in rad)
+
+    Returns:
+        torch.Tensor: 3D rotation matrix
+    """
+    r = torch.tensor([[torch.cos(theta), 0, torch.sin(theta)],
+                      [0, 1, 0],
+                      [-torch.sin(theta), 0, torch.cos(theta)]], dtype=torch.float64)
+
+    return r
+
+
 
 def rotation_x(theta):
     """
@@ -117,5 +151,21 @@ def rotation_x(theta):
     r = np.array(((1, 0, 0),
                   (0, math.cos(theta), -math.sin(theta)),
                   (0, math.sin(theta), math.cos(theta))))
+
+    return r
+
+def rotation_x_torch(theta):
+    """
+    Rotate 3D matrix around the X axis using PyTorch
+
+    Args:
+        theta (tensor.torch): Input angle (in rad)
+
+    Returns:
+        torch.Tensor: 3D rotation matrix
+    """
+    r = torch.tensor([[1, 0, 0],
+                      [0, torch.cos(theta), -torch.sin(theta)],
+                      [0, torch.sin(theta), torch.cos(theta)]], dtype=torch.float64)
 
     return r

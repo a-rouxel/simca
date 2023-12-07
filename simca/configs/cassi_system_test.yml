@@ -30,4 +30,4 @@ coded aperture:
 spectral range:
     wavelength min: 400     # minimum wavelength -- in nm
     wavelength max: 600      # maximum wavelength -- in nm
-    number of spectral samples: 100
+    number of spectral samples: 3

@@ -4,6 +4,7 @@ from simca.functions_patterns_generation import *
 from simca.functions_scenes import *
 from simca.functions_general_purpose import *
 from scipy.signal import convolve
+import snoop
 
 
 
@@ -442,6 +443,7 @@ class CassiSystem():
 
         return X_input_grid, Y_input_grid
 
+    @snoop
     def propagate_coded_aperture_grid(self, X_input_grid=None, Y_input_grid=None,use_torch=False):
         """
         Propagate the coded_aperture pattern through one CASSI system
