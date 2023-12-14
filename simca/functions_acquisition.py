@@ -3,6 +3,7 @@ from scipy.interpolate import griddata
 from tqdm import tqdm
 import multiprocessing as mp
 from multiprocessing import Pool
+import torch
 
 
 def generate_sd_measurement_cube(filtered_scene,X_input, Y_input, X_target, Y_target,grid_type,interp_method):
@@ -61,6 +62,40 @@ def generate_dd_measurement(scene, filtering_cube,chunk_size):
 
     return filtered_scene
 
+def generate_dd_measurement_torch(scene, filtering_cube,chunk_size):
+    """
+    Generate DD-CASSI type system measurement from a scene and a filtering cube. ref : "Single-shot compressive spectral imaging with a dual-disperser architecture", M.Gehm et al., Optics Express, 2007
+
+    Args:
+        scene (numpy.ndarray): observed scene (shape = R  x C x W)
+        filtering_cube (numpy.ndarray):   filtering cube of the instrument for a given pattern (shape = R x C x W)
+        chunk_size (int) : size of the spatial chunks in which the Hadamard product is performed
+
+    Returns:
+        numpy.ndarray: filtered scene (shape = R x C x W)
+    """
+
+    # Initialize an empty array for the result
+    filtered_scene = torch.empty_like(filtering_cube)
+
+    # Calculate total iterations for tqdm
+    total_iterations = (filtering_cube.shape[0] // chunk_size + 1) * (filtering_cube.shape[1] // chunk_size + 1)
+
+    with tqdm(total=total_iterations) as pbar:
+        # Perform the multiplication in chunks
+        for i in range(0, filtering_cube.shape[0], chunk_size):
+            for j in range(0, filtering_cube.shape[1], chunk_size):
+                filtered_scene[i:i + chunk_size, j:j + chunk_size, :] = filtering_cube[i:i + chunk_size,
+                                                                           j:j + chunk_size, :] * scene[
+                                                                                                  i:i + chunk_size,
+                                                                                                  j:j + chunk_size,
+                                                                                                  :]
+                pbar.update()
+
+    filtered_scene = torch.nan_to_num(filtered_scene)
+
+    return filtered_scene
+
 
 
 
@@ -87,18 +122,18 @@ def match_dataset_to_instrument(dataset, filtering_cube):
         print("Dataset Spatial Cropping : Filtering cube and scene must have the same nubmer of lines and columns")
         
     else:
-    	scene = dataset
+        scene = dataset
 
     if len(filtering_cube.shape) == 3 and filtering_cube.shape[2] != dataset.shape[2]:
-            scene = dataset[:, :, 0:filtering_cube.shape[2]]
-            print("Dataset Spectral Cropping : Filtering cube and scene must have the same number of wavelengths")	
+        scene = dataset[:, :, 0:filtering_cube.shape[2]]
+        print("Dataset Spectral Cropping : Filtering cube and scene must have the same number of wavelengths")	
     else:
         scene = dataset
         
     try:
-    	scene
+        scene
     except:
-    	print("Please load a scene first")
+        print("Please load a scene first")
 
     return scene
 
@@ -195,6 +230,48 @@ def interpolate_data_on_grid_positions(data, X_init, Y_init, X_target, Y_target,
             interpolated_data[:, :, index] = zi
 
     interpolated_data = np.nan_to_num(interpolated_data)
+
+    return interpolated_data
+
+def interpolate_data_on_grid_positions_torch(data, X_init, Y_init, X_target, Y_target, grid_type="unstructured", interp_method="linear"):
+    """
+    Interpolate data on a single 2D grid defined by X_target and Y_target
+
+    Args:
+        data (numpy.ndarray): data to interpolate (3D or 2D)
+        X_init (numpy.ndarray): X coordinates of the initial grid (3D)
+        Y_init (numpy.ndarray): Y coordinates of the initial grid (3D)
+        X_target (numpy.ndarray): X coordinates of the target grid (2D)
+        Y_target (numpy.ndarray): Y coordinates of the target grid (2D)
+        grid_type (str): type of the target grid (default = "unstructured", other option = "regular")
+        interp_method (str): interpolation method (default = "linear")
+
+    Returns:
+        numpy.ndarray: 3D data interpolated on the target grid
+    """
+
+    interpolated_data = torch.zeros((X_target.shape[0],X_target.shape[1],X_init.shape[2]))
+    nb_of_grids = X_init.shape[2]
+
+    if grid_type == "unstructured":
+        worker = worker_unstructured
+    elif grid_type == "regular":
+        worker = worker_regulargrid
+
+    if data.ndim == 2:
+        data = data[:, :, None]
+        data = torch.repeat_interleave(data, nb_of_grids, dim=2)
+
+    with Pool(mp.cpu_count()) as p:
+
+        tasks = [(X_init[:, :, i], Y_init[:, :, i], data[:, :, i], X_target, Y_target, interp_method) for i in
+                 range(nb_of_grids)]
+
+        for index, zi in tqdm(enumerate(p.imap(worker, tasks)), total=nb_of_grids,
+                              desc='Interpolate 3D data on grid positions'):
+            interpolated_data[:, :, index] = zi
+
+    interpolated_data = torch.nan_to_num(interpolated_data)
 
     return interpolated_data
 
