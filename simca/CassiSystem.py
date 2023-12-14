@@ -122,6 +122,30 @@ class CassiSystem():
             return self.dataset_interpolated
         else:
             raise ValueError("The new wavelengths sampling must be inside the dataset wavelengths range")
+        
+    def interpolate_dataset_along_wavelengths_torch(self, new_wavelengths_sampling, chunk_size):
+        """
+        Interpolate the dataset cube along the wavelength axis to match the system sampling
+
+        Args:
+            new_wavelengths_sampling (numpy.ndarray): new wavelengths on which to interpolate the dataset (shape = W)
+            chunk_size (int): chunk size for the multiprocessing
+
+        Returns:
+            numpy.ndarray : interpolated dataset cube along the wavelength axis (shape = R_dts x C_dts x W)
+
+        """
+        try:
+            self.dataset
+        except :
+            raise ValueError("The dataset must be loaded first")
+
+        if self.dataset_wavelengths[0] <= new_wavelengths_sampling[0] and self.dataset_wavelengths[-1] >= new_wavelengths_sampling[-1]:
+
+            self.dataset_interpolated = interpolate_data_along_wavelength_torch(self.dataset,self.dataset_wavelengths,new_wavelengths_sampling, chunk_size)
+            return self.dataset_interpolated
+        else:
+            raise ValueError("The new wavelengths sampling must be inside the dataset wavelengths range")
 
 
     def generate_2D_pattern(self, config_pattern):
@@ -235,6 +259,21 @@ class CassiSystem():
                                                                  Y_init=self.Y_coordinates_propagated_coded_aperture,
                                                                  X_target=self.X_detector_coordinates_grid,
                                                                  Y_target=self.Y_detector_coordinates_grid)
+        
+        def generate_filtering_cube_torch(self):
+            """
+            Generate filtering cube : each slice of the cube is a propagated pattern interpolated on the detector grid
+
+            Returns:
+            numpy.ndarray: filtering cube generated according to the optical system & the pattern configuration (R x C x W)
+
+            """
+
+        self.filtering_cube = interpolate_data_on_grid_positions_torch(data=self.pattern,
+                                                                 X_init=self.X_coordinates_propagated_coded_aperture,
+                                                                 Y_init=self.Y_coordinates_propagated_coded_aperture,
+                                                                 X_target=self.X_detector_coordinates_grid,
+                                                                 Y_target=self.Y_detector_coordinates_grid)
 
 
         return self.filtering_cube
@@ -254,6 +293,30 @@ class CassiSystem():
         for idx in range(number_of_patterns):
 
             self.filtering_cube = interpolate_data_on_grid_positions(data=self.list_of_patterns[idx],
+                                                                     X_init=self.X_coordinates_propagated_coded_aperture,
+                                                                     Y_init=self.Y_coordinates_propagated_coded_aperture,
+                                                                     X_target=self.X_detector_coordinates_grid,
+                                                                     Y_target=self.Y_detector_coordinates_grid)
+
+            self.list_of_filtering_cubes.append(self.filtering_cube)
+
+        return self.list_of_filtering_cubes
+    
+    def generate_multiple_filtering_cubes_torch(self, number_of_patterns):
+        """
+        Generate multiple filtering cubes, each cube corresponds to a pattern, and for each pattern, each slice is a propagated coded apertureinterpolated on the detector grid
+
+        Args:
+            number_of_patterns (int): number of patterns to generate
+        Returns:
+            list: filtering cubes generated according to the current optical system and the pattern configuration
+
+        """
+        self.list_of_filtering_cubes = []
+
+        for idx in range(number_of_patterns):
+
+            self.filtering_cube = interpolate_data_on_grid_positions_torch(data=self.list_of_patterns[idx],
                                                                      X_init=self.X_coordinates_propagated_coded_aperture,
                                                                      Y_init=self.Y_coordinates_propagated_coded_aperture,
                                                                      X_target=self.X_detector_coordinates_grid,
@@ -334,6 +397,81 @@ class CassiSystem():
 
         # Calculate the other two arrays
         self.measurement = np.sum(self.last_filtered_interpolated_scene, axis=2)
+
+
+        return self.measurement
+    
+    def image_acquisition_torch(self, use_psf=False, chunck_size=50):
+        """
+        Run the acquisition/measurement process depending on the cassi system type
+
+        Args:
+            chunck_size (int): default block size for the interpolation
+
+        Returns:
+            numpy.ndarray: compressed measurement (R x C)
+        """
+
+        dataset = self.interpolate_dataset_along_wavelengths_torch(self.optical_model.system_wavelengths, chunck_size)
+
+        if dataset is None:
+            return None
+        dataset_labels = self.dataset_labels
+
+        if self.system_config["system architecture"]["system type"] == "DD-CASSI":
+
+            try:
+                self.filtering_cube
+            except:
+                return print("Please generate filtering cube first")
+
+            scene = torch.from_numpy(match_dataset_to_instrument(dataset, self.filtering_cube))
+
+            measurement_in_3D = generate_dd_measurement_torch(scene, self.filtering_cube, chunck_size)
+
+            self.last_filtered_interpolated_scene = measurement_in_3D
+            self.interpolated_scene = scene
+
+            if dataset_labels is not None:
+                scene_labels = torch.from_numpy(match_dataset_labels_to_instrument(dataset_labels, self.filtering_cube))
+                self.scene_labels = scene_labels
+
+
+        elif self.system_config["system architecture"]["system type"] == "SD-CASSI":
+
+            X_coded_aper_coordinates_crop = crop_center(self.X_coded_aper_coordinates,dataset.shape[1], dataset.shape[0])
+            Y_coded_aper_coordinates_crop = crop_center(self.Y_coded_aper_coordinates,dataset.shape[1], dataset.shape[0])
+
+            scene = torch.from_numpy(match_dataset_to_instrument(dataset, X_coded_aper_coordinates_crop))
+
+            pattern_crop = crop_center(self.pattern, scene.shape[1], scene.shape[0])
+
+            filtered_scene = scene * pattern_crop[..., None].repeat((1, 1, scene.shape[2]))
+
+            self.propagate_coded_aperture_grid(X_input_grid=X_coded_aper_coordinates_crop, Y_input_grid=Y_coded_aper_coordinates_crop, use_torch = True)
+
+            sd_measurement = interpolate_data_on_grid_positions_torch(filtered_scene,
+                                                                self.X_coordinates_propagated_coded_aperture,
+                                                                self.Y_coordinates_propagated_coded_aperture,
+                                                                self.X_detector_coordinates_grid,
+                                                                self.Y_detector_coordinates_grid)
+
+            self.last_filtered_interpolated_scene = sd_measurement
+            self.interpolated_scene = scene
+
+            if dataset_labels is not None:
+                scene_labels = torch.from_numpy(match_dataset_labels_to_instrument(dataset_labels, self.last_filtered_interpolated_scene))
+                self.scene_labels = scene_labels
+
+        self.panchro = torch.sum(self.interpolated_scene, dim=2)
+
+        if use_psf:
+            self.apply_psf_torch()
+        else:
+            print("No PSF was applied")
+
+        # Calculate the other two arrays
+        self.measurement = torch.sum(self.last_filtered_interpolated_scene, dim=2)
 
 
         return self.measurement
@@ -419,6 +557,87 @@ class CassiSystem():
 
         return self.list_of_measurements
 
+    def multiple_image_acquisitions_torch(self, use_psf=False, nb_of_filtering_cubes=1,chunck_size=50):
+        """
+        Run the acquisition process depending on the cassi system type
+
+        Args:
+            chunck_size (int): default block size for the dataset
+
+        Returns:
+             list: list of compressed measurements (list of numpy.ndarray of size R x C)
+        """
+
+        dataset = self.interpolate_dataset_along_wavelengths_torch(self.optical_model.system_wavelengths, chunck_size)
+        if dataset is None:
+            return None
+        dataset_labels = self.dataset_labels
+
+        self.list_of_filtered_scenes = []
+
+        if self.system_config["system architecture"]["system type"] == "DD-CASSI":
+            try:
+                self.list_of_filtering_cubes
+            except:
+                return print("Please generate list of filtering cubes first")
+
+            scene = torch.from_numpy(match_dataset_to_instrument(dataset, self.list_of_filtering_cubes[0]))
+
+            if dataset_labels is not None:
+                scene_labels = torch.from_numpy(match_dataset_labels_to_instrument(dataset_labels, self.filtering_cube))
+                self.scene_labels = scene_labels
+
+            self.interpolated_scene = scene
+
+            for i in range(nb_of_filtering_cubes):
+
+                filtered_scene = generate_dd_measurement_torch(scene, self.list_of_filtering_cubes[i], chunck_size)
+                self.list_of_filtered_scenes.append(filtered_scene)
+
+
+        elif self.system_config["system architecture"]["system type"] == "SD-CASSI":
+
+            X_coded_aper_coordinates_crop = crop_center(self.X_coded_aper_coordinates,dataset.shape[1], dataset.shape[0])
+            Y_coded_aper_coordinates_crop = crop_center(self.Y_coded_aper_coordinates,dataset.shape[1], dataset.shape[0])
+
+
+            scene = torch.from_numpy(match_dataset_to_instrument(dataset, X_coded_aper_coordinates_crop))
+
+            if dataset_labels is not None:
+                scene_labels = torch.from_numpy(match_dataset_labels_to_instrument(dataset_labels, self.filtering_cube))
+                self.scene_labels = scene_labels
+
+            self.interpolated_scene = scene
+
+            for i in range(nb_of_filtering_cubes):
+
+                mask_crop = crop_center(self.list_of_patterns[i], scene.shape[1], scene.shape[0])
+
+                filtered_scene = scene * mask_crop[..., None].repeat((1, 1, scene.shape[2]))
+
+                self.propagate_coded_aperture_grid(X_input_grid=X_coded_aper_coordinates_crop, Y_input_grid=Y_coded_aper_coordinates_crop, use_torch = True)
+
+                sd_measurement_cube = interpolate_data_on_grid_positions_torch(filtered_scene,
+                                                                    self.X_coordinates_propagated_coded_aperture,
+                                                                    self.Y_coordinates_propagated_coded_aperture,
+                                                                    self.X_detector_coordinates_grid,
+                                                                    self.Y_detector_coordinates_grid)
+                self.list_of_filtered_scenes.append(sd_measurement_cube)
+
+        self.panchro = torch.sum(self.interpolated_scene, dim=2)
+
+        if use_psf:
+            self.apply_psf_torch()
+        else:
+            print("No PSF was applied")
+
+        # Calculate the other two arrays
+        self.list_of_measurements = []
+        for i in range(nb_of_filtering_cubes):
+            self.list_of_measurements.append(torch.sum(self.list_of_filtered_scenes[i], dim=2))
+
+        return self.list_of_measurements
+
 
 
     def create_coordinates_grid(self, nb_of_pixels_along_x, nb_of_pixels_along_y, delta_x, delta_y):
@@ -474,8 +693,12 @@ class CassiSystem():
 
         self.optical_model.check_if_sampling_is_sufficiant()
 
-        self.X_coordinates_propagated_coded_aperture = np.nan_to_num(self.X_coordinates_propagated_coded_aperture)
-        self.Y_coordinates_propagated_coded_aperture = np.nan_to_num(self.Y_coordinates_propagated_coded_aperture)
+        if use_torch == False:
+            self.X_coordinates_propagated_coded_aperture = np.nan_to_num(self.X_coordinates_propagated_coded_aperture)
+            self.Y_coordinates_propagated_coded_aperture = np.nan_to_num(self.Y_coordinates_propagated_coded_aperture)
+        else:
+            self.X_coordinates_propagated_coded_aperture = torch.nan_to_num(self.X_coordinates_propagated_coded_aperture)
+            self.Y_coordinates_propagated_coded_aperture = torch.nan_to_num(self.Y_coordinates_propagated_coded_aperture)
 
         return self.X_coordinates_propagated_coded_aperture, self.Y_coordinates_propagated_coded_aperture, self.optical_model.system_wavelengths
 
@@ -494,6 +717,31 @@ class CassiSystem():
             # Perform the convolution using convolve
             result = convolve(self.last_filtered_interpolated_scene, psf_3D, mode='same')
             result_panchro = convolve(self.panchro, self.optical_model.psf, mode='same')
+
+        else:
+            print("No PSF or last measurement to apply PSF")
+            result = self.last_filtered_interpolated_scene
+            result_panchro = self.panchro
+
+        self.last_filtered_interpolated_scene = result
+        self.panchro = result_panchro
+
+        return self.last_filtered_interpolated_scene
+    
+    def apply_psf_torch(self):
+        """
+        Apply the PSF to the last measurement
+
+        Returns:
+            numpy.ndarray: last measurement cube convolved with by PSF (shape= R x C x W). Each slice of the 3D filtered scene is convolved with the PSF
+        """
+        if (self.optical_model.psf is not None) and (self.last_filtered_interpolated_scene is not None):
+            # Expand the dimensions of the 2D matrix to match the 3D matrix
+            psf_3D = self.optical_model.psf[..., None]
+
+            # Perform the convolution using convolve
+            result = torch.nn.functional.conv3d(self.last_filtered_interpolated_scene[None, None, ...], torch.flip(psf_3D, (0,1,2))[None, None, ...], padding = tuple((np.array(psf_3D.shape)-1)//2)).squeeze(0,1)
+            result_panchro = torch.nn.functional.conv2d(self.panchro[None, None, ...], torch.flip(self.optical_model.psf, (0,1))[None, None, ...], padding = tuple((np.array(self.optical_model.psf.shape)-1)//2)).squeeze(0,1)
 
         else:
             print("No PSF or last measurement to apply PSF")
