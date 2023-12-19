@@ -4,6 +4,7 @@ from tqdm import tqdm
 import multiprocessing as mp
 from multiprocessing import Pool
 import torch
+from torch_geometric.nn.unpool import knn_interpolate
 
 
 def generate_sd_measurement_cube(filtered_scene,X_input, Y_input, X_target, Y_target,grid_type,interp_method):
@@ -207,7 +208,6 @@ def interpolate_data_on_grid_positions(data, X_init, Y_init, X_target, Y_target,
     Returns:
         numpy.ndarray: 3D data interpolated on the target grid
     """
-
     interpolated_data = np.zeros((X_target.shape[0],X_target.shape[1],X_init.shape[2]))
     nb_of_grids = X_init.shape[2]
 
@@ -250,26 +250,37 @@ def interpolate_data_on_grid_positions_torch(data, X_init, Y_init, X_target, Y_t
         numpy.ndarray: 3D data interpolated on the target grid
     """
 
+    X_init = torch.from_numpy(X_init).astype(torch.float32) if isinstance(X_init, np.ndarray) else X_init
+    Y_init = torch.from_numpy(Y_init).astype(torch.float32) if isinstance(Y_init, np.ndarray) else Y_init
+    X_target = torch.from_numpy(X_target).astype(torch.float32) if isinstance(X_target, np.ndarray) else X_target
+    Y_target = torch.from_numpy(Y_target).astype(torch.float32) if isinstance(Y_target, np.ndarray) else Y_target
+    data = torch.from_numpy(data).astype(torch.float32) if isinstance(data, np.ndarray) else data
+
     interpolated_data = torch.zeros((X_target.shape[0],X_target.shape[1],X_init.shape[2]))
     nb_of_grids = X_init.shape[2]
 
     if grid_type == "unstructured":
-        worker = worker_unstructured
+        worker = worker_unstructured_torch
     elif grid_type == "regular":
-        worker = worker_regulargrid
-
+        worker = worker_regulargrid_torch
+    
     if data.ndim == 2:
         data = data[:, :, None]
         data = torch.repeat_interleave(data, nb_of_grids, dim=2)
 
-    with Pool(mp.cpu_count()) as p:
+    tasks = [(X_init[:, :, i], Y_init[:, :, i], data[:, :, i], X_target, Y_target, interp_method) for i in
+                range(nb_of_grids)]
 
-        tasks = [(X_init[:, :, i], Y_init[:, :, i], data[:, :, i], X_target, Y_target, interp_method) for i in
-                 range(nb_of_grids)]
+    for index, zi in tqdm(enumerate(tasks), total=nb_of_grids,
+                            desc='Interpolate 3D data on grid positions'):
+        interpolated_data[:, :, index] = worker(zi)
+    
 
-        for index, zi in tqdm(enumerate(p.imap(worker, tasks)), total=nb_of_grids,
-                              desc='Interpolate 3D data on grid positions'):
-            interpolated_data[:, :, index] = zi
+    """X_target = X_target[..., None]
+    X_target = torch.repeat_interleave(X_target, nb_of_grids, axis=2)
+    Y_target = Y_target[..., None]
+    Y_target = torch.repeat_interleave(Y_target, nb_of_grids, axis=2)
+    interpolated_data = worker([X_init, Y_init, data, X_target, Y_target, interp_method])"""
 
     interpolated_data = torch.nan_to_num(interpolated_data)
 
@@ -287,13 +298,39 @@ def worker_unstructured(args):
         numpy.ndarray: 2D array of the data interpolated on the target grid
     """
     X_init_2D, Y_init_2D, data_2D, X_target_2D, Y_target_2D, interp_method = args
-
     interpolated_data = griddata((X_init_2D.flatten(),
                                   Y_init_2D.flatten()),
                                  data_2D.flatten(),
                                  (X_target_2D, Y_target_2D),
                                  method=interp_method)
     return interpolated_data
+
+
+def worker_unstructured_torch(args):
+    """
+    Process to parallellize the unstructured griddata interpolation between the propagated grid (mask and the detector grid
+
+    Args:
+        args (tuple): containing the following elements: X_init_2D, Y_init_2D, data_2D, X_target_2D, Y_target_2D
+
+    Returns:
+        torch.tensor: 2D array of the data interpolated on the target grid
+    """
+    X_init_2D, Y_init_2D, data_2D, X_target_2D, Y_target_2D, interp_method = args
+    data = data_2D.flatten()[:, None]
+    init = torch.stack((X_init_2D.flatten(), Y_init_2D.flatten()), dim=-1)
+    target = torch.stack((X_target_2D.flatten(), Y_target_2D.flatten()), dim=-1)
+    """Essai 3D
+    data = data_2D.flatten(0, 1)
+    init = torch.cat((X_init_2D.flatten(0,1), Y_init_2D.flatten(0,1)), dim = 1)
+    init = torch.cat([torch.stack((X_init_2D.flatten(0,1)[...,i], Y_init_2D.flatten(0,1)[...,i]), dim=-1) for i in range(3)], dim=-1)
+    target = torch.cat((X_target_2D.flatten(0, 1), Y_target_2D.flatten(0, 1)), dim=1)
+    target = torch.cat([torch.stack((X_target_2D.flatten(0,1)[...,i], Y_target_2D.flatten(0,1)[...,i]), dim=-1) for i in range(3)], dim=-1)"""
+    interpolated_data = knn_interpolate(data,
+                                 init,
+                                 target,
+                                 k=3)
+    return interpolated_data.reshape(X_target_2D.shape)
 
 def worker_regulargrid(args):
     """
@@ -315,7 +352,27 @@ def worker_regulargrid(args):
                                  method=interp_method)
     return interpolated_data
 
+def worker_regulargrid_torch(args):
+    """
+    Process to parallellize the structured griddata interpolation between the propagated grid (mask and the detector grid
+    Note : For now it is identical to the unstructured method but it could be faster ...
 
+    Args:
+        args (tuple): containing the following elements: X_init_2D, Y_init_2D, data_2D, X_target_2D, Y_target_2D
+
+    Returns:
+        torch.tensor: 2D array of the data interpolated on the target grid
+    """
+    X_init_2D, Y_init_2D, data_2D, X_target_2D, Y_target_2D, interp_method = args
+    data = data_2D.flatten()[:, None]
+    init = torch.stack((X_init_2D.flatten(), Y_init_2D.flatten()), dim=-1)
+    target = torch.stack((X_target_2D.flatten(), Y_target_2D.flatten()), dim=-1)
+    
+    interpolated_data = knn_interpolate(data,
+                                 init,
+                                 target,
+                                 k=3)
+    return interpolated_data.reshape(X_target_2D.shape)
 
 
 
