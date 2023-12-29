@@ -10,6 +10,7 @@ system architecture:
     dispersive element:
     # dispersive element caracteristics
         type: prism        # name of the dispersive element
+        glass: N-BK7       # glass type of the dispersive element (only used if type == 'prism')
         A: 60              # apex angle of the prism in degrees      (only used if type == 'prism')   -- in degrees
         m: 1               # grating order to consider         (only used if type == 'grating')       -- no units
         G: 30             # grating density                   (only used if type == 'grating')       -- in lines/mm

@@ -3,8 +3,8 @@ from scipy.interpolate import griddata
 from tqdm import tqdm
 import multiprocessing as mp
 from multiprocessing import Pool
-import torch
-from torch_geometric.nn.unpool import knn_interpolate
+# import torch
+# from torch_geometric.nn.unpool import knn_interpolate
 
 
 def generate_sd_measurement_cube(filtered_scene,X_input, Y_input, X_target, Y_target,grid_type,interp_method):

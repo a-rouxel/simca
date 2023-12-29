@@ -1,6 +1,9 @@
 from simca.functions_general_purpose import *
-import snoop
+# import snoop
 import torch
+from opticalglass.glassfactory import create_glass
+
+
 class OpticalModel:
     """
     Class that contains the optical model caracteristics and propagation models
@@ -30,6 +33,7 @@ class OpticalModel:
         self.system_config = config
 
         self.dispersive_element_type = config["system architecture"]["dispersive element"]["type"]
+        self.glass = config["system architecture"]["dispersive element"]["glass"]
         self.A = math.radians(config["system architecture"]["dispersive element"]["A"])
         self.G = config["system architecture"]["dispersive element"]["G"]
         self.lba_c = config["system architecture"]["dispersive element"]["wavelength center"]
@@ -70,9 +74,14 @@ class OpticalModel:
         X_input_grid_flatten = X_input_grid.flatten()
         Y_input_grid_flatten = Y_input_grid.flatten()
 
+        glass = create_glass(self.glass, 'Schott')
+        print(glass)
+
         for idx,lba in enumerate(np.linspace(self.system_wavelengths[0], self.system_wavelengths[-1],self.nb_of_spectral_samples)):
 
-            n_array_flatten = np.full(X_input_grid_flatten.shape, self.sellmeier(lba))
+            prism_index = glass.calc_rindex(lba)
+            n_array_flatten = np.full(X_input_grid_flatten.shape, prism_index)
+            # n_array_flatten = np.full(X_input_grid_flatten.shape, self.sellmeier(lba))
             lba_array_flatten = np.full(X_input_grid_flatten.shape, lba)
 
             X_propagated_coded_aperture, Y_propagated_coded_aperture = self.propagate_through_arm(X_input_grid_flatten,Y_input_grid_flatten,n=n_array_flatten,lba=lba_array_flatten)
@@ -82,7 +91,6 @@ class OpticalModel:
 
         return X_coordinates_propagated_coded_aperture, Y_coordinates_propagated_coded_aperture
 
-    @snoop
     def propagation_with_distorsions_torch(self, X_input_grid, Y_input_grid):
         """
         Propagate the coded aperture coded_aperture through one CASSI system
@@ -180,7 +188,6 @@ class OpticalModel:
 
         return self.central_distorsion_in_X
 
-    @snoop
     def propagate_through_arm(self, X_vec_in, Y_vec_in, n, lba):
 
         """
@@ -270,7 +277,6 @@ class OpticalModel:
 
         return X_vec_out, Y_vec_out
 
-    @snoop
     def propagate_through_arm_torch(self, X_tensor_in, Y_tensor_in, n, lba):
 
         """
@@ -440,7 +446,6 @@ class OpticalModel:
 
         return x, y
 
-    @snoop
     def model_Lens_angle_to_position_torch(self,k_in,F):
         """
         Model of the lens : angle to position
@@ -462,7 +467,6 @@ class OpticalModel:
 
         return x, y
 
-    @snoop
     def model_Prism_angle_to_angle(self,k0, n,A):
         """
         Ray tracing through the prism
@@ -485,7 +489,6 @@ class OpticalModel:
 
         return kout
 
-    @snoop
     def model_Prism_angle_to_angle_torch(self,k0, n,A):
         """
         Ray tracing through the prism
@@ -538,7 +541,6 @@ class OpticalModel:
 
         return k_out
 
-    @snoop
     def model_Lens_pos_to_angle_torch(self,x_obj, y_obj, F):
         """
         Model of the lens : position to angle

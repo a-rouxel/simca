@@ -2,7 +2,7 @@ import numpy as np
 import seaborn as sns
 import h5py
 from sklearn.decomposition import PCA
-import torch
+# import torch
 
 def get_dataset(dataset_name, folder="./datasets/"):
     """Gets the dataset specified by name and return the related components.
