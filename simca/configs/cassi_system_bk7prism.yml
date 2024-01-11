@@ -1,0 +1,38 @@
+#####  Configuration file for the chosen optical system
+
+infos:
+    system name: HYACAMEO
+
+system architecture:
+    system type: DD-CASSI
+    propagation type: simca
+    focal lens: 200000
+    dispersive element:
+    # dispersive element caracteristics
+        type: prism        # name of the dispersive element
+        glass1: N-BK7       # glass type of the dispersive element (only used if type == 'prism')
+        glass2: N-BK7       # glass type of the dispersive element (only used if type == 'prism')
+        glass3: N-BK7       # glass type of the dispersive element (only used if type == 'prism')
+        A1: 60              # apex angle of the prism in degrees      (only used if type == 'prism')   -- in degrees
+        A2: 60              # apex angle of the prism in degrees      (only used if type == 'prism')   -- in degrees
+        A3: 60              # apex angle of the prism in degrees      (only used if type == 'prism')   -- in degrees
+        m: 1               # grating order to consider         (only used if type == 'grating')       -- no units
+        G: 30             # grating density                   (only used if type == 'grating')       -- in lines/mm
+        delta alpha c: 0
+        delta beta c: 0
+        wavelength center: 543  # central wavelength -- in nm
+detector:
+    number of pixels along X: 201                  # number of pixels along X axis -- no units
+    number of pixels along Y: 201                  # number of pixels along Y axis -- no units
+    pixel size along X: 40                             # pixel size along X       -- in um
+    pixel size along Y: 40                              # pixel size along Y       -- in um
+coded aperture:
+    number of pixels along X: 111                  # number of pixels along X axis -- no units
+    number of pixels along Y: 111                  # number of pixels along Y axis -- no units
+    pixel size along X: 101                              # pixel size along X       -- in um
+    pixel size along Y: 101                              # pixel size along Y       -- in um
+
+spectral range:
+    wavelength min: 542     # minimum wavelength -- in nm
+    wavelength max: 544      # maximum wavelength -- in nm
+    number of spectral samples: 50

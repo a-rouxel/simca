@@ -4,9 +4,6 @@ from simca.functions_patterns_generation import *
 from simca.functions_scenes import *
 from simca.functions_general_purpose import *
 from scipy.signal import convolve
-# import snoop
-
-
 
 class CassiSystem():
     """Class that contains the cassi system main attributes and methods"""
@@ -69,6 +66,25 @@ class CassiSystem():
             self.system_config["detector"]["number of pixels along Y"],
             self.system_config["detector"]["pixel size along X"],
             self.system_config["detector"]["pixel size along Y"])
+        
+    def set_wavelengths(self, wavelength_min, wavelength_max, nb_of_spectral_samples):
+        """
+        Set the wavelengths range of the optical system
+
+        Args:
+            wavelength_min (float): minimum wavelength of the system
+            wavelength_max (float): maximum wavelength of the system
+            nb_of_spectral_samples (int): number of spectral samples of the system
+        Returns:
+
+        """
+        self.wavelength_min = wavelength_min
+        self.wavelength_max = wavelength_max
+        self.nb_of_spectral_samples = nb_of_spectral_samples
+
+        self.system_wavelengths = np.linspace(self.wavelength_min,self.wavelength_max,self.nb_of_spectral_samples)
+
+        return self.system_wavelengths
 
     def load_dataset(self, directory, dataset_name):
         """
@@ -122,31 +138,6 @@ class CassiSystem():
             return self.dataset_interpolated
         else:
             raise ValueError("The new wavelengths sampling must be inside the dataset wavelengths range")
-        
-    def interpolate_dataset_along_wavelengths_torch(self, new_wavelengths_sampling, chunk_size):
-        """
-        Interpolate the dataset cube along the wavelength axis to match the system sampling
-
-        Args:
-            new_wavelengths_sampling (numpy.ndarray): new wavelengths on which to interpolate the dataset (shape = W)
-            chunk_size (int): chunk size for the multiprocessing
-
-        Returns:
-            numpy.ndarray : interpolated dataset cube along the wavelength axis (shape = R_dts x C_dts x W)
-
-        """
-        try:
-            self.dataset
-        except :
-            raise ValueError("The dataset must be loaded first")
-
-        if self.dataset_wavelengths[0] <= new_wavelengths_sampling[0] and self.dataset_wavelengths[-1] >= new_wavelengths_sampling[-1]:
-
-            self.dataset_interpolated = interpolate_data_along_wavelength_torch(self.dataset,self.dataset_wavelengths,new_wavelengths_sampling, chunk_size)
-            return self.dataset_interpolated
-        else:
-            raise ValueError("The new wavelengths sampling must be inside the dataset wavelengths range")
-
 
     def generate_2D_pattern(self, config_pattern):
         """
@@ -260,14 +251,14 @@ class CassiSystem():
                                                                  X_target=self.X_detector_coordinates_grid,
                                                                  Y_target=self.Y_detector_coordinates_grid)
         
-        def generate_filtering_cube_torch(self):
-            """
-            Generate filtering cube : each slice of the cube is a propagated pattern interpolated on the detector grid
+    def generate_filtering_cube_torch(self):
+        """
+        Generate filtering cube : each slice of the cube is a propagated pattern interpolated on the detector grid
 
-            Returns:
-            numpy.ndarray: filtering cube generated according to the optical system & the pattern configuration (R x C x W)
+        Returns:
+        numpy.ndarray: filtering cube generated according to the optical system & the pattern configuration (R x C x W)
 
-            """
+        """
 
         self.filtering_cube = interpolate_data_on_grid_positions_torch(data=self.pattern,
                                                                  X_init=self.X_coordinates_propagated_coded_aperture,

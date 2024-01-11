@@ -1,8 +1,5 @@
 import numpy as np
-from scipy.interpolate import griddata
 from tqdm import tqdm
-import multiprocessing as mp
-from multiprocessing import Pool
 import torch
 from torch_geometric.nn.unpool import knn_interpolate
 
@@ -82,11 +79,11 @@ def interpolate_data_on_grid_positions_torch(data, X_init, Y_init, X_target, Y_t
         numpy.ndarray: 3D data interpolated on the target grid
     """
 
-    X_init = torch.from_numpy(X_init).float() if isinstance(X_init, np.ndarray) else X_init
-    Y_init = torch.from_numpy(Y_init).float() if isinstance(Y_init, np.ndarray) else Y_init
-    X_target = torch.from_numpy(X_target).float() if isinstance(X_target, np.ndarray) else X_target
-    Y_target = torch.from_numpy(Y_target).float() if isinstance(Y_target, np.ndarray) else Y_target
-    data = torch.from_numpy(data).float() if isinstance(data, np.ndarray) else data
+    X_init = torch.from_numpy(X_init).double() if isinstance(X_init, np.ndarray) else X_init
+    Y_init = torch.from_numpy(Y_init).double() if isinstance(Y_init, np.ndarray) else Y_init
+    X_target = torch.from_numpy(X_target).double() if isinstance(X_target, np.ndarray) else X_target
+    Y_target = torch.from_numpy(Y_target).double() if isinstance(Y_target, np.ndarray) else Y_target
+    data = torch.from_numpy(data).double() if isinstance(data, np.ndarray) else data
 
     interpolated_data = torch.zeros((X_target.shape[0],X_target.shape[1],X_init.shape[2]))
     nb_of_grids = X_init.shape[2]
