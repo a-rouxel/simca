@@ -138,6 +138,7 @@ class CassiSystem():
             return self.dataset_interpolated
         else:
             raise ValueError("The new wavelengths sampling must be inside the dataset wavelengths range")
+        
 
     def generate_2D_pattern(self, config_pattern):
         """

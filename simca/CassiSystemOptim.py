@@ -36,6 +36,13 @@ class CassiSystemOptim(CassiSystem):
         
         self.optical_model = OpticalModelTorch(self.system_config)
 
+        
+        self.empty_grid = torch.zeros((self.system_config["coded aperture"]["number of pixels along Y"],
+            self.system_config["coded aperture"]["number of pixels along X"]))
+        # self.array_x_positions = torch.rand(-1,1,self.system_config["coded aperture"]["number of pixels along X"])
+        self.array_x_positions = torch.zeros((self.system_config["coded aperture"]["number of pixels along Y"]))+ 0.5
+
+
     def update_optical_model(self, system_config=None):
         """
         Update the optical model of the system
@@ -169,6 +176,45 @@ class CassiSystemOptim(CassiSystem):
         self.measurement = torch.sum(self.last_filtered_interpolated_scene, dim=2)
 
         return self.measurement
+
+    def generate_custom_slit_pattern(self):
+
+        # Create a grid to represent positions
+        grid_positions = torch.arange(self.empty_grid.shape[1], dtype=torch.float32)
+        # Expand dimensions for broadcasting
+        expanded_x_positions = (self.array_x_positions.unsqueeze(-1)) * (self.empty_grid.shape[1]-1)
+        expanded_grid_positions = grid_positions.unsqueeze(0)
+
+        # Apply Gaussian-like function
+        # Adjust 'sigma' to control the sharpness
+        sigma = 1
+        gaussian_peaks = torch.exp(-((expanded_grid_positions - expanded_x_positions) ** 2) / (2 * sigma ** 2))
+
+        # Normalize to make sure the maximum value is 1
+        self.pattern = gaussian_peaks / gaussian_peaks.max()
+
+        return self.pattern
+
+
+    
+    # def generate_custom_slit_pattern(self):
+    #     """
+    #     Generate a custom slit pattern
+
+    #     Args:
+    #         array_x_positions (numpy.ndarray): array of the x positions of the slits between -1 and 1
+
+    #     Returns:
+    #         numpy.ndarray: generated slit pattern
+    #     """
+    #     pattern = torch.clone(self.empty_grid)
+    #     self.array_x_positions += 1
+    #     self.array_x_positions *= self.empty_grid.shape[1] // 2
+    #     self.array_x_positions = self.array_x_positions.type(torch.int32)
+    #     for i in range(self.array_x_positions.shape[0]):
+    #         pattern[0, self.array_x_positions[i]] = 1
+
+    #     return self.pattern
     
     def interpolate_dataset_along_wavelengths_torch(self, new_wavelengths_sampling, chunk_size):
         """

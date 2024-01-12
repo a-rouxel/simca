@@ -230,7 +230,7 @@ class OpticalModel:
         k = np.dot(rotation_y(angle_with_P2), k)
 
         return k
-    @snoop
+
     def propagate_through_arm(self, X_vec_in, Y_vec_in, n1, lba):
 
         """
