@@ -11,14 +11,15 @@ def evaluate_slit_scanning_straightness(filtering_cube,threshold):
 
     for i in range(filtering_cube.shape[2]):
         vertical_binning = torch.sum(filtering_cube[:, :, i], axis=0)
-        max_value = torch.max(vertical_binning)
-        std_deviation = torch.std(vertical_binning)
+        #max_value = torch.max(vertical_binning)
+        std_deviation_vertical = torch.std(vertical_binning)
+        #std_deviation_horizontal = torch.std(torch.sum(filtering_cube[:,:,i], axis=1))
         # Reward the max value and penalize based on the standard deviation
 
         # Calculate the differences between consecutive rows (vectorized)
         row_diffs = filtering_cube[1:, :, i] - filtering_cube[:-1, :, i]
         #cost_value = cost_value + max_value / std_deviation - torch.sum(torch.sum(torch.abs(row_diffs)))
-        cost_value = cost_value + std_deviation
+        cost_value = cost_value + std_deviation_vertical - 0.2*torch.sum(torch.sum(torch.abs(row_diffs)))
     # Minimizing the negative of cost_value to maximize the original objective
     return -cost_value
 

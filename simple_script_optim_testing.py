@@ -18,7 +18,7 @@ config_acquisition = load_yaml_config("simca/configs/acquisition.yml")
 
 dataset_name = "indian_pines"
 
-test = "EQUAL_LIGHT"
+test = "SMILE"
 
 if test=="SMILE":
     config_system = load_yaml_config("simca/configs/cassi_system_simple_optim.yml")
