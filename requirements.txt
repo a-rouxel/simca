@@ -8,3 +8,9 @@ tqdm
 imageio
 spectral
 scikit-learn
+matplotlib
+opticalglass
+pyyaml
+#torch
+#torch-geometric
+#torch-cluster

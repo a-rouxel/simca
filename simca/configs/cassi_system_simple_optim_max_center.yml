@@ -1,0 +1,38 @@
+#####  Configuration file for the chosen optical system
+
+infos:
+  system name: HYACAMEO
+
+system architecture:
+  system type: DD-CASSI
+  propagation type: simca
+  focal lens: 100000
+  dispersive element:
+    # dispersive element caracteristics
+    type: prism # name of the dispersive element
+    glass1: N-BK7 # glass type of the dispersive element (only used if type == 'prism')
+    glass2: N-BK7 # glass type of the dispersive element (only used if type == 'prism')
+    glass3: N-BK7 # glass type of the dispersive element (only used if type == 'prism')
+    A1: 60 # apex angle of the prism in degrees      (only used if type == 'prism')   -- in degrees
+    A2: 60 # apex angle of the prism in degrees      (only used if type == 'prism')   -- in degrees
+    A3: 60 # apex angle of the prism in degrees      (only used if type == 'prism')   -- in degrees
+    m: 1 # grating order to consider         (only used if type == 'grating')       -- no units
+    G: 30 # grating density                   (only used if type == 'grating')       -- in lines/mm
+    delta alpha c: 0
+    delta beta c: 0
+    wavelength center: 575 # central wavelength -- in nm
+detector:
+  number of pixels along X: 145 # number of pixels along X axis -- no units
+  number of pixels along Y: 145 # number of pixels along Y axis -- no units
+  pixel size along X: 8 # pixel size along X       -- in um
+  pixel size along Y: 8 # pixel size along Y       -- in um
+coded aperture:
+  number of pixels along X: 145 # number of pixels along X axis -- no units
+  number of pixels along Y: 145 # number of pixels along Y axis -- no units
+  pixel size along X: 11 # pixel size along X       -- in um
+  pixel size along Y: 11 # pixel size along Y       -- in um
+
+spectral range:
+  wavelength min: 450 # minimum wavelength -- in nm
+  wavelength max: 700 # maximum wavelength -- in nm
+  number of spectral samples: 3

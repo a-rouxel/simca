@@ -48,15 +48,16 @@ def generate_dd_measurement_torch(scene, filtering_cube,chunk_size):
     total_iterations = (filtering_cube.shape[0] // chunk_size + 1) * (filtering_cube.shape[1] // chunk_size + 1)
 
     with tqdm(total=total_iterations) as pbar:
-        # Perform the multiplication in chunks
-        for i in range(0, filtering_cube.shape[0], chunk_size):
-            for j in range(0, filtering_cube.shape[1], chunk_size):
-                filtered_scene[i:i + chunk_size, j:j + chunk_size, :] = filtering_cube[i:i + chunk_size,
-                                                                           j:j + chunk_size, :] * scene[
-                                                                                                  i:i + chunk_size,
-                                                                                                  j:j + chunk_size,
-                                                                                                  :]
-                pbar.update()
+        # # Perform the multiplication in chunks
+        # for i in range(0, filtering_cube.shape[0], chunk_size):
+        #     for j in range(0, filtering_cube.shape[1], chunk_size):
+        #         filtered_scene[i:i + chunk_size, j:j + chunk_size, :] = filtering_cube[i:i + chunk_size,
+        #                                                                    j:j + chunk_size, :] * scene[
+        #                                                                                           i:i + chunk_size,
+        #                                                                                           j:j + chunk_size,
+        #                                                                                           :]
+        filtered_scene = torch.mul(filtering_cube, scene)
+        pbar.update()
 
     filtered_scene = torch.nan_to_num(filtered_scene)
 

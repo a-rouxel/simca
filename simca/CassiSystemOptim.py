@@ -127,7 +127,7 @@ class CassiSystemOptim(CassiSystem):
             except:
                 return print("Please generate filtering cube first")
 
-            scene = torch.from_numpy(match_dataset_to_instrument(dataset, self.filtering_cube))
+            scene = torch.from_numpy(match_dataset_to_instrument(dataset, self.filtering_cube)) if isinstance(dataset, np.ndarray) else dataset
 
             measurement_in_3D = generate_dd_measurement_torch(scene, self.filtering_cube, chunck_size)
 
@@ -135,7 +135,7 @@ class CassiSystemOptim(CassiSystem):
             self.interpolated_scene = scene
 
             if dataset_labels is not None:
-                scene_labels = torch.from_numpy(match_dataset_labels_to_instrument(dataset_labels, self.filtering_cube))
+                scene_labels = torch.from_numpy(match_dataset_labels_to_instrument(dataset_labels, self.filtering_cube)) 
                 self.scene_labels = scene_labels
 
 
@@ -176,6 +176,54 @@ class CassiSystemOptim(CassiSystem):
         self.measurement = torch.sum(self.last_filtered_interpolated_scene, dim=2)
 
         return self.measurement
+    
+    def generate_custom_pattern_parameters_slit_width(self, nb_slits=1, nb_rows=1, start_width=1, start_position="line"):
+        # Situation where we have nb_slits per row, and nb_rows rows of slits
+        # Values in self.array_x_positions correspond to the width of the slit
+        # self.array_x_positions is of shape (self.system_config["coded aperture"]["number of pixels along Y"], nb_rows)
+
+        self.array_x_positions = torch.zeros((nb_slits, nb_rows))+start_width # Every slit starts with the same width
+        return self.array_x_positions
+
+    def generate_custom_slit_pattern_width(self, start_position = "line"):
+        nb_slits, nb_rows = self.array_x_positions.shape
+        pos_slits = self.system_config["coded aperture"]["number of pixels along Y"]//(nb_slits+1) # Equally spaced slits
+        height_slits = self.system_config["coded aperture"]["number of pixels along X"]//nb_rows # Same length slits
+
+        if start_position == "line":
+            self.pattern = torch.zeros((self.system_config["coded aperture"]["number of pixels along Y"], self.system_config["coded aperture"]["number of pixels along X"])) # Pattern of correct size
+            for j in range(nb_slits):
+                for i in range(nb_rows):
+                    top_pad = i*height_slits # Padding necessary above slit (j,i)
+                    if i == nb_rows-1:
+                        bottom_pad = 0 # Padding necessary below slit (j,i)
+                        # In that case, the last slit might be longer than the other ones in case size_X isn't divisible by nb_rows
+                        array_x_pos = torch.zeros((height_slits+self.system_config["coded aperture"]["number of pixels along Y"] % nb_rows)) + (j+1)*pos_slits/self.system_config["coded aperture"]["number of pixels along X"]
+                    else:
+                        # Set the position of the slit (j,i)
+                        array_x_pos = torch.zeros((height_slits)) + (j+1)*pos_slits/self.system_config["coded aperture"]["number of pixels along X"]
+                        bottom_pad = (nb_rows - i-1)*height_slits + self.system_config["coded aperture"]["number of pixels along Y"] % nb_rows # Padding necessary below slit (j,i)
+                        top_pad = i*height_slits
+                    
+                    # Create a grid to represent positions
+                    grid_positions = torch.arange(self.empty_grid.shape[1], dtype=torch.float32)
+                    # Expand dimensions for broadcasting
+                    expanded_x_positions = (array_x_pos.unsqueeze(-1)) * (self.empty_grid.shape[1]-1)
+                    expanded_grid_positions = grid_positions.unsqueeze(0)
+
+                    # Apply Gaussian-like function
+                    sigma = (self.array_x_positions[j,i]+1)/2
+                    gaussian = torch.exp(-(((expanded_grid_positions - expanded_x_positions)) ** 2) / (2 * sigma ** 2))
+
+                    padded = torch.nn.functional.pad(gaussian, (0,0,top_pad,bottom_pad)) # padding: left - right - top - bottom
+
+                    # Normalize to make sure the maximum value is 1
+                    self.pattern = self.pattern + padded/padded.max()
+
+        # Normalize to make sure the maximum value is 1
+        self.pattern = self.pattern / self.pattern.max(dim=1).values.unsqueeze(-1)
+
+        return self.pattern
 
     def generate_custom_slit_pattern(self):
 
@@ -192,7 +240,6 @@ class CassiSystemOptim(CassiSystem):
 
         # Normalize to make sure the maximum value is 1
         self.pattern = gaussian_peaks / gaussian_peaks.max()
-
         return self.pattern
 
 

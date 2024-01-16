@@ -134,14 +134,14 @@ class OpticalModelTorch:
     def rotate_from_dispersive_element_to_lens(self,k,alpha_c_transmis,delta_alpha_c,delta_beta_c,alpha_1):
 
         angle_with_P2 = alpha_c_transmis - alpha_1 - delta_alpha_c
-        print(k.shape)
+        #print(k.shape)
         k = torch.matmul(k,rotation_y_torch(alpha_1).T)
-        print(k.shape)
+        #print(k.shape)
         # Rotation in relation to P2 around the X axis
         k = torch.matmul(k,rotation_x_torch(-delta_beta_c).T)
         # Rotation in relation to P2 around the Y axis
         k = torch.matmul(k,rotation_y_torch(angle_with_P2).T)
-        print(k.shape)
+        #print(k.shape)
         return k
     
     def propagate_through_simple_prism(self,k,n,A):

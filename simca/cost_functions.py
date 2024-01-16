@@ -1,9 +1,9 @@
 import torch
 
-def evalute_slit_scanning_straightness(filtering_cube,threshold):
+def evaluate_slit_scanning_straightness(filtering_cube,threshold):
     """
     Evaluate the straightness of the slit scanning.
-    working cost functio for up for focal >100000
+    working cost function for up to focal >100000
     """
 
     epsilon = 1e-6  # Small constant for numerical stability
@@ -17,15 +17,32 @@ def evalute_slit_scanning_straightness(filtering_cube,threshold):
 
         # Calculate the differences between consecutive rows (vectorized)
         row_diffs = filtering_cube[1:, :, i] - filtering_cube[:-1, :, i]
-        cost_value = cost_value + max_value / std_deviation - torch.sum(torch.sum(torch.abs(row_diffs)))
-
+        #cost_value = cost_value + max_value / std_deviation - torch.sum(torch.sum(torch.abs(row_diffs)))
+        cost_value = cost_value + std_deviation
     # Minimizing the negative of cost_value to maximize the original objective
+    return -cost_value
+
+def evaluate_center(acquisition):
+    """
+    Evaluate the value of the central pixel of each line
+    """
+    cost_value = torch.sum(acquisition[:, acquisition.shape[1]//2], axis=0)
+    
+    return -cost_value
+
+def evaluate_mean_lighting(acquisition):
+    """
+    Evaluate the mean and std values of the acquisition, maximizing mean and minimizing std
+    """
+    cost_value = torch.mean(acquisition)/(torch.std(acquisition)+1e-9)
+    cost_value = torch.mean(acquisition) - 8*torch.std(acquisition)
+
     return -cost_value
 
 # def evalute_slit_scanning_straightness(filtering_cube,threshold):
 #     """
 #     Evaluate the straightness of the slit scanning.
-#     working cost functio for up for focal >100000
+#     working cost function for up to focal >100000
 #     """
 #     cost_value = torch.tensor(0.0, requires_grad=True)
 
