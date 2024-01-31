@@ -6,7 +6,7 @@ infos:
 system architecture:
   system type: DD-CASSI
   propagation type: simca
-  focal lens: 100000
+  focal lens: 4000
   dispersive element:
     # dispersive element caracteristics
     type: prism # name of the dispersive element
@@ -20,19 +20,19 @@ system architecture:
     G: 30 # grating density                   (only used if type == 'grating')       -- in lines/mm
     delta alpha c: 0
     delta beta c: 0
-    wavelength center: 620 # central wavelength -- in nm
+    wavelength center: 600 # central wavelength -- in nm
 detector:
-  number of pixels along X: 401 # number of pixels along X axis -- no units
-  number of pixels along Y: 901 # number of pixels along Y axis -- no units
-  pixel size along X: 20 # pixel size along X       -- in um
-  pixel size along Y: 20 # pixel size along Y       -- in um
+  number of pixels along X: 167 # number of pixels along X axis -- no units -> dataset size /0.6
+  number of pixels along Y: 100 # number of pixels along Y axis -- no units
+  pixel size along X: 8 # pixel size along X       -- in um
+  pixel size along Y: 8 # pixel size along Y       -- in um
 coded aperture:
-  number of pixels along X: 101 # number of pixels along X axis -- no units
-  number of pixels along Y: 601 # number of pixels along Y axis -- no units
-  pixel size along X: 27 # pixel size along X       -- in um
-  pixel size along Y: 27 # pixel size along Y       -- in um
+  number of pixels along X: 167 # number of pixels along X axis -- no units -> dataset size /0.6
+  number of pixels along Y: 100 # number of pixels along Y axis -- no units
+  pixel size along X: 11 # pixel size along X       -- in um
+  pixel size along Y: 11 # pixel size along Y       -- in um
 
 spectral range:
-  wavelength min: 450 # minimum wavelength -- in nm
+  wavelength min: 500 # minimum wavelength -- in nm
   wavelength max: 700 # maximum wavelength -- in nm
-  number of spectral samples: 1
+  number of spectral samples: 3

@@ -38,6 +38,6 @@ def interpolate_data_along_wavelength_torch(data, current_sampling, new_sampling
                                                                                                    grid = new_grid,
                                                                                                    padding_mode = "zeros",
                                                                                                    mode = "bilinear",
-                                                                                                   align_corners = True).squeeze()
+                                                                                                   align_corners = True).squeeze(0,1)
 
     return interpolated_data

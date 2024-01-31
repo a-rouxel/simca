@@ -6,7 +6,7 @@ infos:
 system architecture:
   system type: DD-CASSI
   propagation type: simca
-  focal lens: 100000
+  focal lens: 80000
   dispersive element:
     # dispersive element caracteristics
     type: prism # name of the dispersive element
@@ -24,13 +24,13 @@ system architecture:
 detector:
   number of pixels along X: 401 # number of pixels along X axis -- no units
   number of pixels along Y: 901 # number of pixels along Y axis -- no units
-  pixel size along X: 20 # pixel size along X       -- in um
-  pixel size along Y: 20 # pixel size along Y       -- in um
+  pixel size along X: 8 # pixel size along X       -- in um
+  pixel size along Y: 8 # pixel size along Y       -- in um
 coded aperture:
-  number of pixels along X: 101 # number of pixels along X axis -- no units
+  number of pixels along X: 201 # number of pixels along X axis -- no units
   number of pixels along Y: 601 # number of pixels along Y axis -- no units
-  pixel size along X: 27 # pixel size along X       -- in um
-  pixel size along Y: 27 # pixel size along Y       -- in um
+  pixel size along X: 11 # pixel size along X       -- in um
+  pixel size along Y: 11 # pixel size along Y       -- in um
 
 spectral range:
   wavelength min: 450 # minimum wavelength -- in nm

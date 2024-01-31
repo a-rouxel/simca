@@ -42,7 +42,28 @@ class CassiSystemOptim(CassiSystem):
         # self.array_x_positions = torch.rand(-1,1,self.system_config["coded aperture"]["number of pixels along X"])
         self.array_x_positions = torch.zeros((self.system_config["coded aperture"]["number of pixels along Y"]))+ 0.5
 
+    def create_coordinates_grid(self, nb_of_pixels_along_x, nb_of_pixels_along_y, delta_x, delta_y):
+        """
+        Create a coordinates grid for a given number of samples along X and Y axis and a given pixel size
 
+        Args:
+            nb_of_pixels_along_x (int): number of samples along X axis
+            nb_of_pixels_along_y (int): number of samples along Y axis
+            delta_x (float): pixel size along X axis
+            delta_y (float): pixel size along Y axis
+
+        Returns:
+            tuple: X coordinates grid (numpy.ndarray) and Y coordinates grid (numpy.ndarray)
+        """
+        x = np.arange(-(nb_of_pixels_along_x-1) * delta_x / 2, (nb_of_pixels_along_x+1) * delta_x / 2,delta_x)
+        y = np.arange(-(nb_of_pixels_along_y-1) * delta_y / 2, (nb_of_pixels_along_y+1) * delta_y / 2, delta_y)
+
+
+        # Create a two-dimensional grid of coordinates
+        X_input_grid, Y_input_grid = np.meshgrid(x, y)
+
+        return torch.from_numpy(X_input_grid), torch.from_numpy(Y_input_grid)
+    
     def update_optical_model(self, system_config=None):
         """
         Update the optical model of the system
@@ -127,7 +148,8 @@ class CassiSystemOptim(CassiSystem):
             except:
                 return print("Please generate filtering cube first")
 
-            scene = torch.from_numpy(match_dataset_to_instrument(dataset, self.filtering_cube)) if isinstance(dataset, np.ndarray) else dataset
+            scene = match_dataset_to_instrument(dataset, self.filtering_cube)
+            scene = torch.from_numpy(match_dataset_to_instrument(dataset, self.filtering_cube)) if isinstance(scene, np.ndarray) else scene
 
             measurement_in_3D = generate_dd_measurement_torch(scene, self.filtering_cube, chunck_size)
 
@@ -177,7 +199,12 @@ class CassiSystemOptim(CassiSystem):
 
         return self.measurement
     
-    def generate_custom_pattern_parameters_slit_width(self, nb_slits=1, nb_rows=1, start_width=1, start_position="line"):
+    def generate_custom_pattern_parameters_slit(self, position=0.5):
+        # Position is a float: 0 means slit is on the left edge, 1 means the slit is on the right edge
+        self.array_x_positions = torch.zeros((self.system_config["coded aperture"]["number of pixels along Y"]))+ position
+        return self.array_x_positions
+    
+    def generate_custom_pattern_parameters_slit_width(self, nb_slits=1, nb_rows=1, start_width=1):
         # Situation where we have nb_slits per row, and nb_rows rows of slits
         # Values in self.array_x_positions correspond to the width of the slit
         # self.array_x_positions is of shape (self.system_config["coded aperture"]["number of pixels along Y"], nb_rows)
@@ -185,12 +212,15 @@ class CassiSystemOptim(CassiSystem):
         self.array_x_positions = torch.zeros((nb_slits, nb_rows))+start_width # Every slit starts with the same width
         return self.array_x_positions
 
-    def generate_custom_slit_pattern_width(self, start_position = "line"):
+    def generate_custom_slit_pattern_width(self, start_pattern = "line", start_position = 0):
         nb_slits, nb_rows = self.array_x_positions.shape
         pos_slits = self.system_config["coded aperture"]["number of pixels along Y"]//(nb_slits+1) # Equally spaced slits
         height_slits = self.system_config["coded aperture"]["number of pixels along X"]//nb_rows # Same length slits
 
-        if start_position == "line":
+        if start_position != 0:
+            start_position = start_position - pos_slits/self.system_config["coded aperture"]["number of pixels along X"]
+
+        if start_pattern == "line":
             self.pattern = torch.zeros((self.system_config["coded aperture"]["number of pixels along Y"], self.system_config["coded aperture"]["number of pixels along X"])) # Pattern of correct size
             for j in range(nb_slits):
                 for i in range(nb_rows):
@@ -198,10 +228,10 @@ class CassiSystemOptim(CassiSystem):
                     if i == nb_rows-1:
                         bottom_pad = 0 # Padding necessary below slit (j,i)
                         # In that case, the last slit might be longer than the other ones in case size_X isn't divisible by nb_rows
-                        array_x_pos = torch.zeros((height_slits+self.system_config["coded aperture"]["number of pixels along Y"] % nb_rows)) + (j+1)*pos_slits/self.system_config["coded aperture"]["number of pixels along X"]
+                        array_x_pos = torch.zeros((height_slits+self.system_config["coded aperture"]["number of pixels along Y"] % nb_rows)) + start_position +  (j+1)*pos_slits/self.system_config["coded aperture"]["number of pixels along X"]
                     else:
                         # Set the position of the slit (j,i)
-                        array_x_pos = torch.zeros((height_slits)) + (j+1)*pos_slits/self.system_config["coded aperture"]["number of pixels along X"]
+                        array_x_pos = torch.zeros((height_slits)) + start_position + (j+1)*pos_slits/self.system_config["coded aperture"]["number of pixels along X"]
                         bottom_pad = (nb_rows - i-1)*height_slits + self.system_config["coded aperture"]["number of pixels along Y"] % nb_rows # Padding necessary below slit (j,i)
                         top_pad = i*height_slits
                     
@@ -235,7 +265,7 @@ class CassiSystemOptim(CassiSystem):
 
         # Apply Gaussian-like function
         # Adjust 'sigma' to control the sharpness
-        sigma = 1
+        sigma = 0.75
         gaussian_peaks = torch.exp(-((expanded_grid_positions - expanded_x_positions) ** 2) / (2 * sigma ** 2))
 
         # Normalize to make sure the maximum value is 1

@@ -20,19 +20,19 @@ system architecture:
     G: 30 # grating density                   (only used if type == 'grating')       -- in lines/mm
     delta alpha c: 0
     delta beta c: 0
-    wavelength center: 620 # central wavelength -- in nm
+    wavelength center: 600 # central wavelength -- in nm
 detector:
-  number of pixels along X: 401 # number of pixels along X axis -- no units
-  number of pixels along Y: 901 # number of pixels along Y axis -- no units
-  pixel size along X: 20 # pixel size along X       -- in um
-  pixel size along Y: 20 # pixel size along Y       -- in um
+  number of pixels along X: 145 # number of pixels along X axis -- no units
+  number of pixels along Y: 145 # number of pixels along Y axis -- no units
+  pixel size along X: 6 # pixel size along X       -- in um
+  pixel size along Y: 6 # pixel size along Y       -- in um
 coded aperture:
-  number of pixels along X: 101 # number of pixels along X axis -- no units
-  number of pixels along Y: 601 # number of pixels along Y axis -- no units
-  pixel size along X: 27 # pixel size along X       -- in um
-  pixel size along Y: 27 # pixel size along Y       -- in um
+  number of pixels along X: 145 # number of pixels along X axis -- no units
+  number of pixels along Y: 145 # number of pixels along Y axis -- no units
+  pixel size along X: 12 # pixel size along X       -- in um
+  pixel size along Y: 12 # pixel size along Y       -- in um
 
 spectral range:
-  wavelength min: 450 # minimum wavelength -- in nm
-  wavelength max: 700 # maximum wavelength -- in nm
-  number of spectral samples: 1
+  wavelength min: 400 # minimum wavelength -- in nm
+  wavelength max: 800 # maximum wavelength -- in nm
+  number of spectral samples: 5
