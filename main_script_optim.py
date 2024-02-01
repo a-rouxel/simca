@@ -109,13 +109,6 @@ if __name__ == '__main__':
         for iteration in range(num_iterations):  # Define num_iterations as needed
             
             #print(pattern[:, pattern.shape[1]//2-4:pattern.shape[1]//2+4])
-
-            if iteration==-1:
-                plt.imshow(cassi_system.pattern.detach().numpy(), aspect=aspect)
-                plt.show()
-                plt.imshow(cassi_system.filtering_cube[:, :, 0].detach().numpy(), aspect=aspect)
-                plt.show()
-            
             if algo == "LBFGS":
                 def closure():
                     optimizer.zero_grad()

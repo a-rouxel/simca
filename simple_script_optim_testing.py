@@ -9,6 +9,7 @@ import torch
 import time
 from pprint import pprint
 from simca.cost_functions import evaluate_slit_scanning_straightness, evaluate_center, evaluate_mean_lighting, evaluate_max_lighting
+from simca.functions_optim import optim_smile, optim_width
 
 #matplotlib.use('Agg')
 config_dataset = load_yaml_config("simca/configs/dataset.yml")
@@ -18,7 +19,9 @@ config_acquisition = load_yaml_config("simca/configs/acquisition.yml")
 
 dataset_name = "indian_pines"
 
-test = "MAX_LIGHT"
+test = "SMILE"
+
+algo = "LBFGS"
 
 if test=="SMILE":
     config_system = load_yaml_config("simca/configs/cassi_system_simple_optim.yml")
@@ -50,7 +53,7 @@ if __name__ == '__main__':
 
     num_iterations = 3000  # Define num_iterations as needed
 
-    convergence_counter = 0 # Counter to check convergence
+    """ convergence_counter = 0 # Counter to check convergence
     max_cnt = 100
     min_cost_value = np.inf 
 
@@ -173,5 +176,46 @@ if __name__ == '__main__':
 
     if (test=="MAX_CENTER") or (test == "EQUAL_LIGHT") or (test == "SMILE_mono") or (test == "MAX_LIGHT"):
         plt.imshow(cassi_system.measurement.detach().numpy())
-        plt.show()
+        plt.show()"""
+    algo = "ADAM"
+    if algo == "LBFGS":
+        lr = 0.002 # default: 0.05
+    elif algo == "ADAM":
+        lr = 0.005 # default: 0.005
+    
+    max_cnt = 25
 
+    #cassi_system = optim_smile(cassi_system, 0.5, 0.41, sigma, 'cpu', algo, lr, num_iterations, max_cnt, plot_frequency=200)
+    start_position = torch.tensor([0.5000, 0.5000, 0.5000, 0.5000, 0.5000, 0.5000, 0.5000, 0.5000, 0.5000,
+        0.5000, 0.5000, 0.5000, 0.5000, 0.5000, 0.5000, 0.5000, 0.5000, 0.4923,
+        0.4859, 0.4915, 0.4934, 0.4972, 0.4996, 0.5003, 0.5009, 0.5013, 0.5033,
+        0.5041, 0.5064, 0.5068, 0.5078, 0.5070, 0.5099, 0.5103, 0.5146, 0.5145,
+        0.5146, 0.5152, 0.5173, 0.5195, 0.5215, 0.5208, 0.5208, 0.5222, 0.5247,
+        0.5272, 0.5287, 0.5285, 0.5240, 0.5283, 0.5282, 0.5288, 0.5288, 0.5291,
+        0.5289, 0.5282, 0.5334, 0.5314, 0.5324, 0.5370, 0.5323, 0.5322, 0.5341,
+        0.5329, 0.5361, 0.5364, 0.5346, 0.5333, 0.5340, 0.5333, 0.5339, 0.5345,
+        0.5359, 0.5349, 0.5364, 0.5344, 0.5341, 0.5346, 0.5353, 0.5345, 0.5347,
+        0.5346, 0.5362, 0.5363, 0.5330, 0.5321, 0.5323, 0.5299, 0.5315, 0.5318,
+        0.5298, 0.5291, 0.5291, 0.5298, 0.5292, 0.5256, 0.5270, 0.5283, 0.5268,
+        0.5255, 0.5245, 0.5200, 0.5205, 0.5207, 0.5190, 0.5188, 0.5144, 0.5122,
+        0.5138, 0.5133, 0.5131, 0.5122, 0.5111, 0.5156, 0.5118, 0.5091, 0.5077,
+        0.5068, 0.5030, 0.5003, 0.5000, 0.4992, 0.4970, 0.4968, 0.4947, 0.4949,
+        0.4935, 0.4983, 0.5000, 0.5000, 0.5000, 0.5000, 0.5000, 0.5000, 0.5000,
+        0.5000, 0.5000, 0.5000, 0.5000, 0.5000, 0.5000, 0.5000, 0.5000, 0.5000,
+        0.5000])
+    cassi_system = optim_width(cassi_system, start_position, 0.41, cassi_system.system_config["detector"]["number of pixels along Y"], sigma, 'cpu', algo, lr, num_iterations, max_cnt, plot_frequency = 200)
+    
+    print(f"Exec time: {time.time() - time_start:.3f}s")
+    print(cassi_system.array_x_positions)
+    plt.imshow(cassi_system.pattern.detach().numpy(), aspect=aspect)
+    plt.show()
+
+    plt.imshow(cassi_system.filtering_cube[:, :, 0].detach().numpy(), aspect=aspect)
+    plt.show()
+
+    plt.plot(np.sum(cassi_system.filtering_cube[:, :, 0].detach().numpy(),axis=0))
+    plt.show()
+
+    if (test=="MAX_CENTER") or (test == "EQUAL_LIGHT") or (test == "SMILE_mono") or (test == "MAX_LIGHT"):
+        plt.imshow(cassi_system.measurement.detach().numpy())
+        plt.show()
