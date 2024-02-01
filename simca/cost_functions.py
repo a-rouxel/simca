@@ -24,9 +24,9 @@ def evaluate_slit_scanning_straightness(filtering_cube, sigma = 0.75, pos_slit=0
         #cost_value = cost_value + max_value / std_deviation - torch.sum(torch.sum(torch.abs(row_diffs)))
         cost_value = cost_value + std_deviation_vertical  - 0.2*torch.sum(torch.sum(torch.square(row_diffs))) #- 0.2*torch.sum(torch.sum(torch.abs(row_diffs)))"""
         row_diffs = filtering_cube[1:, :, 0] - filtering_cube[:-1, :, 0]
-
-        #cost_value = cost_value - torch.sum((torch.square(filtering_cube[:, :, 0] - gaussian)+1e-8)) - 5*torch.sum(torch.var(filtering_cube[:, :, 0], dim=0)) - 0.5*torch.sum(torch.sum(torch.abs(row_diffs)))
-        cost_value = cost_value - (2**2)*torch.sum((torch.sqrt(1+((filtering_cube[:, :, 0] - gaussian)/2)**2)-1))
+        cost_value = cost_value - torch.sum((torch.abs(filtering_cube[:, :, 0] - gaussian)+1e-8)**0.4) + 0.6*torch.sum(filtering_cube[:, pos_cube,0]) - 0.8*torch.sum(torch.sum(torch.abs(row_diffs))) #- 2*torch.sum(torch.var(filtering_cube[:, :, 0], dim=0)) 
+        #delta = 2
+        #cost_value = cost_value - (delta**2)*torch.sum((torch.sqrt(1+((filtering_cube[:, :, 0] - gaussian)/delta)**2)-1)) # pseudo-huber loss
     # Minimizing the negative of cost_value to maximize the original objective
     return -cost_value
 
@@ -50,7 +50,9 @@ def evaluate_mean_lighting(acquisition):
 def evaluate_max_lighting(acquisition, pos_check):
     cost_value = 0
 
-    col = acquisition[:, pos_check]
+    pos_cube = round(acquisition.shape[1]*pos_check)
+
+    col = acquisition[:, pos_cube]
 
     cost_value = 2*torch.mean(col)**2 - 8*torch.var(col)
 

@@ -217,11 +217,10 @@ class CassiSystemOptim(CassiSystem):
         pos_slits = self.system_config["coded aperture"]["number of pixels along Y"]//(nb_slits+1) # Equally spaced slits
         height_slits = self.system_config["coded aperture"]["number of pixels along X"]//nb_rows # Same length slits
 
-        if start_position != 0:
-            start_position = start_position - pos_slits/self.system_config["coded aperture"]["number of pixels along X"]
-
+        self.pattern = torch.zeros((self.system_config["coded aperture"]["number of pixels along Y"], self.system_config["coded aperture"]["number of pixels along X"])) # Pattern of correct size
         if start_pattern == "line":
-            self.pattern = torch.zeros((self.system_config["coded aperture"]["number of pixels along Y"], self.system_config["coded aperture"]["number of pixels along X"])) # Pattern of correct size
+            if start_position != 0:
+                start_position = start_position - pos_slits/self.system_config["coded aperture"]["number of pixels along X"]
             for j in range(nb_slits):
                 for i in range(nb_rows):
                     top_pad = i*height_slits # Padding necessary above slit (j,i)
@@ -249,6 +248,34 @@ class CassiSystemOptim(CassiSystem):
 
                     # Normalize to make sure the maximum value is 1
                     self.pattern = self.pattern + padded/padded.max()
+        elif start_pattern == "corrected":
+            for j in range(nb_slits):
+                for i in range(nb_rows):
+                    top_pad = i*height_slits # Padding necessary above slit (j,i)
+                    if i == nb_rows-1:
+                        bottom_pad = 0 # Padding necessary below slit (j,i)
+                        # In that case, the last slit might be longer than the other ones in case size_X isn't divisible by nb_rows
+                    else:
+                        # Set the position of the slit (j,i)
+                        bottom_pad = (nb_rows - i-1)*height_slits + self.system_config["coded aperture"]["number of pixels along Y"] % nb_rows # Padding necessary below slit (j,i)
+                        top_pad = i*height_slits
+                    array_x_pos = torch.tensor(start_position[i])
+
+                    # Create a grid to represent positions
+                    grid_positions = torch.arange(self.empty_grid.shape[1], dtype=torch.float32)
+                    # Expand dimensions for broadcasting
+                    expanded_x_positions = (array_x_pos.unsqueeze(-1)) * (self.empty_grid.shape[1]-1)
+                    expanded_grid_positions = grid_positions.unsqueeze(0)
+
+                    # Apply Gaussian-like function
+                    sigma = (self.array_x_positions[j,i]+1)/2
+                    gaussian = torch.exp(-(((expanded_grid_positions - expanded_x_positions)) ** 2) / (2 * sigma ** 2))
+
+                    padded = torch.nn.functional.pad(gaussian, (0,0,top_pad,bottom_pad)) # padding: left - right - top - bottom
+
+                    # Normalize to make sure the maximum value is 1
+                    self.pattern = self.pattern + padded/padded.max()
+
 
         # Normalize to make sure the maximum value is 1
         self.pattern = self.pattern / self.pattern.max(dim=1).values.unsqueeze(-1)

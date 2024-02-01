@@ -22,17 +22,21 @@ system architecture:
     delta beta c: 0
     wavelength center: 620 # central wavelength -- in nm
 detector:
-  number of pixels along X: 401 # number of pixels along X axis -- no units
-  number of pixels along Y: 901 # number of pixels along Y axis -- no units
-  pixel size along X: 20 # pixel size along X       -- in um
-  pixel size along Y: 20 # pixel size along Y       -- in um
+  #number of pixels along X: 400 # number of pixels along X axis -- no units
+  #number of pixels along Y: 401 # number of pixels along Y axis -- no units
+  number of pixels along X: 145
+  number of pixels along Y: 145
+  pixel size along X: 240 # pixel size along X       -- in um
+  pixel size along Y: 240 # pixel size along Y       -- in um
 coded aperture:
-  number of pixels along X: 101 # number of pixels along X axis -- no units
-  number of pixels along Y: 601 # number of pixels along Y axis -- no units
-  pixel size along X: 27 # pixel size along X       -- in um
-  pixel size along Y: 27 # pixel size along Y       -- in um
+  #number of pixels along X: 100 # number of pixels along X axis -- no units
+  #number of pixels along Y: 401 # number of pixels along Y axis -- no units
+  number of pixels along X: 145
+  number of pixels along Y: 145
+  pixel size along X: 320 # pixel size along X       -- in um
+  pixel size along Y: 320 # pixel size along Y       -- in um
 
 spectral range:
   wavelength min: 450 # minimum wavelength -- in nm
   wavelength max: 700 # maximum wavelength -- in nm
-  number of spectral samples: 1
+  number of spectral samples: 7

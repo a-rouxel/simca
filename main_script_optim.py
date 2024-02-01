@@ -50,6 +50,7 @@ if __name__ == '__main__':
     # Loop beginning if optics optim.
     cassi_system.update_optical_model(system_config=config_system)
     X_vec_out, Y_vec_out = cassi_system.propagate_coded_aperture_grid()
+    sigma = 0.75
 
     cassi_system.X_coordinates_propagated_coded_aperture = cassi_system.X_coordinates_propagated_coded_aperture.to(device)
     cassi_system.Y_coordinates_propagated_coded_aperture = cassi_system.Y_coordinates_propagated_coded_aperture.to(device)
@@ -78,9 +79,9 @@ if __name__ == '__main__':
         min_cost_value = np.inf 
 
         if test == "EQUAL_LIGHT":
-            cassi_system.generate_custom_pattern_parameters_slit_width(nb_slits=10, nb_rows=3, start_width = 1)
+            cassi_system.generate_custom_pattern_parameters_slit_width(nb_slits=10, nb_rows=3, start_width = sigma)
         elif test == "MAX_LIGHT":
-            cassi_system.generate_custom_pattern_parameters_slit_width(nb_slits=1, nb_rows=cassi_system.system_config["detector"]["number of pixels along Y"], start_width = 1)
+            cassi_system.generate_custom_pattern_parameters_slit_width(nb_slits=1, nb_rows=cassi_system.system_config["detector"]["number of pixels along Y"], start_width = sigma)
         elif (test == "SMILE") or (test == "SMILE_mono"):
             if image_counter==1:
                 cassi_system.generate_custom_pattern_parameters_slit(position=position)
@@ -129,10 +130,10 @@ if __name__ == '__main__':
                     cassi_system.generate_filtering_cube()
                     cassi_system.filtering_cube = cassi_system.filtering_cube.to(device)
                     if (test == "SMILE"):
-                        cost_value = evaluate_slit_scanning_straightness(cassi_system.filtering_cube, sigma = 0.75, pos_slit = position)
+                        cost_value = evaluate_slit_scanning_straightness(cassi_system.filtering_cube, sigma = sigma, pos_slit = 0.1+position)
                     elif (test == "SMILE_mono"):
                         cassi_system.image_acquisition(use_psf = False, chunck_size = 50)
-                        cost_value = evaluate_slit_scanning_straightness(cassi_system.filtering_cube, sigma = 0.75, pos_slit = position)
+                        cost_value = evaluate_slit_scanning_straightness(cassi_system.filtering_cube, sigma = sigma, pos_slit = position)
                     elif test == "MAX_CENTER":
                         cassi_system.image_acquisition(use_psf=False, chunck_size=50)
                         cost_value = evaluate_center(cassi_system.measurement)
@@ -147,9 +148,9 @@ if __name__ == '__main__':
                 optimizer.step(closure) 
 
                 if (test == "SMILE"):
-                    cost_value = evaluate_slit_scanning_straightness(cassi_system.filtering_cube, sigma = 0.75, pos_slit = position)
+                    cost_value = evaluate_slit_scanning_straightness(cassi_system.filtering_cube, sigma = sigma, pos_slit = position)
                 elif (test == "SMILE_mono"):
-                    cost_value = evaluate_slit_scanning_straightness(cassi_system.filtering_cube, sigma = 0.75, pos_slit = position)
+                    cost_value = evaluate_slit_scanning_straightness(cassi_system.filtering_cube, sigma = sigma, pos_slit = position)
                 elif test == "MAX_CENTER":
                     cost_value = evaluate_center(cassi_system.measurement)
                 elif test == "EQUAL_LIGHT":
@@ -171,9 +172,9 @@ if __name__ == '__main__':
                 cassi_system.generate_filtering_cube()
                 cassi_system.filtering_cube = cassi_system.filtering_cube.to(device)
                 if (test == "SMILE"):
-                    cost_value = evaluate_slit_scanning_straightness(cassi_system.filtering_cube, sigma = 0.75, pos_slit = position)
+                    cost_value = evaluate_slit_scanning_straightness(cassi_system.filtering_cube, sigma = sigma, pos_slit = position)
                 elif (test == "SMILE_mono"):
-                    cost_value = evaluate_slit_scanning_straightness(cassi_system.filtering_cube, sigma = 0.75, pos_slit = position)
+                    cost_value = evaluate_slit_scanning_straightness(cassi_system.filtering_cube, sigma = sigma, pos_slit = position)
                 elif test == "MAX_CENTER":
                     cassi_system.image_acquisition(use_psf=False, chunck_size=50)
                     cost_value = evaluate_center(cassi_system.measurement)
