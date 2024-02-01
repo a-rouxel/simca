@@ -17,7 +17,7 @@ def optim_smile(cassi_system, position, pos_slit_detector, sigma, device,
     if prev_position is None:
         cassi_system.generate_custom_pattern_parameters_slit(position=position)
     else:
-        cassi_system.generate_custom_pattern_parameters_slit(position=position+(cassi_system.array_x_positions-prev_position))
+        cassi_system.generate_custom_pattern_parameters_slit(position=position+prev_position)
 
     cassi_system.array_x_positions = cassi_system.array_x_positions.to(device)
     # Ensure array_x_positions is a tensor with gradient tracking
@@ -96,6 +96,11 @@ def optim_smile(cassi_system, position, pos_slit_detector, sigma, device,
                 plt.show()
     
     cassi_system.array_x_positions.data = torch.relu(best_x.data)
+    cassi_system.generate_custom_slit_pattern()
+    cassi_system.pattern = cassi_system.pattern.to(device)
+    cassi_system.generate_filtering_cube()
+    cassi_system.filtering_cube = cassi_system.filtering_cube.to(device)
+    
     return cassi_system
 
 def optim_width(cassi_system, position, pos_slit_detector, nb_rows, sigma, device,
@@ -185,4 +190,8 @@ def optim_width(cassi_system, position, pos_slit_detector, nb_rows, sigma, devic
                 plt.show()
 
     cassi_system.array_x_positions.data = torch.relu(best_x.data)
+    cassi_system.generate_custom_slit_pattern_width(start_pattern = "corrected", start_position = position)
+    cassi_system.pattern = cassi_system.pattern.to(device)
+    cassi_system.generate_filtering_cube()
+
     return cassi_system
