@@ -11,6 +11,7 @@ scikit-learn
 matplotlib
 opticalglass
 pyyaml
+snoop
 #torch
 #torch-geometric
 #torch-cluster

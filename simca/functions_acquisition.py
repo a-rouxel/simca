@@ -78,9 +78,9 @@ def match_dataset_to_instrument(dataset, filtering_cube):
 
     if filtering_cube.shape[0] != dataset.shape[0] or filtering_cube.shape[1] != dataset.shape[1]:
         if dataset.shape[0] < filtering_cube.shape[0]:
-            dataset = np.pad(dataset, ((0, filtering_cube.shape[0] - dataset.shape[0]), (0, 0), (0, 0)), mode="constant")
+            dataset = np.pad(dataset, ((np.floor((filtering_cube.shape[0] - dataset.shape[0])/2).astype('int'), np.ceil((filtering_cube.shape[0] - dataset.shape[0])/2).astype('int')), (0, 0), (0, 0)), mode="constant")
         if dataset.shape[1] < filtering_cube.shape[1]:
-            dataset = np.pad(dataset, ((0, 0), (0, filtering_cube.shape[1] - dataset.shape[1]), (0, 0)), mode="constant")
+            dataset = np.pad(dataset, ((0, 0), (np.floor((filtering_cube.shape[1] - dataset.shape[1])/2).astype('int'), np.ceil((filtering_cube.shape[1] - dataset.shape[1])/2).astype('int')), (0, 0)), mode="constant")
         scene = dataset[0:filtering_cube.shape[0], 0:filtering_cube.shape[1], :]
         print("Dataset Spatial Cropping : Filtering cube and scene must have the same number of lines and columns")
         
