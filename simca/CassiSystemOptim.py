@@ -61,10 +61,14 @@ class CassiSystemOptim(CassiSystem):
     
     def propagate_coded_aperture_grid(self):
 
-
+        import time
         n1 = self.optical_model.glass1.calc_rindex(self.wavelengths)
         n2 = self.optical_model.glass2.calc_rindex(self.wavelengths)
         n3 = self.optical_model.glass3.calc_rindex(self.wavelengths)
+        #
+        # n1 = np.repeat(1.5, self.wavelengths.shape[0])
+        # n2 = np.repeat(1.8, self.wavelengths.shape[0])
+        # n3 = np.repeat(1.5, self.wavelengths.shape[0])
 
         X_input_grid = torch.from_numpy(self.X_coded_aper_coordinates) if isinstance(self.X_coded_aper_coordinates, np.ndarray) else self.X_coded_aper_coordinates
         Y_input_grid = torch.from_numpy(self.Y_coded_aper_coordinates) if isinstance(self.Y_coded_aper_coordinates, np.ndarray) else self.Y_coded_aper_coordinates
@@ -79,6 +83,8 @@ class CassiSystemOptim(CassiSystem):
         n1_3D = n1_vec[None,None,:].repeat(X_input_grid.shape[0], X_input_grid.shape[1],1)
         n2_3D = n2_vec[None,None,:].repeat(X_input_grid.shape[0], X_input_grid.shape[1],1)
         n3_3D = n3_vec[None,None,:].repeat(X_input_grid.shape[0], X_input_grid.shape[1],1)
+
+        starting_time = time.time()
 
         self.X_coordinates_propagated_coded_aperture, self.Y_coordinates_propagated_coded_aperture = self.optical_model.propagate(X_input_grid_3D, Y_input_grid_3D, lba_3D, n1_3D, n2_3D, n3_3D)
 
