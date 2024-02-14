@@ -80,11 +80,13 @@ class OpticalModelTorch:
         self.G = torch.tensor(config["system architecture"]["dispersive element"]["G"])
         self.m = torch.tensor(config["system architecture"]["dispersive element"]["m"])
 
-        self.alpha_c = torch.tensor(50*math.pi/180)
+        self.alpha_c = torch.tensor(math.radians(config["system architecture"]["dispersive element"]["alpha_c"]))
         self.delta_alpha_c = torch.tensor(math.radians(config["system architecture"]["dispersive element"]["delta alpha c"]))
         self.delta_beta_c = torch.tensor(math.radians(config["system architecture"]["dispersive element"]["delta beta c"]))
 
-        self.alpha_c_transmis = -1*torch.tensor(self.propagate_central_microm_through_disperser(self.lba_c))
+        alpha_c_transmis = -1*self.propagate_central_microm_through_disperser(self.lba_c)
+        self.alpha_c_transmis = torch.tensor(alpha_c_transmis)
+
 
     def propagate(self,X,Y,lba,n1,n2,n3):
 
@@ -93,19 +95,19 @@ class OpticalModelTorch:
         if self.dispersive_element_type == "prism":
             alpha_1 = self.A1 - self.A1/2
             k = self.rotate_from_lens_to_dispersive_element(k,self.alpha_c,self.delta_alpha_c,self.delta_beta_c,alpha_1)
-            k = self.propagate_through_simple_prism(k,n1,self.A1)
+            k, list_theta_in, list_theta_out = self.propagate_through_simple_prism(k,n1,self.A1)
             k = self.rotate_from_dispersive_element_to_lens(k,self.alpha_c_transmis,self.delta_alpha_c,self.delta_beta_c,alpha_1)
 
         elif self.dispersive_element_type == "doubleprism":
             alpha_1 = self.A1 - self.A2/2
             k = self.rotate_from_lens_to_dispersive_element(k,self.alpha_c,self.delta_alpha_c,self.delta_beta_c,alpha_1)
-            k = self.propagate_through_double_prism(k,n1,n2,self.A1,self.A2)
+            k, list_theta_in, list_theta_out = self.propagate_through_double_prism(k,n1,n2,self.A1,self.A2)
             k = self.rotate_from_dispersive_element_to_lens(k,self.alpha_c_transmis,self.delta_alpha_c,self.delta_beta_c,alpha_1)
 
         elif self.dispersive_element_type == "tripleprism":
             alpha_1 = self.A1 - self.A2/2
             k = self.rotate_from_lens_to_dispersive_element(k,self.alpha_c,self.delta_alpha_c,self.delta_beta_c,alpha_1)
-            k = self.propagate_through_simple_prism(k,n1,n2,n3,self.A1,self.A2,self.A3)
+            k, list_theta_in, list_theta_out = self.propagate_through_triple_prism(k,n1,n2,n3,self.A1,self.A2,self.A3)
             k = self.rotate_from_dispersive_element_to_lens(k,self.alpha_c_transmis,self.delta_alpha_c,self.delta_beta_c,alpha_1)
         
         elif self.dispersive_element_type == "grating":
@@ -117,7 +119,8 @@ class OpticalModelTorch:
         X_vec_out, Y_vec_out = self.model_Lens_angle_to_position(k, self.F)
 
         return X_vec_out, Y_vec_out
-    
+
+
     def rotate_from_lens_to_dispersive_element(self,k,alpha_c,delta_alpha_c,delta_beta_c,alpha_1):
 
         angle_with_P1 = alpha_c - alpha_1 + delta_alpha_c
@@ -128,6 +131,7 @@ class OpticalModelTorch:
         k = torch.matmul(k,rotation_x_torch(delta_beta_c).T)
         # Rotation of P1 in relation to frame_in along the new Y axis
         k = torch.matmul(k,rotation_y_torch(alpha_1).T)
+
 
         return k
     
@@ -151,10 +155,13 @@ class OpticalModelTorch:
         norm_k = norm_k.repeat(1, 1, 1,3)
         k /= norm_k
 
-        k = self.model_Prism_angle_to_angle_torch(k, n, A)
+        k,theta_in, theta_out = self.model_Prism_angle_to_angle_torch(k, n, A)
         k = k * norm_k
 
-        return k
+        list_theta_in = [theta_in]
+        list_theta_out = [theta_out]
+
+        return k,list_theta_in, list_theta_out
     
     def propagate_through_double_prism(self,k,n1,n2,A1,A2):
 
@@ -163,14 +170,18 @@ class OpticalModelTorch:
         norm_k = norm_k.repeat(1, 1, 1,3)
         k /= norm_k
 
-        k = self.model_Prism_angle_to_angle_torch(k, n1, A1)
+        k,theta_in_1, theta_out_1 = self.model_Prism_angle_to_angle_torch(k, n1, A1)
         k = k * norm_k
-        k = torch.matmul(k,rotation_z_torch(0).T)
-        k = self.model_Prism_angle_to_angle_torch(k, n2, A2)
+        k = torch.matmul(k,rotation_z_torch(torch.tensor(np.pi)).T)
+        k,theta_in_2, theta_out_2 = self.model_Prism_angle_to_angle_torch(k, n2, A2)
         k = k * norm_k
 
-        return k
-    
+        list_theta_in = [theta_in_1,theta_in_2]
+        list_theta_out = [theta_out_1,theta_out_2]
+
+        return k,list_theta_in, list_theta_out
+
+
     def propagate_through_triple_prism(self,k,n1,n2,n3,A1,A2,A3):
 
         norm_k = torch.sqrt(k[...,0] ** 2 + k[...,1] ** 2 + k[...,2] ** 2)
@@ -178,16 +189,19 @@ class OpticalModelTorch:
         norm_k = norm_k.repeat(1, 1, 1,3)
         k /= norm_k
 
-        k = self.model_Prism_angle_to_angle_torch(k, n1, A1)
+        k,theta_in_1, theta_out_1 = self.model_Prism_angle_to_angle_torch(k, n1, A1)
         k = k * norm_k
-        k = torch.matmul(k,rotation_z_torch(0).T)
-        k = self.model_Prism_angle_to_angle_torch(k, n2, A2)
+        k = torch.matmul(k,rotation_z_torch(torch.tensor(np.pi)).T)
+        k,theta_in_2, theta_out_2 = self.model_Prism_angle_to_angle_torch(k, n2, A2)
         k = k * norm_k
-        k = torch.matmul(k,rotation_z_torch(0).T)
-        k = self.model_Prism_angle_to_angle_torch(k, n3, A3)
+        k = torch.matmul(k,rotation_z_torch(torch.tensor(np.pi)).T)
+        k,theta_in_3, theta_out_3 = self.model_Prism_angle_to_angle_torch(k, n3, A3)
         k = k * norm_k
 
-        return k
+        list_theta_in = [theta_in_1,theta_in_2,theta_in_3]
+        list_theta_out = [theta_out_1,theta_out_2,theta_out_3]
+
+        return k, list_theta_in, list_theta_out
 
 
 
@@ -523,6 +537,7 @@ class OpticalModelTorch:
 
         return kout
 
+
     def model_Prism_angle_to_angle_torch(self,k0, n,A):
         """
         Ray tracing through the prism
@@ -539,9 +554,13 @@ class OpticalModelTorch:
         kp = torch.zeros_like(k0)
         kout = torch.zeros_like(k0)
 
+        theta_in = torch.atan2(k0[...,2], k0[...,0])
+
         kp[...,0] = k0[...,0]
         kp[...,1] = k0[...,1]
         kp[...,2] = torch.sqrt(n ** 2 - k0[...,0] ** 2 - k0[...,1] ** 2)
+
+        theta_out = torch.atan2(kp[...,2], kp[...,0])
 
         kp_r = torch.matmul(kp, rotation_y_torch(-A).T)
 
@@ -549,7 +568,7 @@ class OpticalModelTorch:
         kout[...,1] = kp_r[...,1]
         kout[...,2] = torch.sqrt(1 - kp_r[...,0] ** 2 - kp_r[...,1] ** 2)
 
-        return kout
+        return kout, theta_in, theta_out
 
     def model_Lens_pos_to_angle(self,x_obj, y_obj, F):
         """
@@ -756,12 +775,16 @@ class OpticalModelTorch:
 
         return nb_of_sample_points_per_pix
     
-    
+
     def propagate_central_microm_through_disperser(self,lambda_):
 
         n1 =  self.glass1.calc_rindex(lambda_)
         n2 =  self.glass2.calc_rindex(lambda_)
         n3 =  self.glass3.calc_rindex(lambda_)
+
+        # n1 = 1.5
+        # n2 = 1.8
+        # n3 = 1.5
 
         x0 = torch.zeros((1,1,1,1))
         y0 = torch.zeros((1,1,1,1))
@@ -771,18 +794,17 @@ class OpticalModelTorch:
         if self.dispersive_element_type == "prism":
             alpha_1 = self.A1 - self.A1/2
             k = self.rotate_from_lens_to_dispersive_element(k,self.alpha_c,self.delta_alpha_c,self.delta_beta_c,alpha_1)
-            k = self.propagate_through_simple_prism(k,n1,self.A1)
-            print(k)
+            k, list_theta_in, list_theta_out = self.propagate_through_simple_prism(k,n1,self.A1)
 
         elif self.dispersive_element_type == "doubleprism":
             alpha_1 = self.A1 - self.A2/2
             k = self.rotate_from_lens_to_dispersive_element(k,self.alpha_c,self.delta_alpha_c,self.delta_beta_c,alpha_1)
-            k = self.propagate_through_double_prism(k,n1,n2,self.A1,self.A2)
+            k, list_theta_in, list_theta_out = self.propagate_through_double_prism(k,n1,n2,self.A1,self.A2)
 
         elif self.dispersive_element_type == "tripleprism":
             alpha_1 = self.A1 - self.A2/2
             k = self.rotate_from_lens_to_dispersive_element(k,self.alpha_c,self.delta_alpha_c,self.delta_beta_c,alpha_1)
-            k = self.propagate_through_simple_prism(k,n1,n2,n3,self.A1,self.A2,self.A3)
+            k, list_theta_in, list_theta_out = self.propagate_through_triple_prism(k,n1,n2,n3,self.A1,self.A2,self.A3)
         
         elif self.dispersive_element_type == "grating":
             alpha_1 = 0
@@ -791,5 +813,8 @@ class OpticalModelTorch:
 
         alpha = torch.arctan(k[...,0] / k[...,2])
         beta = torch.arctan(k[...,1] / k[...,2])
+
+        self.list_theta_in = list_theta_in
+        self.list_theta_out = list_theta_out
 
         return alpha

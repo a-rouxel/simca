@@ -69,30 +69,43 @@ class OpticalModel:
 
         self.calculate_central_dispersion()
 
-        X_coordinates_propagated_coded_aperture = np.zeros((X_input_grid.shape[0],X_input_grid.shape[1],
-                                                            self.nb_of_spectral_samples))
-        Y_coordinates_propagated_coded_aperture = np.zeros((X_input_grid.shape[0],X_input_grid.shape[1],
-                                                            self.nb_of_spectral_samples))
-
-        X_input_grid_flatten = X_input_grid.flatten()
-        Y_input_grid_flatten = Y_input_grid.flatten()
-
-        glass = create_glass(self.glass1, 'Schott')
-        print(glass)
-
-        for idx,lba in enumerate(np.linspace(self.system_wavelengths[0], self.system_wavelengths[-1],self.nb_of_spectral_samples)):
-
-            prism_index = glass.calc_rindex(lba)
-            n_array_flatten = np.full(X_input_grid_flatten.shape, prism_index)
-            # n_array_flatten = np.full(X_input_grid_flatten.shape, self.sellmeier(lba))
-            lba_array_flatten = np.full(X_input_grid_flatten.shape, lba)
-
-            X_propagated_coded_aperture, Y_propagated_coded_aperture = self.propagate_through_arm(X_input_grid_flatten,Y_input_grid_flatten,n1=n_array_flatten,lba=lba_array_flatten)
-
-            X_coordinates_propagated_coded_aperture[:,:,idx] = X_propagated_coded_aperture.reshape(X_input_grid.shape)
-            Y_coordinates_propagated_coded_aperture[:,:,idx] = Y_propagated_coded_aperture.reshape(Y_input_grid.shape)
-
-        return X_coordinates_propagated_coded_aperture, Y_coordinates_propagated_coded_aperture
+        # X_coordinates_propagated_coded_aperture = np.zeros((X_input_grid.shape[0],X_input_grid.shape[1],
+        #                                                     self.nb_of_spectral_samples))
+        # Y_coordinates_propagated_coded_aperture = np.zeros((X_input_grid.shape[0],X_input_grid.shape[1],
+        #                                                     self.nb_of_spectral_samples))
+        #
+        # X_input_grid_flatten = X_input_grid.flatten()
+        # Y_input_grid_flatten = Y_input_grid.flatten()
+        #
+        # glass = create_glass(self.glass1, 'Schott')
+        # print(glass)
+        #
+        #
+        # n1 = 1.5
+        # n2 = 1.8
+        # n3 = 1.5
+        #
+        # for idx,lba in enumerate(np.linspace(self.system_wavelengths[0], self.system_wavelengths[-1],self.nb_of_spectral_samples)):
+        #
+        #     prism_index = glass.calc_rindex(lba)
+        #     # n_array_flatten = np.full(X_input_grid_flatten.shape, prism_index)
+        #     # n_array_flatten = np.full(X_input_grid_flatten.shape, self.sellmeier(lba))
+        #     n1_flatten = np.full(X_input_grid_flatten.shape, n1)
+        #     n2_flatten = np.full(X_input_grid_flatten.shape, n2)
+        #     n3_flatten = np.full(X_input_grid_flatten.shape, n3)
+        #
+        #     lba_array_flatten = np.full(X_input_grid_flatten.shape, lba)
+        #
+        #     X_propagated_coded_aperture, Y_propagated_coded_aperture = self.propagate_through_arm(X_input_grid_flatten,Y_input_grid_flatten,
+        #                                                                                           n1=n1_flatten,
+        #                                                                                           n2=n2_flatten,
+        #                                                                                           n3=n3_flatten,
+        #                                                                                           lba=lba_array_flatten)
+        #
+        #     X_coordinates_propagated_coded_aperture[:,:,idx] = X_propagated_coded_aperture.reshape(X_input_grid.shape)
+        #     Y_coordinates_propagated_coded_aperture[:,:,idx] = Y_propagated_coded_aperture.reshape(Y_input_grid.shape)
+        #
+        # return X_coordinates_propagated_coded_aperture, Y_coordinates_propagated_coded_aperture
 
     def propagation_with_no_distorsions(self, X_input_grid, Y_input_grid):
         """
@@ -140,6 +153,7 @@ class OpticalModel:
 
         self.system_wavelengths = np.linspace(self.wavelength_min,self.wavelength_max,self.nb_of_spectral_samples)
 
+    @snoop
     def calculate_central_dispersion(self):
         """
         Calculate the dispersion related to the central pixel of the coded aperture
@@ -148,15 +162,23 @@ class OpticalModel:
             numpy.float: spectral dispersion of the central pixel of the coded aperture
         """
 
-        self.alpha_c = self.calculate_alpha_c()
-
+        # self.alpha_c = self.calculate_alpha_c()
+        self.alpha_c = 55*np.pi/180
         X0_coordinates_array_flatten = np.zeros(self.system_wavelengths.shape[0])
         Y0_coordinates_array_flatten = np.zeros(self.system_wavelengths.shape[0])
         lba_array_flatten = self.system_wavelengths
 
-        n_array_flatten = np.full(lba_array_flatten.shape, self.sellmeier(lba_array_flatten))
+        n1_array_flatten = np.full(lba_array_flatten.shape, 1.5)
+        n2_array_flatten = np.full(lba_array_flatten.shape, 1.8)
+        n3_array_flatten = np.full(lba_array_flatten.shape, 1.5)
 
-        X0_propagated, Y0_propagated = self.propagate_through_arm(X_vec_in=X0_coordinates_array_flatten,Y_vec_in=Y0_coordinates_array_flatten,n1=n_array_flatten,lba=lba_array_flatten)
+        # n_array_flatten = np.full(lba_array_flatten.shape, self.sellmeier(lba_array_flatten))
+
+        X0_propagated, Y0_propagated = self.propagate_through_arm(X_vec_in=X0_coordinates_array_flatten,Y_vec_in=Y0_coordinates_array_flatten,
+                                                                  n1=n1_array_flatten,
+                                                                  n2=n2_array_flatten,
+                                                                  n3=n3_array_flatten,
+                                                                  lba=lba_array_flatten)
 
         self.X0_propagated, self.Y0_propagated = X0_propagated, Y0_propagated
 
@@ -189,7 +211,8 @@ class OpticalModel:
         k_out = k_out * norm_k
 
         return k_out
-    
+
+    @snoop
     def propagate_through_triple_prism(self,k,n1,n2,n3,A1,A2,A3):
 
         norm_k = np.sqrt(k[0] ** 2 + k[1] ** 2 + k[2] ** 2)
@@ -204,18 +227,26 @@ class OpticalModel:
         k_out = self.model_Prism_angle_to_angle(k, n3, A3)
         k_out *= norm_k
 
+        print('alpha', np.arctan(k_out[0, 0] / k_out[2, 0]) * 180 / np.pi)
+        print('beta', np.arctan(k_out[1, 0] / k_out[2, 0]) * 180 / np.pi)
+
         return k_out
 
-    
+    @snoop
     def rotate_from_lens_to_dispersive_element(self,k,alpha_c,delta_alpha_c,delta_beta_c,alpha_1):
 
         angle_with_P1 = alpha_c - alpha_1 + delta_alpha_c
+
+        print('angle_with_P1',angle_with_P1*180/np.pi)
         
         k = rotation_y(angle_with_P1) @ k[:, 0, :]
         # Rotation in relation to P1 around the X axis
         k = rotation_x(delta_beta_c) @ k
         # Rotation of P1 in relation to frame_in along the new Y axis
         k = rotation_y(alpha_1) @ k
+
+        print('alpha', np.arctan(k[0, 0] / k[2, 0]) * 180 / np.pi)
+        # print('beta', np.arctan(k[0, 0] / k[2, 0]) * 180 / np.pi)
 
         return k
     
@@ -231,7 +262,7 @@ class OpticalModel:
 
         return k
 
-    def propagate_through_arm(self, X_vec_in, Y_vec_in, n1, lba):
+    def propagate_through_arm(self, X_vec_in, Y_vec_in, n1, n2,n3,lba):
 
         """
         Propagate the light through one system arm : (lens + dispersive element + lens)
@@ -256,9 +287,9 @@ class OpticalModel:
         delta_alpha_c = self.delta_alpha_c
         delta_beta_c = self.delta_beta_c
         alpha_c = self.alpha_c
-        alpha_c_transmis = self.alpha_c_transmis
+        # alpha_c_transmis = self.alpha_c_transmis
 
-        alpha_c = 50*np.pi/180
+        # alpha_c = 50*np.pi/180
 
 
         k = self.model_Lens_pos_to_angle(X_vec_in, Y_vec_in, F)
@@ -278,7 +309,7 @@ class OpticalModel:
         elif dispersive_element_type == "tripleprism":
             alpha_1 = A1 - A2/2
             k = self.rotate_from_lens_to_dispersive_element(k,alpha_c,delta_alpha_c,delta_beta_c,alpha_1)
-            k = self.propagate_through_simple_prism(k,n1,n2,n3,A1,A2,A3)
+            k = self.propagate_through_triple_prism(k,n1,n2,n3,A1,A2,A3)
             k = self.rotate_from_dispersive_element_to_lens(k,alpha_c_transmis,delta_alpha_c,delta_beta_c,alpha_1)
         
         elif dispersive_element_type == "grating":
