@@ -1,54 +1,100 @@
 import torch
 import snoop
 
+
 def rotation_z_torch(theta):
     """
     Rotate 3D matrix around the Z axis using PyTorch
 
     Args:
-        theta (torch.tensor): Input angle (in rad)
+        theta (torch.Tensor): Input angle (in rad)
 
     Returns:
         torch.Tensor: 3D rotation matrix
     """
-    r = torch.tensor([[torch.cos(theta), -torch.sin(theta), 0],
-                      [torch.sin(theta), torch.cos(theta), 0],
-                      [0, 0, 1]], dtype=torch.float64)
+    # Ensure theta is a tensor with requires_grad=True
+    if not isinstance(theta, torch.Tensor):
+        theta = torch.tensor(theta, requires_grad=True)
+
+    cos_theta = torch.cos(theta)
+    sin_theta = torch.sin(theta)
+
+    # Construct the rotation matrix using torch.stack to support gradient computation
+    # For rotation around the Z axis, the changes affect the first two rows
+    row1 = torch.stack([cos_theta, -sin_theta, torch.zeros_like(theta)])
+    row2 = torch.stack([sin_theta, cos_theta, torch.zeros_like(theta)])
+    row3 = torch.stack([torch.zeros_like(theta), torch.zeros_like(theta), torch.ones_like(theta)])
+
+    # Concatenate the rows to form the rotation matrix
+    r = torch.stack([row1, row2, row3], dim=0)
+
+    # Adjust the matrix to have the correct shape (3, 3) for each theta
+    r = r.transpose(0, 1)  # This may need adjustment based on how you intend to use r
 
     return r
+
 
 def rotation_y_torch(theta):
     """
     Rotate 3D matrix around the Y axis using PyTorch
 
     Args:
-        theta (tensor.torch): Input angle (in rad)
+        theta (torch.Tensor): Input angle (in rad)
 
     Returns:
         torch.Tensor: 3D rotation matrix
     """
-    r = torch.tensor([[torch.cos(theta), 0, torch.sin(theta)],
-                      [0, 1, 0],
-                      [-torch.sin(theta), 0, torch.cos(theta)]], dtype=torch.float64)
+    # Ensure theta is a tensor with requires_grad=True
+    if not isinstance(theta, torch.Tensor):
+        theta = torch.tensor(theta, requires_grad=True)
+
+    cos_theta = torch.cos(theta)
+    sin_theta = torch.sin(theta)
+
+    # Construct the rotation matrix using torch.stack to support gradient computation
+    # For rotation around the Y axis, the changes affect the first and third rows
+    row1 = torch.stack([cos_theta, torch.zeros_like(theta), -sin_theta])  # Note the change to -sin_theta for correct Y-axis rotation
+    row2 = torch.stack([torch.zeros_like(theta), torch.ones_like(theta), torch.zeros_like(theta)])
+    row3 = torch.stack([sin_theta, torch.zeros_like(theta), cos_theta])
+
+    # Concatenate the rows to form the rotation matrix
+    r = torch.stack([row1, row2, row3], dim=0)
+
+    # Adjust the matrix to have the correct shape (3, 3) for each theta
+    r = r.transpose(0, 1)  # Adjust transpose for consistency with your requirements
 
     return r
+
 
 def rotation_x_torch(theta):
     """
     Rotate 3D matrix around the X axis using PyTorch
 
     Args:
-        theta (tensor.torch): Input angle (in rad)
+        theta (tensor): Input angle (in rad)
 
     Returns:
         torch.Tensor: 3D rotation matrix
     """
-    r = torch.tensor([[1, 0, 0],
-                      [0, torch.cos(theta), -torch.sin(theta)],
-                      [0, torch.sin(theta), torch.cos(theta)]], dtype=torch.float64)
+    # Ensure theta is a tensor with requires_grad=True
+    if not isinstance(theta, torch.Tensor):
+        theta = torch.tensor(theta, requires_grad=True)
+
+    cos_theta = torch.cos(theta)
+    sin_theta = torch.sin(theta)
+
+    # Use torch.stack and torch.cat to construct the rotation matrix
+    row1 = torch.stack([torch.ones_like(theta), torch.zeros_like(theta), torch.zeros_like(theta)])
+    row2 = torch.stack([torch.zeros_like(theta), cos_theta, -sin_theta])
+    row3 = torch.stack([torch.zeros_like(theta), sin_theta, cos_theta])
+
+    # Concatenate the rows to form the rotation matrix
+    r = torch.stack([row1, row2, row3], dim=0)
+
+    # Transpose the matrix to match the expected shape
+    r = r.transpose(0, 1)
 
     return r
-
 
 from simca.functions_general_purpose import *
 # import snoop
@@ -72,25 +118,47 @@ class OpticalModelTorch:
         self.glass3 = create_glass(config["system architecture"]["dispersive element"]["glass3"], 'Schott')
 
         # - with any optimizer
-        self.A1 = torch.tensor(math.radians(config["system architecture"]["dispersive element"]["A1"]))
-        self.A2 = torch.tensor(math.radians(config["system architecture"]["dispersive element"]["A2"]))
-        self.A3 = torch.tensor(math.radians(config["system architecture"]["dispersive element"]["A3"]))
+        self.A1 = torch.tensor(math.radians(config["system architecture"]["dispersive element"]["A1"]),requires_grad=True)
+        self.A2 = torch.tensor(math.radians(config["system architecture"]["dispersive element"]["A2"]),requires_grad=True)
+        self.A3 = torch.tensor(math.radians(config["system architecture"]["dispersive element"]["A3"]),requires_grad=True)
         self.F = torch.tensor(config["system architecture"]["focal lens"])
+
 
         self.G = torch.tensor(config["system architecture"]["dispersive element"]["G"])
         self.m = torch.tensor(config["system architecture"]["dispersive element"]["m"])
 
-        self.alpha_c = torch.tensor(math.radians(config["system architecture"]["dispersive element"]["alpha_c"]))
+        self.alpha_c = torch.tensor(math.radians(config["system architecture"]["dispersive element"]["alpha_c"]),requires_grad=True)
         self.delta_alpha_c = torch.tensor(math.radians(config["system architecture"]["dispersive element"]["delta alpha c"]))
         self.delta_beta_c = torch.tensor(math.radians(config["system architecture"]["dispersive element"]["delta beta c"]))
 
-        alpha_c_transmis = -1*self.propagate_central_microm_through_disperser(self.lba_c)
-        self.alpha_c_transmis = torch.tensor(alpha_c_transmis)
+        self.continuous_glass_materials1 = config["system architecture"]["dispersive element"]["continuous glass materials 1"]
+        self.continuous_glass_materials2 = config["system architecture"]["dispersive element"]["continuous glass materials 2"]
+        self.continuous_glass_materials3 = config["system architecture"]["dispersive element"]["continuous glass materials 3"]
 
+        self.nd1 = torch.tensor(config["system architecture"]["dispersive element"]["nd1"],requires_grad=True)
+        self.vd1 = torch.tensor(config["system architecture"]["dispersive element"]["vd1"],requires_grad=True)
+        self.nd2 = torch.tensor(config["system architecture"]["dispersive element"]["nd2"],requires_grad=True)
+        self.vd2 = torch.tensor(config["system architecture"]["dispersive element"]["vd2"],requires_grad=True)
+        self.nd3 = torch.tensor(config["system architecture"]["dispersive element"]["nd3"],requires_grad=True)
+        self.vd3 = torch.tensor(config["system architecture"]["dispersive element"]["vd3"],requires_grad=True)
+
+        alpha_c_transmis = -1*self.propagate_central_microm_through_disperser(self.lba_c)
+        self.alpha_c_transmis = alpha_c_transmis
+
+
+
+
+
+    def rerun_central_dispersion(self):
+        alpha_c_transmis = -1 * self.propagate_central_microm_through_disperser(self.lba_c)
+        self.alpha_c_transmis = alpha_c_transmis
+
+        return alpha_c_transmis
 
     def propagate(self,X,Y,lba,n1,n2,n3):
 
         k = self.model_Lens_pos_to_angle(X, Y, self.F)
+
 
         if self.dispersive_element_type == "prism":
             alpha_1 = self.A1 - self.A1/2
@@ -116,21 +184,42 @@ class OpticalModelTorch:
             k = self.model_Grating_angle_to_angle(k, lba, self.m, self.G)
             k = self.rotate_from_dispersive_element_to_lens(k,self.alpha_c_transmis,self.delta_alpha_c,self.delta_beta_c,alpha_1)
 
+        # print(k)
         X_vec_out, Y_vec_out = self.model_Lens_angle_to_position(k, self.F)
 
         return X_vec_out, Y_vec_out
 
+    def calculate_dispersion_with_cauchy(self,lambda_vec, nD, V):
+        lambda_vec = lambda_vec * 1e-9  # Convert nm to meters for calculation
+        lambda_D = 589.3e-9  # D line wavelength in meters
+        lambda_F = 486.1e-9  # F line wavelength in meters
+        lambda_C = 656.3e-9  # C line wavelength in meters
+
+        # Calculate B using the given formula
+        B = (nD - 1) / (V * (1 / lambda_F ** 2 - 1 / lambda_C ** 2))
+
+        # Calculate A using the given formula
+        A = nD - B / lambda_D ** 2
+
+        # Calculate n for each wavelength in lambda_vec
+        n = A + B / lambda_vec ** 2  # Note: lambda_vec is already in meters
+
+        return n
 
     def rotate_from_lens_to_dispersive_element(self,k,alpha_c,delta_alpha_c,delta_beta_c,alpha_1):
 
         angle_with_P1 = alpha_c - alpha_1 + delta_alpha_c
-
+        k = k.to(dtype=torch.float32)
         # k_1 = rotation_y_torch(angle_with_P1) @ k
         k = torch.matmul(k,rotation_y_torch(angle_with_P1).T)
         # Rotation in relation to P1 around the X axis
+        k = k.to(dtype=torch.float32)
         k = torch.matmul(k,rotation_x_torch(delta_beta_c).T)
         # Rotation of P1 in relation to frame_in along the new Y axis
+        k = k.to(dtype=torch.float32)
+
         k = torch.matmul(k,rotation_y_torch(alpha_1).T)
+
 
 
         return k
@@ -138,43 +227,43 @@ class OpticalModelTorch:
     def rotate_from_dispersive_element_to_lens(self,k,alpha_c_transmis,delta_alpha_c,delta_beta_c,alpha_1):
 
         angle_with_P2 = alpha_c_transmis - alpha_1 - delta_alpha_c
-        #print(k.shape)
         k = torch.matmul(k,rotation_y_torch(alpha_1).T)
-        #print(k.shape)
         # Rotation in relation to P2 around the X axis
         k = torch.matmul(k,rotation_x_torch(-delta_beta_c).T)
         # Rotation in relation to P2 around the Y axis
         k = torch.matmul(k,rotation_y_torch(angle_with_P2).T)
         #print(k.shape)
         return k
-    
-    def propagate_through_simple_prism(self,k,n,A):
 
-        norm_k = torch.sqrt(k[...,0] ** 2 + k[...,1] ** 2 + k[...,2] ** 2)
+    def propagate_through_simple_prism(self, k, n, A):
+        norm_k = torch.sqrt(k[..., 0] ** 2 + k[..., 1] ** 2 + k[..., 2] ** 2)
         norm_k = norm_k.unsqueeze(-1)
-        norm_k = norm_k.repeat(1, 1, 1,3)
-        k /= norm_k
+        norm_k = norm_k.repeat(1, 1, 1, 3)
+        # Use out-of-place operation instead of in-place
+        k_normalized = k / norm_k
 
-        k,theta_in, theta_out = self.model_Prism_angle_to_angle_torch(k, n, A)
-        k = k * norm_k
+        k_updated, theta_in, theta_out,distance_from_total_intern_reflection = self.model_Prism_angle_to_angle_torch(k_normalized, n, A)
+        # Apply the normalization factor to k_updated if necessary
+        k_updated = k_updated * norm_k
 
         list_theta_in = [theta_in]
         list_theta_out = [theta_out]
 
-        return k,list_theta_in, list_theta_out
+        return k_updated, list_theta_in, list_theta_out
     
     def propagate_through_double_prism(self,k,n1,n2,A1,A2):
 
         norm_k = torch.sqrt(k[...,0] ** 2 + k[...,1] ** 2 + k[...,2] ** 2)
         norm_k = norm_k.unsqueeze(-1)
         norm_k = norm_k.repeat(1, 1, 1,3)
-        k /= norm_k
+        k_normalized = k / norm_k
 
-        k,theta_in_1, theta_out_1 = self.model_Prism_angle_to_angle_torch(k, n1, A1)
+        k,theta_in_1, theta_out_1,distance_from_total_intern_reflection = self.model_Prism_angle_to_angle_torch(k_normalized, n1, A1)
         k = k * norm_k
         k = torch.matmul(k,rotation_z_torch(torch.tensor(np.pi)).T)
-        k,theta_in_2, theta_out_2 = self.model_Prism_angle_to_angle_torch(k, n2, A2)
+        k,theta_in_2, theta_out_2,distance_from_total_intern_reflection = self.model_Prism_angle_to_angle_torch(k, n2, A2)
         k = k * norm_k
+        k = torch.matmul(k, rotation_z_torch(torch.tensor(np.pi)).T)
 
         list_theta_in = [theta_in_1,theta_in_2]
         list_theta_out = [theta_out_1,theta_out_2]
@@ -182,24 +271,29 @@ class OpticalModelTorch:
         return k,list_theta_in, list_theta_out
 
 
+
     def propagate_through_triple_prism(self,k,n1,n2,n3,A1,A2,A3):
 
         norm_k = torch.sqrt(k[...,0] ** 2 + k[...,1] ** 2 + k[...,2] ** 2)
         norm_k = norm_k.unsqueeze(-1)
         norm_k = norm_k.repeat(1, 1, 1,3)
-        k /= norm_k
+        k_normalized = k / norm_k
 
-        k,theta_in_1, theta_out_1 = self.model_Prism_angle_to_angle_torch(k, n1, A1)
+        k,theta_in_1, theta_out_1,distance_from_total_intern_reflection1 = self.model_Prism_angle_to_angle_torch(k_normalized, n1, A1)
         k = k * norm_k
         k = torch.matmul(k,rotation_z_torch(torch.tensor(np.pi)).T)
-        k,theta_in_2, theta_out_2 = self.model_Prism_angle_to_angle_torch(k, n2, A2)
+        k,theta_in_2, theta_out_2,distance_from_total_intern_reflection2 = self.model_Prism_angle_to_angle_torch(k, n2, A2)
         k = k * norm_k
         k = torch.matmul(k,rotation_z_torch(torch.tensor(np.pi)).T)
-        k,theta_in_3, theta_out_3 = self.model_Prism_angle_to_angle_torch(k, n3, A3)
+        k,theta_in_3, theta_out_3,distance_from_total_intern_reflection3 = self.model_Prism_angle_to_angle_torch(k, n3, A3)
         k = k * norm_k
 
         list_theta_in = [theta_in_1,theta_in_2,theta_in_3]
         list_theta_out = [theta_out_1,theta_out_2,theta_out_3]
+
+        self.min_distance_from_total_intern_reflection = min(torch.min(distance_from_total_intern_reflection1),
+                                                             torch.min(distance_from_total_intern_reflection2),
+                                                             torch.min(distance_from_total_intern_reflection3))
 
         return k, list_theta_in, list_theta_out
 
@@ -554,13 +648,17 @@ class OpticalModelTorch:
         kp = torch.zeros_like(k0)
         kout = torch.zeros_like(k0)
 
-        theta_in = torch.atan2(k0[...,2], k0[...,0])
+        theta_in = torch.atan2(k0[...,0], k0[...,2])
 
         kp[...,0] = k0[...,0]
         kp[...,1] = k0[...,1]
+
+        # compare = n ** 2 - k0[...,0] ** 2 - k0[...,1] ** 2
+
+
         kp[...,2] = torch.sqrt(n ** 2 - k0[...,0] ** 2 - k0[...,1] ** 2)
 
-        theta_out = torch.atan2(kp[...,2], kp[...,0])
+        theta_out = torch.atan2(kp[...,0], kp[...,2])
 
         kp_r = torch.matmul(kp, rotation_y_torch(-A).T)
 
@@ -568,7 +666,9 @@ class OpticalModelTorch:
         kout[...,1] = kp_r[...,1]
         kout[...,2] = torch.sqrt(1 - kp_r[...,0] ** 2 - kp_r[...,1] ** 2)
 
-        return kout, theta_in, theta_out
+        distance_from_total_intern_reflection = 1 - kp_r[...,0] ** 2 - kp_r[...,1] ** 2
+
+        return kout, theta_in, theta_out,distance_from_total_intern_reflection
 
     def model_Lens_pos_to_angle(self,x_obj, y_obj, F):
         """
@@ -778,9 +878,18 @@ class OpticalModelTorch:
 
     def propagate_central_microm_through_disperser(self,lambda_):
 
-        n1 =  self.glass1.calc_rindex(lambda_)
-        n2 =  self.glass2.calc_rindex(lambda_)
-        n3 =  self.glass3.calc_rindex(lambda_)
+        if self.continuous_glass_materials1:
+            n1 = self.calculate_dispersion_with_cauchy(lambda_,self.nd1,self.vd1)
+        else:
+            n1 = self.glass1.calc_rindex(lambda_)
+        if self.continuous_glass_materials2:
+            n2 = self.calculate_dispersion_with_cauchy(lambda_,self.nd2,self.vd2)
+        else:
+            n2 = self.glass2.calc_rindex(lambda_)
+        if self.continuous_glass_materials3:
+            n3 = self.calculate_dispersion_with_cauchy(lambda_,self.nd3,self.vd3)
+        else:
+            n3 = self.glass3.calc_rindex(lambda_)
 
         # n1 = 1.5
         # n2 = 1.8
@@ -791,10 +900,19 @@ class OpticalModelTorch:
 
         k = self.model_Lens_pos_to_angle(x0, y0, self.F)
 
+        # torch.autograd.set_detect_anomaly(True)
+
         if self.dispersive_element_type == "prism":
+
             alpha_1 = self.A1 - self.A1/2
+            # alpha_1.backward(retain_graph=True)  # This requires alpha_1 to be a scalar
+            # print("A1 requires grd",self.A1.grad)
             k = self.rotate_from_lens_to_dispersive_element(k,self.alpha_c,self.delta_alpha_c,self.delta_beta_c,alpha_1)
+            # k.backward(torch.ones_like(k), retain_graph=True)
+            # print("A1 requires grd", self.A1.grad)
             k, list_theta_in, list_theta_out = self.propagate_through_simple_prism(k,n1,self.A1)
+            # k.backward(torch.ones_like(k), retain_graph=True)
+            # print("A1 requires grd", self.A1.grad)
 
         elif self.dispersive_element_type == "doubleprism":
             alpha_1 = self.A1 - self.A2/2
@@ -805,7 +923,7 @@ class OpticalModelTorch:
             alpha_1 = self.A1 - self.A2/2
             k = self.rotate_from_lens_to_dispersive_element(k,self.alpha_c,self.delta_alpha_c,self.delta_beta_c,alpha_1)
             k, list_theta_in, list_theta_out = self.propagate_through_triple_prism(k,n1,n2,n3,self.A1,self.A2,self.A3)
-        
+
         elif self.dispersive_element_type == "grating":
             alpha_1 = 0
             k = self.rotate_from_lens_to_dispersive_element(k,self.alpha_c,self.delta_alpha_c,self.delta_beta_c,alpha_1)
@@ -813,6 +931,9 @@ class OpticalModelTorch:
 
         alpha = torch.arctan(k[...,0] / k[...,2])
         beta = torch.arctan(k[...,1] / k[...,2])
+        #
+        # alpha.backward(retain_graph=True)  # This requires alpha_1 to be a scalar
+        # print("A1 requires grd", self.A1.grad)
 
         self.list_theta_in = list_theta_in
         self.list_theta_out = list_theta_out
