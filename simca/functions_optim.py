@@ -135,7 +135,7 @@ def optim_width(cassi_system, position, pos_slit_detector, nb_rows, sigma, devic
                 cassi_system.generate_filtering_cube()
                 cassi_system.filtering_cube = cassi_system.filtering_cube.to(device)
 
-                cassi_system.image_acquisition(use_psf=False, chunck_size=50)
+                cassi_system.image_acquisition(use_psf=False, chunck_size=cassi_system.system_config["detector"]["number of pixels along Y"])
                 cost_value = evaluate_max_lighting(cassi_system.measurement, pos_slit_detector)
                 cost_value.backward()
                 return cost_value
@@ -152,7 +152,7 @@ def optim_width(cassi_system, position, pos_slit_detector, nb_rows, sigma, devic
             #print(pattern[:, pattern.shape[1]//2-4:pattern.shape[1]//2+4])
             cassi_system.generate_filtering_cube()
             cassi_system.filtering_cube = cassi_system.filtering_cube.to(device)
-            cassi_system.image_acquisition(use_psf=False, chunck_size=50)
+            cassi_system.image_acquisition(use_psf=False, chunck_size=cassi_system.system_config["detector"]["number of pixels along Y"])
             cost_value = evaluate_max_lighting(cassi_system.measurement, pos_slit_detector)
             cost_value.backward()
             optimizer.step() 
