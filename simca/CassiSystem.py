@@ -101,6 +101,12 @@ class CassiSystem():
         dataset, wavelengths_vec, dataset_labels, label_names, ignored_labels = get_dataset(directory, dataset_name)
 
         self.dataset = dataset
+
+        ### MODIFICATIONS TO TEST
+        #self.dataset[20:50,:] /= 10
+        #self.dataset[60:120, :] *= 10
+        #################################
+
         self.dataset_labels = dataset_labels
         self.dataset_wavelengths = wavelengths_vec
 

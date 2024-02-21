@@ -18,6 +18,7 @@ system architecture:
     A3: 60 # apex angle of the prism in degrees      (only used if type == 'prism')   -- in degrees
     m: 1 # grating order to consider         (only used if type == 'grating')       -- no units
     G: 30 # grating density                   (only used if type == 'grating')       -- in lines/mm
+    alpha_c: 50
     delta alpha c: 0
     delta beta c: 0
     wavelength center: 620 # central wavelength -- in nm
@@ -35,4 +36,4 @@ coded aperture:
 spectral range:
   wavelength min: 450 # minimum wavelength -- in nm
   wavelength max: 700 # maximum wavelength -- in nm
-  number of spectral samples: 61
+  number of spectral samples: 61 #61

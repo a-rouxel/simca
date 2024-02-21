@@ -106,7 +106,8 @@ def optim_smile(cassi_system, position, pos_slit_detector, sigma, device,
 def optim_width(cassi_system, position, pos_slit_detector, nb_rows, sigma, device,
                 algo, lr, num_iterations,  max_iter_cnv, threshold = 0,
                 plot_frequency = None, aspect_plot = 1):
-    cassi_system.generate_custom_pattern_parameters_slit_width(nb_slits=1, nb_rows=nb_rows, start_width = sigma)
+    #cassi_system.generate_custom_pattern_parameters_slit_width(nb_slits=1, nb_rows=nb_rows, start_width = sigma)
+    cassi_system.generate_custom_pattern_parameters_slit_width(nb_slits=1, nb_rows=nb_rows, start_width = 0.01)
 
     cassi_system.array_x_positions = cassi_system.array_x_positions.to(device)
     # Ensure array_x_positions is a tensor with gradient tracking

@@ -265,7 +265,7 @@ class CassiSystemOptim(CassiSystem):
                         # Set the position of the slit (j,i)
                         bottom_pad = (nb_rows - i-1)*height_slits + self.system_config["coded aperture"]["number of pixels along Y"] % nb_rows # Padding necessary below slit (j,i)
                         top_pad = i*height_slits
-                    array_x_pos = torch.tensor(start_position[i])
+                    """ array_x_pos = torch.tensor(start_position[i])
 
                     # Create a grid to represent positions
                     grid_positions = torch.arange(self.empty_grid.shape[1], dtype=torch.float32)
@@ -280,8 +280,25 @@ class CassiSystemOptim(CassiSystem):
                     padded = torch.nn.functional.pad(gaussian, (0,0,top_pad,bottom_pad)) # padding: left - right - top - bottom
 
                     # Normalize to make sure the maximum value is 1
-                    self.pattern = self.pattern + padded/padded.max()
+                    self.pattern = self.pattern + padded/padded.max() """
 
+                    c = torch.tensor(start_position[i])
+                    d = self.array_x_positions[j,i]/2
+                    m = (c-d)*(self.system_config["coded aperture"]["number of pixels along X"]-1)
+                    M = (c+d)*(self.system_config["coded aperture"]["number of pixels along X"]-1)
+                    rect = torch.arange(self.system_config["coded aperture"]["number of pixels along X"])
+                    rect = torch.clamp(-(rect-m)*(rect-M)+1,0,1)
+
+                    gaussian_range = torch.arange(self.system_config["coded aperture"]["number of pixels along X"], dtype=torch.float32)
+                    center_pos = 0.5*(len(gaussian_range)-1)
+                    sigma = 1.5
+                    gaussian_peaks = np.exp(-((center_pos - gaussian_range) ** 2) / (2 * sigma ** 2))
+                    gaussian = gaussian_peaks /gaussian_peaks.max()
+                    res = torch.nn.functional.conv1d(rect.unsqueeze(0), gaussian.unsqueeze(0).unsqueeze(0), padding = 144//2).squeeze()
+
+                    res = res/res.max()
+
+                    self.pattern[i, :] = self.pattern[i, :] + res
 
         # Normalize to make sure the maximum value is 1
         self.pattern = self.pattern / self.pattern.max(dim=1).values.unsqueeze(-1)
@@ -298,7 +315,7 @@ class CassiSystemOptim(CassiSystem):
 
         # Apply Gaussian-like function
         # Adjust 'sigma' to control the sharpness
-        sigma = 0.75
+        sigma = 1.5
         gaussian_peaks = torch.exp(-((expanded_grid_positions - expanded_x_positions) ** 2) / (2 * sigma ** 2))
 
         # Normalize to make sure the maximum value is 1
