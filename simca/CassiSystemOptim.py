@@ -6,6 +6,7 @@ from simca.functions_scenes_torch import *
 from simca.functions_general_purpose import *
 from simca.CassiSystem import CassiSystem
 from simca.functions_acquisition_torch import *
+import time
 
 
 class CassiSystemOptim(CassiSystem):
@@ -63,6 +64,25 @@ class CassiSystemOptim(CassiSystem):
         X_input_grid, Y_input_grid = np.meshgrid(x, y)
 
         return torch.from_numpy(X_input_grid), torch.from_numpy(Y_input_grid)
+
+    def set_wavelengths(self, wavelength_min, wavelength_max, nb_of_spectral_samples):
+        """
+        Set the wavelengths range of the optical system
+
+        Args:
+            wavelength_min (float): minimum wavelength of the system
+            wavelength_max (float): maximum wavelength of the system
+            nb_of_spectral_samples (int): number of spectral samples of the system
+        Returns:
+
+        """
+        self.wavelength_min = wavelength_min
+        self.wavelength_max = wavelength_max
+        self.nb_of_spectral_samples = nb_of_spectral_samples
+
+        self.system_wavelengths = torch.linspace(self.wavelength_min,self.wavelength_max,self.nb_of_spectral_samples)
+
+        return self.system_wavelengths
     
     def update_optical_model(self, system_config=None):
         """
@@ -82,14 +102,24 @@ class CassiSystemOptim(CassiSystem):
     
     def propagate_coded_aperture_grid(self):
 
-        import time
-        n1 = self.optical_model.glass1.calc_rindex(self.wavelengths)
-        n2 = self.optical_model.glass2.calc_rindex(self.wavelengths)
-        n3 = self.optical_model.glass3.calc_rindex(self.wavelengths)
-        #
+        if self.optical_model.continuous_glass_materials1 == True:
+            n1 = self.optical_model.calculate_dispersion_with_cauchy(self.wavelengths,self.optical_model.nd1,self.optical_model.vd1)
+        else:
+            n1 = self.optical_model.glass1.calc_rindex(self.wavelengths)
+        if self.optical_model.continuous_glass_materials2 == True:
+            n2 = self.optical_model.calculate_dispersion_with_cauchy(self.wavelengths,self.optical_model.nd2,self.optical_model.vd2)
+        else:
+            n2 = self.optical_model.glass2.calc_rindex(self.wavelengths)
+        if self.optical_model.continuous_glass_materials3 == True:
+            n3 = self.optical_model.calculate_dispersion_with_cauchy(self.wavelengths,self.optical_model.nd3,self.optical_model.vd3)
+        else:
+            n3 = self.optical_model.glass3.calc_rindex(self.wavelengths)
+
         # n1 = np.repeat(1.5, self.wavelengths.shape[0])
         # n2 = np.repeat(1.8, self.wavelengths.shape[0])
         # n3 = np.repeat(1.5, self.wavelengths.shape[0])
+
+
 
         X_input_grid = torch.from_numpy(self.X_coded_aper_coordinates) if isinstance(self.X_coded_aper_coordinates, np.ndarray) else self.X_coded_aper_coordinates
         Y_input_grid = torch.from_numpy(self.Y_coded_aper_coordinates) if isinstance(self.Y_coded_aper_coordinates, np.ndarray) else self.Y_coded_aper_coordinates
