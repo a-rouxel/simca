@@ -39,7 +39,7 @@ class CubesDataset(Dataset):
         elif "img" in data:
             cube = data['img'] / 65536.
         cube = cube.astype(np.float32) # H x W x lambda
-        wavelengths = np.linspace(450, 650, 28)
+        wavelengths = torch.tensor(np.linspace(450, 650, 28))
 
         return cube, wavelengths
     
