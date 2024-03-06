@@ -2,7 +2,7 @@ import pytorch_lightning as pl
 from data_handler import CubesDataModule
 from optimization_modules import JointReconstructionModule_V1
 
-data_dir = "./datasets_reconstruction/"
+data_dir = "/local/users/ademaio/lpaillet/mst_datasets/cave_1024_28/"
 
 datamodule = CubesDataModule(data_dir, batch_size=2, num_workers=1)
 

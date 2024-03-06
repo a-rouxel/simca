@@ -5,28 +5,20 @@ from simca.CassiSystemOptim import CassiSystemOptim
 from simca import  load_yaml_config
 
 
-class EmptyModule(nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.useless_linear = nn.Linear(1, 1)
-    def forward(self, x):
-        
-        return x
-
-
 class JointReconstructionModule_V1(pl.LightningModule):
 
     def __init__(self):
         super().__init__()
         
-        self.inittialize_cassi_system()
-        #TODO
+        self.initialize_cassi_system()
+        # TODO : use a real reconstruction module
         # self.reconstruction_model = ReconstructionModel()
         self.reconstruction_model = EmptyModule()
 
         self.loss_fn = nn.MSELoss()
 
-    def inittialize_cassi_system(self):
+
+    def initialize_cassi_system(self):
 
         config_system = load_yaml_config("simca/configs/cassi_system_optim_optics_full_triplet_sd_cassi.yml")
         self.config_patterns = load_yaml_config("simca/configs/pattern.yml")
@@ -42,8 +34,9 @@ class JointReconstructionModule_V1(pl.LightningModule):
         # generate first acquisition with simca
         filtering_cube = self.cassi_system.generate_filtering_cube()
         acquired_image1 = self.cassi_system.image_acquisition(x)
+
         # process first acquisition with reconstruction model
-        # TODO : replace by the reconstruction model
+        # TODO : replace by the real reconstruction model
         reconstructed_cube = acquired_image1
 
         return reconstructed_cube
@@ -104,3 +97,9 @@ class JointReconstructionModule_V1(pl.LightningModule):
         return optimizer
 
     
+class EmptyModule(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.useless_linear = nn.Linear(1, 1)
+    def forward(self, x):
+        return x
