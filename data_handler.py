@@ -201,5 +201,5 @@ def arguement_2(generate_gt):
 #         return acq, cube
 
 if __name__ == "__main__":
-    data_dir = "/local/users/ademaio/lpaillet/mst_datasets"
+    data_dir = "/local/users/ademaio/lpaillet/mst_datasets/cave_1024_28/"
     datamodule = CubesDataModule(data_dir, batch_size=5, num_workers=2)
