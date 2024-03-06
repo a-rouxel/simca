@@ -46,7 +46,7 @@ def rotation_y_torch(theta):
     """
     # Ensure theta is a tensor with requires_grad=True
     if not isinstance(theta, torch.Tensor):
-        theta = torch.tensor(theta, requires_grad=True)
+        theta = torch.tensor(theta, requires_grad=True, dtype=torch.float32)
 
     cos_theta = torch.cos(theta)
     sin_theta = torch.sin(theta)
@@ -78,7 +78,7 @@ def rotation_x_torch(theta):
     """
     # Ensure theta is a tensor with requires_grad=True
     if not isinstance(theta, torch.Tensor):
-        theta = torch.tensor(theta, requires_grad=True)
+        theta = torch.tensor(theta, requires_grad=True, dtype=torch.float32)
 
     cos_theta = torch.cos(theta)
     sin_theta = torch.sin(theta)
