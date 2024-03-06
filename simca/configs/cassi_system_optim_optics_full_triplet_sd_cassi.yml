@@ -4,7 +4,7 @@ infos:
     system name: HYACAMEO
 
 system architecture:
-    system type: DD-CASSI
+    system type: SD-CASSI
     propagation type: simca
     focal lens: 50000
     dispersive element:
@@ -32,17 +32,17 @@ system architecture:
         delta beta c: 0
         wavelength center: 600  # central wavelength -- in nm
 detector:
-    number of pixels along X: 201                  # number of pixels along X axis -- no units
-    number of pixels along Y: 201                  # number of pixels along Y axis -- no units
-    pixel size along X: 40                             # pixel size along X       -- in um
-    pixel size along Y: 40                              # pixel size along Y       -- in um
+    number of pixels along X: 150                  # number of pixels along X axis -- no units
+    number of pixels along Y: 111                  # number of pixels along Y axis -- no units
+    pixel size along X: 12                             # pixel size along X       -- in um
+    pixel size along Y: 12                              # pixel size along Y       -- in um
 coded aperture:
-    number of pixels along X: 7                  # number of pixels along X axis -- no units
-    number of pixels along Y: 9                  # number of pixels along Y axis -- no units
-    pixel size along X: 1200                              # pixel size along X       -- in um
-    pixel size along Y: 1200                              # pixel size along Y       -- in um
+    number of pixels along X: 111                  # number of pixels along X axis -- no units
+    number of pixels along Y: 113                  # number of pixels along Y axis -- no units
+    pixel size along X: 12                              # pixel size along X       -- in um
+    pixel size along Y: 12                              # pixel size along Y       -- in um
 
 spectral range:
     wavelength min: 400     # minimum wavelength -- in nm
     wavelength max: 650      # maximum wavelength -- in nm
-    number of spectral samples: 15
+    number of spectral samples: 55
