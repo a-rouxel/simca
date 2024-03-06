@@ -39,7 +39,7 @@ def expand_mask_3d(mask):
     mask3d = torch.from_numpy(mask3d)
     return mask3d
 
-def train_recons(model, cassi_system, nb_epochs, display_iter=10):
+def train_recons(model, cassi_system, optimizer, mse, nb_epochs, display_iter=10):
     train_losses = []
     test_losses = []
     for e in range(1, nb_epochs + 1):
@@ -54,7 +54,7 @@ def train_recons(model, cassi_system, nb_epochs, display_iter=10):
             # cube_i = cube[i,...]
             # wavelengths_i = wavelengths[i,...]
 
-            
+
             # cassi_system.dataset = cube # b x 28 x H x W
             # cassi_system.wavelengths = wavelengths
             input_mask = np.random.randint(0,1,size=(128,128))
@@ -95,10 +95,12 @@ def train_recons(model, cassi_system, nb_epochs, display_iter=10):
             with torch.no_grad():
                 input_mask = np.random.randint(0,1,size=(128,128))
                 cassi_system.pattern = torch.tensor(input_mask)
-                cassi_system.generate_filtering_cube()
                 # cassi_system.dataset = cube
                 # cassi_system.wavelengths = wavelengths
+                cassi_system.generate_filtering_cube()
+
                 input_acq = cassi_system.image_acquisition(use_psf=False)
+                d=2
                 input_acq = shift_back(input_acq, step=d)
                 input_mask_3d = expand_mask_3d(input_mask) #TODO, like in train_method/utils.py
 
@@ -111,7 +113,7 @@ def train_recons(model, cassi_system, nb_epochs, display_iter=10):
         tqdm.write(string)
         test_losses.append(avg_loss)
 
-def test_recons(model, cassi_system):
+def test_recons(model, mse, cassi_system):
     model.eval()
     avg_loss = 0
 
@@ -119,10 +121,12 @@ def test_recons(model, cassi_system):
         with torch.no_grad():
             input_mask = np.random.randint(0,1,size=(128,128))
             cassi_system.pattern = torch.tensor(input_mask)
-            cassi_system.generate_filtering_cube()
             # cassi_system.dataset = cube
             # cassi_system.wavelengths = wavelengths
+            cassi_system.generate_filtering_cube()
+            
             input_acq = cassi_system.image_acquisition(use_psf=False)
+            d=2
             input_acq = shift_back(input_acq, step=d)
             input_mask_3d = expand_mask_3d(input_mask) #TODO, like in train_method/utils.py
 
@@ -132,6 +136,28 @@ def test_recons(model, cassi_system):
     avg_loss /= len(datamodule.test_dataloader)
     print(f"\nTest loss: {avg_loss:.6f}")
 
+def full_flow(cassi_system, scene, wavelengths, resnet, recons_model, mse):
+    input_mask = np.random.randint(0,1,size=(128,128))
+    cassi_system.dataset = scene
+    cassi_system.wavelengths = wavelengths
+    cassi_system.pattern = torch.tensor(input_mask)
+    cassi_system.generate_filtering_cube()
+
+    acq1 = cassi_system.image_acquisition(use_psf=False)
+    new_mask = resnet(acq1)
+
+    cassi_system.pattern = new_mask
+    cassi_system.generate_filtering_cube()
+
+    acq2 = cassi_system.image_acquisition(use_psf=False)
+
+    input_mask_3d = expand_mask_3d(new_mask.numpy())
+    input_acq = shift_back(acq2, step=d)
+    out_cube = recons_model(input_acq, input_mask_3d)
+    loss = torch.sqrt(mse(out_cube, scene))
+    print(f"\nTest loss: {loss:.6f}")
+
+
 if __name__ == '__main__':
     datamodule = CubesDataModule(data_dir, batch_size=5, num_workers=2)
     cassi_system = CassiSystemOptim(system_config=config_system)
@@ -140,9 +166,10 @@ if __name__ == '__main__':
     cassi_system.update_optical_model(system_config=config_system)
     X_vec_out, Y_vec_out = cassi_system.propagate_coded_aperture_grid()
 
-    model = model_generator(model_name, None)
-    optimizer = torch.optim.Adam(model.parameters(), lr=lr, betas=(0.9, 0.999))
+    recons_model = model_generator(model_name, None)
+    optimizer = torch.optim.Adam(recons_model.parameters(), lr=lr, betas=(0.9, 0.999))
     mse = torch.nn.MSELoss()
 
-    model = train_recons(model, cassi_system, nb_epochs)
-    test_recons(model, cassi_system)
+    recons_model = train_recons(recons_model, optimizer, mse, cassi_system, nb_epochs)
+    test_recons(recons_model, mse, cassi_system)
+    torch.save(recons_model.state_dict(), "./recons_model.pt")
