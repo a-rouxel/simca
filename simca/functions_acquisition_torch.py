@@ -2,6 +2,7 @@ import numpy as np
 from tqdm import tqdm
 import torch
 from torch_geometric.nn.unpool import knn_interpolate
+import snoop
 
 # TODO: sd measurement torch
 def generate_sd_measurement_cube(filtered_scene,X_input, Y_input, X_target, Y_target,grid_type,interp_method):
@@ -27,7 +28,6 @@ def generate_sd_measurement_cube(filtered_scene,X_input, Y_input, X_target, Y_ta
                                                              interp_method=interp_method)
     return measurement_sd
 
-
 def generate_dd_measurement_torch(scene, filtering_cube,chunk_size):
     """
     Generate DD-CASSI type system measurement from a scene and a filtering cube. ref : "Single-shot compressive spectral imaging with a dual-disperser architecture", M.Gehm et al., Optics Express, 2007
@@ -42,7 +42,7 @@ def generate_dd_measurement_torch(scene, filtering_cube,chunk_size):
     """
 
     # Initialize an empty array for the result
-    filtered_scene = torch.empty_like(filtering_cube)
+    #filtered_scene = torch.empty_like(filtering_cube)
 
     # Calculate total iterations for tqdm
     total_iterations = (filtering_cube.shape[0] // chunk_size + 1) * (filtering_cube.shape[1] // chunk_size + 1)
@@ -80,10 +80,10 @@ def interpolate_data_on_grid_positions_torch(data, X_init, Y_init, X_target, Y_t
         numpy.ndarray: 3D data interpolated on the target grid
     """
 
-    X_init = torch.from_numpy(X_init).double() if isinstance(X_init, np.ndarray) else X_init
-    Y_init = torch.from_numpy(Y_init).double() if isinstance(Y_init, np.ndarray) else Y_init
-    X_target = torch.from_numpy(X_target).double() if isinstance(X_target, np.ndarray) else X_target
-    Y_target = torch.from_numpy(Y_target).double() if isinstance(Y_target, np.ndarray) else Y_target
+    X_init = torch.from_numpy(X_init).double().squeeze() if isinstance(X_init, np.ndarray) else X_init.squeeze()
+    Y_init = torch.from_numpy(Y_init).double().squeeze() if isinstance(Y_init, np.ndarray) else Y_init.squeeze()
+    X_target = torch.from_numpy(X_target).double().squeeze() if isinstance(X_target, np.ndarray) else X_target.squeeze()
+    Y_target = torch.from_numpy(Y_target).double().squeeze() if isinstance(Y_target, np.ndarray) else Y_target.squeeze()
     data = torch.from_numpy(data).double() if isinstance(data, np.ndarray) else data
 
     interpolated_data = torch.zeros((X_target.shape[0],X_target.shape[1],X_init.shape[2]))
@@ -100,7 +100,6 @@ def interpolate_data_on_grid_positions_torch(data, X_init, Y_init, X_target, Y_t
 
     tasks = [(X_init[:, :, i], Y_init[:, :, i], data[:, :, i], X_target, Y_target, interp_method) for i in
                 range(nb_of_grids)]
-
     for index, zi in tqdm(enumerate(tasks), total=nb_of_grids,
                             desc='Interpolate 3D data on grid positions'):
         interpolated_data[:, :, index] = worker(zi)

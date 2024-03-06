@@ -1,48 +1,48 @@
 #####  Configuration file for the chosen optical system
 
 infos:
-    system name: HYACAMEO
+  system name: HYACAMEO
 
 system architecture:
-    system type: DD-CASSI
-    propagation type: simca
-    focal lens: 50000
-    dispersive element:
+  system type: DD-CASSI
+  propagation type: simca
+  focal lens: 50000
+  dispersive element:
     # dispersive element caracteristics
-        type: tripleprism        # name of the dispersive element
-        glass1: P-SK60       # glass type of the dispersive element (only used if type == 'prism')
-        glass2: SF4       # glass type of the dispersive element (only used if type == 'prism')
-        glass3: P-SK60       # glass type of the dispersive element (only used if type == 'prism')
-        A1: 21.5              # apex angle of the prism in degrees      (only used if type == 'prism')   -- in degrees
-        A2: 43.0              # apex angle of the prism in degrees      (only used if type == 'prism')   -- in degrees
-        A3: 21.5              # apex angle of the prism in degrees      (only used if type == 'prism')   -- in degrees
-        nd1: 1.6074
-        nd2: 1.7552
-        nd3: 1.6074
-        vd1: 56.65
-        vd2: 27.58
-        vd3: 56.65
-        continuous glass materials 1: False
-        continuous glass materials 2: False
-        continuous glass materials 3: False
-        m: 1               # grating order to consider         (only used if type == 'grating')       -- no units
-        G: 30             # grating density                   (only used if type == 'grating')       -- in lines/mm
-        alpha_c: 2.6
-        delta alpha c: 0
-        delta beta c: 0
-        wavelength center: 600  # central wavelength -- in nm
+    type: tripleprism # name of the dispersive element
+    glass1: P-SK60 # glass type of the dispersive element (only used if type == 'prism')
+    glass2: SF4 # glass type of the dispersive element (only used if type == 'prism')
+    glass3: P-SK60 # glass type of the dispersive element (only used if type == 'prism')
+    A1: 21.5 # apex angle of the prism in degrees      (only used if type == 'prism')   -- in degrees
+    A2: 43.0 # apex angle of the prism in degrees      (only used if type == 'prism')   -- in degrees
+    A3: 21.5 # apex angle of the prism in degrees      (only used if type == 'prism')   -- in degrees
+    nd1: 1.6074
+    nd2: 1.7552
+    nd3: 1.6074
+    vd1: 56.65
+    vd2: 27.58
+    vd3: 56.65
+    continuous glass materials 1: False
+    continuous glass materials 2: False
+    continuous glass materials 3: False
+    m: 1 # grating order to consider         (only used if type == 'grating')       -- no units
+    G: 30 # grating density                   (only used if type == 'grating')       -- in lines/mm
+    alpha_c: 2.6
+    delta alpha c: 0
+    delta beta c: 0
+    wavelength center: 600 # central wavelength -- in nm
 detector:
-    number of pixels along X: 201                  # number of pixels along X axis -- no units
-    number of pixels along Y: 201                  # number of pixels along Y axis -- no units
-    pixel size along X: 40                             # pixel size along X       -- in um
-    pixel size along Y: 40                              # pixel size along Y       -- in um
+  number of pixels along X: 145 # number of pixels along X axis -- no units
+  number of pixels along Y: 901 # number of pixels along Y axis -- no units
+  pixel size along X: 15 # pixel size along X       -- in um
+  pixel size along Y: 15 # pixel size along Y       -- in um
 coded aperture:
-    number of pixels along X: 11                  # number of pixels along X axis -- no units
-    number of pixels along Y: 13                  # number of pixels along Y axis -- no units
-    pixel size along X: 1000                              # pixel size along X       -- in um
-    pixel size along Y: 1000                              # pixel size along Y       -- in um
+  number of pixels along X: 145 # 151 # number of pixels along X axis -- no units
+  number of pixels along Y: 901 # 151 # number of pixels along Y axis -- no units
+  pixel size along X: 15 # pixel size along X       -- in um
+  pixel size along Y: 15 # pixel size along Y       -- in um
 
 spectral range:
-    wavelength min: 400     # minimum wavelength -- in nm
-    wavelength max: 1050      # maximum wavelength -- in nm
-    number of spectral samples: 15
+  wavelength min: 410 # minimum wavelength -- in nm
+  wavelength max: 1050 # maximum wavelength -- in nm
+  number of spectral samples: 151
