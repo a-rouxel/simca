@@ -5,6 +5,7 @@ from simca.CassiSystem_lightning import CassiSystemOptim
 from MST.simulation.train_code.architecture import *
 from simca import  load_yaml_config
 import matplotlib.pyplot as plt
+import numpy as np
 
 
 class JointReconstructionModule_V1(pl.LightningModule):
@@ -23,8 +24,9 @@ class JointReconstructionModule_V1(pl.LightningModule):
 
     def on_validation_start(self,stage=None):
         print("---VALIDATION START---")
-
-        config_system = load_yaml_config("simca/configs/cassi_system_optim_optics_full_triplet_sd_cassi.yml")
+        #self.config = "simca/configs/cassi_system_optim_optics_full_triplet_sd_cassi.yml"
+        self.config = "simca/configs/cassi_system_optim_optics_full_triplet_sd_cassi_shifted.yml"
+        config_system = load_yaml_config(self.config)
         self.config_patterns = load_yaml_config("simca/configs/pattern.yml")
         self.cassi_system = CassiSystemOptim(system_config=config_system)
         self.cassi_system.propagate_coded_aperture_grid()
@@ -54,14 +56,21 @@ class JointReconstructionModule_V1(pl.LightningModule):
 
         # process first acquisition with reconstruction model
         # TODO : replace by the real reconstruction model
-        # mask_3d = expand_mask_3d(patterns)
-        acquired_cubes = acquired_image1.unsqueeze(1).repeat((1, 28, 1, 1)).float().to(self.device) # b x W x R x C
-        acquired_cubes = torch.flip(acquired_cubes, dims=(2,)) # -1 magnification
+        if self.config == "simca/configs/cassi_system_optim_optics_full_triplet_sd_cassi.yml":
+            acquired_cubes = acquired_image1.unsqueeze(1).repeat((1, 28, 1, 1)).float().to(self.device) # b x W x R x C
+            acquired_cubes = torch.flip(acquired_cubes, dims=(2,)) # -1 magnification
+            reconstructed_cube = self.reconstruction_model(acquired_cubes, filtering_cubes)
+        else:
+            mask_3d = expand_mask_3d(pattern).float().to(self.device)
+            shifted_image = shift_back(acquired_image1, displacement_in_pix).float().to(self.device)
+            reconstructed_cube = self.reconstruction_model(shifted_image, mask_3d)
+
+        
 
         #print(acquired_cubes.shape)
         #print(filtering_cubes.shape)
-        reconstructed_cube = self.reconstruction_model(acquired_cubes, filtering_cubes)
-        # reconstructed_cube = self.reconstruction_model(acquired_cubes, mask_3d)
+        
+        # 
 
         return reconstructed_cube
 
@@ -124,7 +133,7 @@ class JointReconstructionModule_V1(pl.LightningModule):
         #print("y_hat shape", y_hat.shape)
         #print("hyperspectral_cube shape", hyperspectral_cube.shape)
 
-        loss = self.loss_fn(y_hat, hyperspectral_cube)
+        loss = torch.sqrt(self.loss_fn(y_hat, hyperspectral_cube))
 
         return loss, y_hat, hyperspectral_cube
 
@@ -133,16 +142,24 @@ class JointReconstructionModule_V1(pl.LightningModule):
         return optimizer
 
 def expand_mask_3d(mask_batch):
-    mask3d = mask_batch.unsqueeze(-1).repeat((1, 1, 1, 28))
+    if len(mask_batch.shape)==3:
+        mask3d = mask_batch.unsqueeze(-1).repeat((1, 1, 1, 28))
+    else:
+        mask3d = mask_batch.repeat((1, 1, 1, 28))
     mask3d = torch.permute(mask3d, (0, 3, 1, 2))
     return mask3d
 
 def shift_back(inputs, d):  # input [bs,256,310], [bs, 28]  output [bs, 28, 256, 256]
     [bs, row, col] = inputs.shape
     nC = 28
-    output = torch.zeros(bs, nC, row, col - (nC - 1) * step).cuda().float()
+    output = torch.zeros(bs, nC, row, row).cuda().float()
     for i in range(nC):
-        output[:, i, :, :] = inputs[:, :, step * i:step * i + col - (nC - 1) * step]
+        shift = int(np.round(d[0][i]))
+        #output[:, i, :, :] = inputs[:, :, step * i:step * i + col - 27 * step] step = 2
+        if shift >=0:
+            output[:, i, :, :] = inputs[:, :, shift:row+shift]
+        else:
+            output[:, i, :, :] = inputs[:, :, shift-row:shift]
     return output
     
 class EmptyModule(nn.Module):
