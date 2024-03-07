@@ -34,7 +34,6 @@ class CassiSystemOptim(CassiSystem):
         self.wavelengths = self.set_wavelengths(self.system_config["spectral range"]["wavelength min"],
                                                 self.system_config["spectral range"]["wavelength max"],
                                                 self.system_config["spectral range"]["number of spectral samples"])
-        
         self.optical_model = OpticalModelTorch(self.system_config)
 
         
@@ -63,7 +62,7 @@ class CassiSystemOptim(CassiSystem):
         # Create a two-dimensional grid of coordinates
         X_input_grid, Y_input_grid = np.meshgrid(x, y)
 
-        return torch.from_numpy(X_input_grid), torch.from_numpy(Y_input_grid)
+        return torch.from_numpy(X_input_grid).float(), torch.from_numpy(Y_input_grid).float()
 
     def set_wavelengths(self, wavelength_min, wavelength_max, nb_of_spectral_samples):
         """
@@ -154,8 +153,7 @@ class CassiSystemOptim(CassiSystem):
                                                                  X_init=self.X_coordinates_propagated_coded_aperture,
                                                                  Y_init=self.Y_coordinates_propagated_coded_aperture,
                                                                  X_target=self.X_detector_coordinates_grid,
-                                                                 Y_target=self.Y_detector_coordinates_grid)
-
+                                                                 Y_target=self.Y_detector_coordinates_grid).to(self.device)
 
         return self.filtering_cube
     
@@ -185,7 +183,7 @@ class CassiSystemOptim(CassiSystem):
                 return print("Please generate filtering cube first")
 
             scene = match_dataset_to_instrument(dataset, self.filtering_cube)
-            scene = torch.from_numpy(match_dataset_to_instrument(dataset, self.filtering_cube)) if isinstance(scene, np.ndarray) else scene
+            scene = torch.from_numpy(match_dataset_to_instrument(dataset, self.filtering_cube)).to(self.device) if isinstance(scene, np.ndarray) else scene.to(self.device)
 
             measurement_in_3D = generate_dd_measurement_torch(scene, self.filtering_cube, chunck_size)
 
@@ -238,6 +236,7 @@ class CassiSystemOptim(CassiSystem):
     def generate_custom_pattern_parameters_slit(self, position=0.5):
         # Position is a float: 0 means slit is on the left edge, 1 means the slit is on the right edge
         self.array_x_positions = torch.zeros((self.system_config["coded aperture"]["number of pixels along Y"]))+ position
+        self.array_x_positions = self.array_x_positions.to(self.device)
         return self.array_x_positions
     
     def generate_custom_pattern_parameters_slit_width(self, nb_slits=1, nb_rows=1, start_width=1):
@@ -246,14 +245,16 @@ class CassiSystemOptim(CassiSystem):
         # self.array_x_positions is of shape (self.system_config["coded aperture"]["number of pixels along Y"], nb_rows)
 
         self.array_x_positions = torch.zeros((nb_slits, nb_rows))+start_width # Every slit starts with the same width
+        self.array_x_positions = self.array_x_positions.to(self.device)
+        self.array_x_positions_normalized = torch.zeros((nb_slits, nb_rows))+start_width
         return self.array_x_positions
 
     def generate_custom_slit_pattern_width(self, start_pattern = "line", start_position = 0):
         nb_slits, nb_rows = self.array_x_positions.shape
-        pos_slits = self.system_config["coded aperture"]["number of pixels along Y"]//(nb_slits+1) # Equally spaced slits
-        height_slits = self.system_config["coded aperture"]["number of pixels along X"]//nb_rows # Same length slits
+        pos_slits = self.system_config["coded aperture"]["number of pixels along X"]//(nb_slits+1) # Equally spaced slits
+        height_slits = self.system_config["coded aperture"]["number of pixels along Y"]//nb_rows # Same length slits
 
-        self.pattern = torch.zeros((self.system_config["coded aperture"]["number of pixels along Y"], self.system_config["coded aperture"]["number of pixels along X"])) # Pattern of correct size
+        self.pattern = torch.zeros((self.system_config["coded aperture"]["number of pixels along Y"], self.system_config["coded aperture"]["number of pixels along X"])).to(self.device) # Pattern of correct size
         if start_pattern == "line":
             if start_position != 0:
                 start_position = start_position - pos_slits/self.system_config["coded aperture"]["number of pixels along X"]
@@ -312,22 +313,35 @@ class CassiSystemOptim(CassiSystem):
                     # Normalize to make sure the maximum value is 1
                     self.pattern = self.pattern + padded/padded.max() """
 
-                    c = torch.tensor(start_position[i])
-                    d = self.array_x_positions[j,i]/2
-                    m = (c-d)*(self.system_config["coded aperture"]["number of pixels along X"]-1)
-                    M = (c+d)*(self.system_config["coded aperture"]["number of pixels along X"]-1)
-                    rect = torch.arange(self.system_config["coded aperture"]["number of pixels along X"])
-                    rect = torch.clamp(-(rect-m)*(rect-M)+1,0,1)
+                    c = start_position[i].clone().detach() # center of the slit
+                    #d = ((torch.tanh(1.1*self.array_x_positions[j,i])+1)/2)/2 # width of the slit at pos 
+                    d = self.array_x_positions[j,i]/2 # width of the slit at pos 
+                    m = (c-d)*(self.system_config["coded aperture"]["number of pixels along X"]-1) # left bound
+                    M = (c+d)*(self.system_config["coded aperture"]["number of pixels along X"]-1) # right bound
+                    rect = torch.arange(self.system_config["coded aperture"]["number of pixels along X"]).to(self.device)
+                    clamp_M = torch.clamp(M-rect, 0, 1)
+
+                    clamp_m = torch.clamp(rect-m, 0, 1)
+                    diff = 1-clamp_m
+                    reg = torch.where(diff < 1, diff, -1)
+                    clamp_m = torch.where(reg!=0, reg, 1)
+                    clamp_m = torch.where(clamp_m!=-1, clamp_m, 0)
+                    clamp_m = torch.roll(clamp_m, -1)
+                    clamp_m[-1]=1
+
+                    rect = clamp_M - clamp_m +1
+                    rect = torch.where(rect!=2, rect, 0)
+                    rect = torch.where(rect <= 1, rect, rect-1)
+                    #rect = torch.clamp(-(rect-m)*(rect-M)+1,0,1).to(self.device)
 
                     gaussian_range = torch.arange(self.system_config["coded aperture"]["number of pixels along X"], dtype=torch.float32)
                     center_pos = 0.5*(len(gaussian_range)-1)
                     sigma = 1.5
-                    gaussian_peaks = np.exp(-((center_pos - gaussian_range) ** 2) / (2 * sigma ** 2))
+                    gaussian_peaks = torch.exp(-((center_pos - gaussian_range) ** 2) / (2 * sigma ** 2)).to(self.device)
                     gaussian = gaussian_peaks /gaussian_peaks.max()
-                    res = torch.nn.functional.conv1d(rect.unsqueeze(0), gaussian.unsqueeze(0).unsqueeze(0), padding = 144//2).squeeze()
+                    res = torch.nn.functional.conv1d(rect.unsqueeze(0), gaussian.unsqueeze(0).unsqueeze(0), padding = (len(gaussian_range)-1)//2).squeeze().to(self.device)
 
                     res = res/res.max()
-
                     self.pattern[i, :] = self.pattern[i, :] + res
 
         # Normalize to make sure the maximum value is 1
@@ -338,15 +352,15 @@ class CassiSystemOptim(CassiSystem):
     def generate_custom_slit_pattern(self):
 
         # Create a grid to represent positions
-        grid_positions = torch.arange(self.empty_grid.shape[1], dtype=torch.float32)
+        grid_positions = torch.arange(self.empty_grid.shape[1], dtype=torch.float32).to(self.device)
         # Expand dimensions for broadcasting
-        expanded_x_positions = (self.array_x_positions.unsqueeze(-1)) * (self.empty_grid.shape[1]-1)
-        expanded_grid_positions = grid_positions.unsqueeze(0)
+        expanded_x_positions = ((self.array_x_positions.unsqueeze(-1)) * (self.empty_grid.shape[1]-1)).to(self.device)
+        expanded_grid_positions = grid_positions.unsqueeze(0).to(self.device)
 
         # Apply Gaussian-like function
         # Adjust 'sigma' to control the sharpness
         sigma = 1.5
-        gaussian_peaks = torch.exp(-((expanded_grid_positions - expanded_x_positions) ** 2) / (2 * sigma ** 2))
+        gaussian_peaks = torch.exp(-((expanded_grid_positions - expanded_x_positions) ** 2) / (2 * sigma ** 2)).to(self.device)
 
         # Normalize to make sure the maximum value is 1
         self.pattern = gaussian_peaks / gaussian_peaks.max()

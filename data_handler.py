@@ -25,11 +25,11 @@ class CubesDataset(Dataset):
         cube, wavelengths = self.load_hyperspectral_data(idx) # H x W x lambda
 
         if self.augment_:
-            cube = self.augment(cube) # lambda x H x W
+            cube = self.augment(cube, 128) # lambda x H x W
         else:
             cube = torch.from_numpy(np.transpose(cube, (2, 0, 1))).float()[:,:128,:128] # lambda x H x W
         
-        return cube, wavelengths
+        return cube #, wavelengths
 
     def load_hyperspectral_data(self, idx):
         file_path = os.path.join(self.data_dir, self.data_file_names[idx])
@@ -39,7 +39,7 @@ class CubesDataset(Dataset):
         elif "img" in data:
             cube = data['img'] / 65536.
         cube = cube.astype(np.float32) # H x W x lambda
-        wavelengths = np.linspace(450, 650, 28)
+        wavelengths = torch.tensor(np.linspace(450, 650, 28))
 
         return cube, wavelengths
     
@@ -201,5 +201,5 @@ def arguement_2(generate_gt):
 #         return acq, cube
 
 if __name__ == "__main__":
-    data_dir = "/local/users/ademaio/lpaillet/mst_datasets"
+    data_dir = "/local/users/ademaio/lpaillet/mst_datasets/cave_1024_28/"
     datamodule = CubesDataModule(data_dir, batch_size=5, num_workers=2)
