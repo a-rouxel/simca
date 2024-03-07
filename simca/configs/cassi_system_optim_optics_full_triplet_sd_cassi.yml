@@ -6,16 +6,16 @@ infos:
 system architecture:
     system type: SD-CASSI
     propagation type: simca
-    focal lens: 50000
+    focal lens: 75000
     dispersive element:
     # dispersive element caracteristics
         type: tripleprism        # name of the dispersive element
-        glass1: P-SK60       # glass type of the dispersive element (only used if type == 'prism')
-        glass2: N-SF14      # glass type of the dispersive element (only used if type == 'prism')
-        glass3: P-SK60       # glass type of the dispersive element (only used if type == 'prism')
-        A1: 12             # apex angle of the prism in degrees      (only used if type == 'prism')   -- in degrees
-        A2: 24              # apex angle of the prism in degrees      (only used if type == 'prism')   -- in degrees
-        A3: 12              # apex angle of the prism in degrees      (only used if type == 'prism')   -- in degrees
+        glass1: N-SK2       # glass type of the dispersive element (only used if type == 'prism')
+        glass2: N-SF4      # glass type of the dispersive element (only used if type == 'prism')
+        glass3: N-SK2       # glass type of the dispersive element (only used if type == 'prism')
+        A1: 26.7             # apex angle of the prism in degrees      (only used if type == 'prism')   -- in degrees
+        A2: 53.4              # apex angle of the prism in degrees      (only used if type == 'prism')   -- in degrees
+        A3: 26.7              # apex angle of the prism in degrees      (only used if type == 'prism')   -- in degrees
         nd1: 1.6074
         nd2: 1.7552
         nd3: 1.6074
@@ -27,22 +27,22 @@ system architecture:
         continuous glass materials 3: False
         m: 1               # grating order to consider         (only used if type == 'grating')       -- no units
         G: 30             # grating density                   (only used if type == 'grating')       -- in lines/mm
-        alpha_c: 2.6
+        alpha_c: 0
         delta alpha c: 0
         delta beta c: 0
-        wavelength center: 600  # central wavelength -- in nm
+        wavelength center: 550  # central wavelength -- in nm
 detector:
-    number of pixels along X: 150                  # number of pixels along X axis -- no units
-    number of pixels along Y: 111                  # number of pixels along Y axis -- no units
-    pixel size along X: 12                             # pixel size along X       -- in um
-    pixel size along Y: 12                              # pixel size along Y       -- in um
+    number of pixels along X: 113                  # number of pixels along X axis -- no units
+    number of pixels along Y: 113                  # number of pixels along Y axis -- no units
+    pixel size along X: 70                             # pixel size along X       -- in um
+    pixel size along Y: 70                              # pixel size along Y       -- in um
 coded aperture:
-    number of pixels along X: 133                  # number of pixels along X axis -- no units
-    number of pixels along Y: 141                  # number of pixels along Y axis -- no units
-    pixel size along X: 12                              # pixel size along X       -- in um
-    pixel size along Y: 12                              # pixel size along Y       -- in um
+    number of pixels along X: 131                  # number of pixels along X axis -- no units
+    number of pixels along Y: 131                  # number of pixels along Y axis -- no units
+    pixel size along X: 80                              # pixel size along X       -- in um
+    pixel size along Y: 80                              # pixel size along Y       -- in um
 
 spectral range:
-    wavelength min: 400     # minimum wavelength -- in nm
+    wavelength min: 450     # minimum wavelength -- in nm
     wavelength max: 650      # maximum wavelength -- in nm
     number of spectral samples: 55

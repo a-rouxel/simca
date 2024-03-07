@@ -658,8 +658,6 @@ class OpticalModelTorch(pl.LightningModule):
 
         # compare = n ** 2 - k0[...,0] ** 2 - k0[...,1] ** 2
 
-        print("k0",k0.get_device())
-        print("n",n.get_device())
 
         kp[...,2] = torch.sqrt(n ** 2 - k0[...,0] ** 2 - k0[...,1] ** 2)
 
