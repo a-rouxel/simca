@@ -4,6 +4,7 @@ from tqdm import tqdm
 import multiprocessing as mp
 from multiprocessing import Pool
 
+import torch
 
 def generate_sd_measurement_cube(filtered_scene,X_input, Y_input, X_target, Y_target,grid_type,interp_method):
     """
@@ -67,6 +68,56 @@ def match_dataset_to_instrument(dataset, filtering_cube):
     Match the size of the dataset to the size of the filtering cube. Either by padding or by cropping
 
     Args:
+        dataset (torch.Tensor): dataset
+        filtering_cube (torch.Tensor):  filtering cube of the instrument
+
+    Returns:
+        torch.Tensor: observed scene (shape = R x C x W)
+    """
+
+    print("filtering_cube : ", filtering_cube.shape)
+    print("dataset : ", dataset.shape)
+
+    # Initialize scene as dataset for simplicity
+    scene = dataset.clone()
+
+    # Match spatial dimensions (R and C)
+    if filtering_cube.shape[0] != dataset.shape[1] or filtering_cube.shape[1] != dataset.shape[2]:
+        # Calculate padding
+        pad_height = (filtering_cube.shape[0] - dataset.shape[1]) / 2
+        pad_width = (filtering_cube.shape[1] - dataset.shape[2]) / 2
+
+        # Apply padding if necessary
+        if pad_height > 0 or pad_width > 0:
+            pad_height_low = int(torch.floor(pad_height)) if isinstance(pad_height, torch.Tensor) else int(
+                pad_height // 1)
+            pad_height_high = int(torch.ceil(pad_height)) if isinstance(pad_height, torch.Tensor) else int(
+                -(-pad_height // 1))  # Equivalent to ceil for positive numbers
+            pad_width_low = int(torch.floor(pad_width)) if isinstance(pad_width, torch.Tensor) else int(pad_width // 1)
+            pad_width_high = int(torch.ceil(pad_width)) if isinstance(pad_width, torch.Tensor) else int(
+                -(-pad_width // 1))
+
+            padding = (
+            pad_width_low, pad_width_high, pad_height_low, pad_height_high, 0, 0)  # Padding for W, H, and dummy D
+            scene = torch.nn.functional.pad(scene, padding, "constant", 0)
+
+        # Crop if necessary (this adjusts if the padding made the scene too large)
+        scene = scene[:filtering_cube.shape[0], :filtering_cube.shape[1], :]
+
+        print("Dataset Spatial Adjustment: Filtering cube and scene must have the same number of rows and columns.")
+
+    # Match spectral dimensions (W)
+    if len(filtering_cube.shape) == 3 and filtering_cube.shape[2] != dataset.shape[2]:
+        scene = scene[:, :, :filtering_cube.shape[2]]
+        print("Dataset Spectral Cropping: Filtering cube and scene must have the same number of wavelengths")
+
+    return scene
+
+def match_dataset_to_instrument_old(dataset, filtering_cube):
+    """
+    Match the size of the dataset to the size of the filtering cube. Either by padding or by cropping
+
+    Args:
         dataset (numpy.ndarray): dataset
         filtering_cube (numpy.ndarray):  filtering cube of the instrument
 
@@ -74,7 +125,8 @@ def match_dataset_to_instrument(dataset, filtering_cube):
         numpy.ndarray: observed scene (shape = R  x C x W)
     """
 
-
+    print("filtering_cube : ", filtering_cube.shape)
+    print("dataset : ", dataset.shape)
 
     if filtering_cube.shape[0] != dataset.shape[0] or filtering_cube.shape[1] != dataset.shape[1]:
         if dataset.shape[0] < filtering_cube.shape[0]:
@@ -121,6 +173,35 @@ def match_dataset_labels_to_instrument(dataset_labels, filtering_cube):
         print("Filtering cube and scene must have the same lines and columns")
 
     return dataset_labels
+
+import torch
+
+def crop_center_3D(tensor, nb_of_pixels_along_x, nb_of_pixels_along_y):
+    """
+    Crop the given tensor to the given size, centered on the tensor, for each item in the batch.
+
+    Args:
+        tensor (torch.Tensor): 3D tensor to be cropped with shape (batch, y, x).
+        nb_of_pixels_along_x (int): Number of samples to keep along the X axis.
+        nb_of_pixels_along_y (int): Number of samples to keep along the Y axis.
+
+    Returns:
+        torch.Tensor: Cropped tensor with shape (batch, nb_of_pixels_along_y, nb_of_pixels_along_x).
+    """
+
+    _, y_len, x_len = tensor.shape  # Ignore batch dimension for the cropping calculations
+
+    x_start = x_len // 2 - nb_of_pixels_along_x // 2
+    x_end = x_start + nb_of_pixels_along_x
+
+    y_start = y_len // 2 - nb_of_pixels_along_y // 2
+    y_end = y_start + nb_of_pixels_along_y
+
+    # Perform cropping for each item in the batch
+    cropped_tensor = tensor[:, y_start:y_end, x_start:x_end]
+
+    return cropped_tensor
+
 
 def crop_center(array, nb_of_pixels_along_x, nb_of_pixels_along_y):
     """

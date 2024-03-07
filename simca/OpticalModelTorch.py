@@ -100,13 +100,14 @@ from simca.functions_general_purpose import *
 # import snoop
 import torch
 from opticalglass.glassfactory import create_glass
+import pytorch_lightning as pl
 
-
-class OpticalModelTorch:
+class OpticalModelTorch(pl.LightningModule):
     """
     Class that contains the optical model caracteristics and propagation models
     """
     def __init__(self, config):
+        super().__init__()
         self.system_config = config
         self.dispersive_element_type = config["system architecture"]["dispersive element"]["type"]
         self.lba_c = torch.tensor(config["system architecture"]["dispersive element"]["wavelength center"])
@@ -145,7 +146,7 @@ class OpticalModelTorch:
         alpha_c_transmis = -1*self.propagate_central_microm_through_disperser(self.lba_c)
         self.alpha_c_transmis = alpha_c_transmis
 
-
+        print("Optica lmodel device : ",self.device)
 
 
 
@@ -207,6 +208,7 @@ class OpticalModelTorch:
         return n
 
     def rotate_from_lens_to_dispersive_element(self,k,alpha_c,delta_alpha_c,delta_beta_c,alpha_1):
+
 
         angle_with_P1 = alpha_c - alpha_1 + delta_alpha_c
         k = k.to(dtype=torch.float32)
@@ -278,6 +280,7 @@ class OpticalModelTorch:
         norm_k = norm_k.unsqueeze(-1)
         norm_k = norm_k.repeat(1, 1, 1,3)
         k_normalized = k / norm_k
+
 
         k,theta_in_1, theta_out_1,distance_from_total_intern_reflection1 = self.model_Prism_angle_to_angle_torch(k_normalized, n1, A1)
         k = k * norm_k
@@ -645,8 +648,8 @@ class OpticalModelTorch:
             torch.tensor: wave vector of the outgoing ray
 
         """
-        kp = torch.zeros_like(k0)
-        kout = torch.zeros_like(k0)
+        kp = torch.zeros_like(k0,device=k0.device)
+        kout = torch.zeros_like(k0,device=k0.device)
 
         theta_in = torch.atan2(k0[...,0], k0[...,2])
 
@@ -655,6 +658,8 @@ class OpticalModelTorch:
 
         # compare = n ** 2 - k0[...,0] ** 2 - k0[...,1] ** 2
 
+        print("k0",k0.get_device())
+        print("n",n.get_device())
 
         kp[...,2] = torch.sqrt(n ** 2 - k0[...,0] ** 2 - k0[...,1] ** 2)
 
@@ -688,7 +693,7 @@ class OpticalModelTorch:
         beta = -1 * torch.atan(y_obj / F)
 
         # Adjusting the dimension for k_out to make it a 4D tensor
-        k_out = torch.zeros(size=(x_obj.shape[0], x_obj.shape[1], x_obj.shape[2], 3),dtype=torch.float64)
+        k_out = torch.zeros(size=(x_obj.shape[0], x_obj.shape[1], x_obj.shape[2], 3),dtype=torch.float64,device=x_obj.device)
 
         # the fourth dimension should have 3 components
         k_out[...,0] = torch.sin(alpha) * torch.cos(beta)

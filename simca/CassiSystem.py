@@ -144,45 +144,60 @@ class CassiSystem():
             return self.dataset_interpolated
         else:
             raise ValueError("The new wavelengths sampling must be inside the dataset wavelengths range")
-        
 
-    def generate_2D_pattern(self, config_pattern):
+    def generate_2D_pattern(self, config_pattern, nb_of_patterns=1):
         """
-        Generate the coded aperture 2D pattern based on the "pattern" configuration file
+        Generate multiple coded aperture 2D patterns based on the "pattern" configuration file
+        and stack them to match the desired number of patterns.
 
         Args:
-            config_pattern (dict): coded-aperture pattern configuration
+            config_pattern (dict): coded-aperture pattern configuration.
+            nb_of_patterns (int): Number of patterns to generate.
 
         Returns:
-            numpy.ndarray: coded-aperture 2D pattern based on the configuration file (shape = H x L)
+            torch.Tensor: Stacked coded-aperture 2D patterns (shape = nb_of_patterns x H x L).
         """
 
-        pattern_type = config_pattern['pattern']['type']
+        pattern_list = []  # List to hold individual patterns
 
-        if pattern_type == "random":
-            pattern= generate_random_pattern((self.system_config["coded aperture"]["number of pixels along Y"],self.system_config["coded aperture"]["number of pixels along X"]),
-                                        config_pattern['pattern']['ROM'])
+        for _ in range(nb_of_patterns):
+            pattern_type = config_pattern['pattern']['type']
 
-        elif pattern_type == "slit":
-            pattern= generate_slit_pattern((self.system_config["coded aperture"]["number of pixels along Y"],self.system_config["coded aperture"]["number of pixels along X"]),
-                                      config_pattern['pattern']['slit position'],
-                                      config_pattern['pattern']['slit width'])
+            if pattern_type == "random":
+                pattern = generate_random_pattern((self.system_config["coded aperture"]["number of pixels along Y"],
+                                                   self.system_config["coded aperture"]["number of pixels along X"]),
+                                                  config_pattern['pattern']['ROM'])
+            elif pattern_type == "slit":
+                pattern = generate_slit_pattern((self.system_config["coded aperture"]["number of pixels along Y"],
+                                                 self.system_config["coded aperture"]["number of pixels along X"]),
+                                                config_pattern['pattern']['slit position'],
+                                                config_pattern['pattern']['slit width'])
+            elif pattern_type == "blue-noise type 1":
+                pattern = generate_blue_noise_type_1_pattern((self.system_config["coded aperture"][
+                                                                  "number of pixels along Y"],
+                                                              self.system_config["coded aperture"][
+                                                                  "number of pixels along X"]))
+            elif pattern_type == "blue-noise type 2":
+                pattern = generate_blue_noise_type_2_pattern((self.system_config["coded aperture"][
+                                                                  "number of pixels along Y"],
+                                                              self.system_config["coded aperture"][
+                                                                  "number of pixels along X"]))
+            elif pattern_type == "custom h5 pattern":
+                pattern = load_custom_pattern((self.system_config["coded aperture"]["number of pixels along Y"],
+                                               self.system_config["coded aperture"]["number of pixels along X"]),
+                                              config_pattern['pattern']['file path'])
+            else:
+                raise ValueError("Pattern type is not supported, change it in the 'pattern.yml' config file")
 
-        elif pattern_type == "blue-noise type 1":
-            pattern= generate_blue_noise_type_1_pattern((self.system_config["coded aperture"]["number of pixels along Y"], self.system_config["coded aperture"]["number of pixels along X"]))
+            # Assume pattern is a numpy array; convert to tensor
+            pattern_tensor = torch.from_numpy(pattern)
+            pattern_list.append(pattern_tensor)
 
-        elif pattern_type == "blue-noise type 2":
-            pattern= generate_blue_noise_type_2_pattern((self.system_config["coded aperture"]["number of pixels along Y"], self.system_config["coded aperture"]["number of pixels along X"]))
+        # Stack all generated pattern tensors along a new dimension
+        stacked_patterns = torch.stack(pattern_list)  # Shape: (nb_of_patterns, y, x)
 
-        elif pattern_type == "custom h5 pattern":
-            pattern= load_custom_pattern((self.system_config["coded aperture"]["number of pixels along Y"], self.system_config["coded aperture"]["number of pixels along X"]),
-                                    config_pattern['pattern']['file path'])
-        else:
-            raise ValueError("patterntype is not supported for single patterngeneration, change it in the 'pattern.yml' config file")
-
-        self.pattern= pattern
-
-        return pattern
+        self.pattern = stacked_patterns
+        return stacked_patterns
 
     def generate_multiple_patterns(self, config_pattern, number_of_patterns):
         """

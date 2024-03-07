@@ -37,8 +37,8 @@ detector:
     pixel size along X: 12                             # pixel size along X       -- in um
     pixel size along Y: 12                              # pixel size along Y       -- in um
 coded aperture:
-    number of pixels along X: 111                  # number of pixels along X axis -- no units
-    number of pixels along Y: 113                  # number of pixels along Y axis -- no units
+    number of pixels along X: 133                  # number of pixels along X axis -- no units
+    number of pixels along Y: 141                  # number of pixels along Y axis -- no units
     pixel size along X: 12                              # pixel size along X       -- in um
     pixel size along Y: 12                              # pixel size along Y       -- in um
 

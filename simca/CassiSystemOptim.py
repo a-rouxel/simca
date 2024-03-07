@@ -153,12 +153,12 @@ class CassiSystemOptim(CassiSystem):
                                                                  X_init=self.X_coordinates_propagated_coded_aperture,
                                                                  Y_init=self.Y_coordinates_propagated_coded_aperture,
                                                                  X_target=self.X_detector_coordinates_grid,
-                                                                 Y_target=self.Y_detector_coordinates_grid).to(self.device)
+                                                                 Y_target=self.Y_detector_coordinates_grid)
 
         return self.filtering_cube
     
 
-    def image_acquisition(self, use_psf=False, chunck_size=50):
+    def image_acquisition(self, hyperspectral_cube, wavelengths,use_psf=False, chunck_size=50):
         """
         Run the acquisition/measurement process depending on the cassi system type
 
@@ -169,7 +169,7 @@ class CassiSystemOptim(CassiSystem):
             numpy.ndarray: compressed measurement (R x C)
         """
 
-        dataset = self.interpolate_dataset_along_wavelengths_torch(self.wavelengths, chunck_size)
+        dataset = self.interpolate_dataset_along_wavelengths_torch(hyperspectral_cube, wavelengths,self.wavelengths, chunck_size)
 
         if dataset is None:
             return None
@@ -387,7 +387,7 @@ class CassiSystemOptim(CassiSystem):
 
     #     return self.pattern
     
-    def interpolate_dataset_along_wavelengths_torch(self, new_wavelengths_sampling, chunk_size):
+    def interpolate_dataset_along_wavelengths_torch(self, hyperspectral_cube, wavelengths,new_wavelengths_sampling, chunk_size):
         """
         Interpolate the dataset cube along the wavelength axis to match the system sampling
 
@@ -402,19 +402,61 @@ class CassiSystemOptim(CassiSystem):
         try:
             self.dataset
         except :
-            raise ValueError("The dataset must be loaded first")
+            self.dataset = hyperspectral_cube
+            self.dataset_wavelengths = wavelengths
+
+            print(self.dataset.shape)
+            print(self.dataset_wavelengths.shape)
         
         self.dataset_wavelengths = torch.from_numpy(self.dataset_wavelengths) if isinstance(self.dataset_wavelengths, np.ndarray) else self.dataset_wavelengths
         new_wavelengths_sampling = torch.from_numpy(new_wavelengths_sampling).float() if isinstance(new_wavelengths_sampling, np.ndarray) else new_wavelengths_sampling
         self.dataset = torch.from_numpy(self.dataset).float() if isinstance(self.dataset, np.ndarray) else self.dataset
 
-        if self.dataset_wavelengths[0] <= new_wavelengths_sampling[0] and self.dataset_wavelengths[-1] >= new_wavelengths_sampling[-1]:
+        self.dataset_interpolated = self.interpolate_data_along_wavelength_torch(self.dataset,self.dataset_wavelengths,new_wavelengths_sampling,chunk_size)
+        return self.dataset_interpolated
 
-            self.dataset_interpolated = interpolate_data_along_wavelength_torch(self.dataset,self.dataset_wavelengths,new_wavelengths_sampling, chunk_size)
-            return self.dataset_interpolated
-        else:
-            raise ValueError("The new wavelengths sampling must be inside the dataset wavelengths range")
-    
+    def interpolate_data_along_wavelength_torch(self,data, current_sampling, new_sampling, chunk_size=50):
+        """Interpolate the input 3D data along a new sampling in the third axis.
+
+        Args:
+            data (numpy.ndarray): 3D data to interpolate
+            current_sampling (numpy.ndarray): current sampling for the 3rd axis
+            new_sampling (numpy.ndarray): new sampling for the 3rd axis
+            chunk_size (int): size of the chunks to use for the interpolation
+        """
+
+        # Generate the coordinates for the original grid
+        x = torch.arange(data.shape[0]).float()
+        y = torch.arange(data.shape[1]).float()
+        z = current_sampling
+
+        # Initialize an empty array for the result
+        interpolated_data = torch.empty((data.shape[0], data.shape[1], len(new_sampling)))
+
+        # Perform the interpolation in chunks
+        for i in range(0, data.shape[0], chunk_size):
+            for j in range(0, data.shape[1], chunk_size):
+                new_coordinates = torch.meshgrid(x[i:i + chunk_size], y[j:j + chunk_size], new_sampling, indexing='ij')
+                new_grid = torch.stack(new_coordinates, axis=-1)
+
+                min_bound = torch.tensor([torch.min(x[i:i + chunk_size]), torch.min(y[j:j + chunk_size]), torch.min(z)])
+                max_bound = torch.tensor([torch.max(x[i:i + chunk_size]), torch.max(y[j:j + chunk_size]), torch.max(z)])
+
+                new_grid = (2 * ((new_grid - min_bound) / (max_bound - min_bound)) - 1).unsqueeze(0).flip(
+                    -1).float()  # Normalize between -1 and 1
+
+                """new_coordinates = np.meshgrid(x[i:i+chunk_size], y[j:j+chunk_size], new_sampling, indexing='ij')
+                new_grid = np.stack(new_coordinates, axis=-1)
+
+                new_grid = torch.from_numpy(2*((new_grid-min_bound)/(max_bound - min_bound))-1).unsqueeze(0).flip(-1).double()"""
+                interpolated_data[i:i + chunk_size, j:j + chunk_size, :] = torch.nn.functional.grid_sample(
+                    input=data[i:i + chunk_size, j:j + chunk_size, :][None, None, ...],
+                    grid=new_grid,
+                    padding_mode="zeros",
+                    mode="bilinear",
+                    align_corners=True).squeeze(0, 1)
+
+        return interpolated_data
     def apply_psf(self):
         """
         Apply the PSF to the last measurement

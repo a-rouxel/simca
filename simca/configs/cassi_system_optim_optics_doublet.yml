@@ -1,0 +1,48 @@
+#####  Configuration file for the chosen optical system
+
+infos:
+    system name: HYACAMEO
+
+system architecture:
+    system type: DD-CASSI
+    propagation type: simca
+    focal lens: 50000
+    dispersive element:
+    # dispersive element caracteristics
+        type: doubleprism        # name of the dispersive element
+        glass1: N-LAK34       # glass type of the dispersive element (only used if type == 'prism')
+        glass2: N-SF66       # glass type of the dispersive element (only used if type == 'prism')
+        glass3: N-SK2       # glass type of the dispersive element (only used if type == 'prism')
+        A1: 60              # apex angle of the prism in degrees      (only used if type == 'prism')   -- in degrees
+        A2: 40              # apex angle of the prism in degrees      (only used if type == 'prism')   -- in degrees
+        A3: 20.4              # apex angle of the prism in degrees      (only used if type == 'prism')   -- in degrees
+        nd1: 1.7292
+        nd2: 1.7847
+        nd3: 1.55
+        vd1: 54.50
+        vd2: 26.09
+        vd3: 54.50
+        continuous glass materials 1: True
+        continuous glass materials 2: True
+        continuous glass materials 3: True
+        m: 1               # grating order to consider         (only used if type == 'grating')       -- no units
+        G: 30             # grating density                   (only used if type == 'grating')       -- in lines/mm
+        alpha_c: 80
+        delta alpha c: 0
+        delta beta c: 0
+        wavelength center: 600  # central wavelength -- in nm
+detector:
+    number of pixels along X: 201                  # number of pixels along X axis -- no units
+    number of pixels along Y: 201                  # number of pixels along Y axis -- no units
+    pixel size along X: 40                             # pixel size along X       -- in um
+    pixel size along Y: 40                              # pixel size along Y       -- in um
+coded aperture:
+    number of pixels along X: 11                  # number of pixels along X axis -- no units
+    number of pixels along Y: 13                  # number of pixels along Y axis -- no units
+    pixel size along X: 1500                              # pixel size along X       -- in um
+    pixel size along Y: 1500                              # pixel size along Y       -- in um
+
+spectral range:
+    wavelength min: 400     # minimum wavelength -- in nm
+    wavelength max: 1100      # maximum wavelength -- in nm
+    number of spectral samples: 15

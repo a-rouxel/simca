@@ -4,7 +4,7 @@ infos:
     results directory: ./data/patterns/
 
 pattern:
-    type: slit
+    type: blue-noise type 1
     slit position: 0
     slit width: 1
     ROM : 0.5
