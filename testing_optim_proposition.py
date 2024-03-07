@@ -7,7 +7,7 @@ import pandas as pd
 
 
 config_dataset = load_yaml_config("simca/configs/dataset.yml")
-config_system = load_yaml_config("simca/configs/cassi_system_optim_optics_full_triplet.yml")
+config_system = load_yaml_config("simca/configs/cassi_system_optim_optics_full_triplet_sd_cassi.yml")
 config_patterns = load_yaml_config("simca/configs/pattern.yml")
 config_acquisition = load_yaml_config("simca/configs/acquisition.yml")
 
@@ -72,9 +72,11 @@ if __name__ == '__main__':
 
     print("distortion metric", distortion_metric)
 
-    plt.plot(cassi_system.wavelengths.detach().numpy(), central_coordinates_X.detach().numpy())
+    displacement_in_pix = central_coordinates_X.detach().numpy()/cassi_system.system_config["detector"]["pixel size along X"]
+
+    plt.plot(cassi_system.wavelengths.detach().numpy(), displacement_in_pix)
+    plt.title("central coordinates in pix")
     plt.show()
-    #
     # y_second_derivative = calculate_second_derivative(cassi_system.wavelengths, central_coordinates_X)
     #
     # plt.plot(y_second_derivative.detach().numpy())
@@ -82,13 +84,14 @@ if __name__ == '__main__':
     print(x_vec_out.detach().numpy().shape)
 
     plt.scatter(x_vec_out.detach().numpy()[...,0], y_vec_out.detach().numpy()[...,0],color='blue',label="distor")
+    plt.scatter(x_vec_out.detach().numpy()[...,3], y_vec_out.detach().numpy()[...,0],color='green',label="distor")
     plt.scatter(x_vec_out.detach().numpy()[...,-1], y_vec_out.detach().numpy()[...,-1],color='red',label="distor")
+    plt.scatter(cassi_system.X_detector_coordinates_grid.detach().numpy(),cassi_system.Y_detector_coordinates_grid.detach().numpy(),color='black',label="distor")
     #
-    plt.scatter(x_vec_no_dist.detach().numpy()[...,0], y_vec_no_dist.detach().numpy()[...,0],label="no dist",color='green')
-    plt.scatter(x_vec_no_dist.detach().numpy()[...,-1], y_vec_no_dist.detach().numpy()[...,-1],label="no dist",color='green')
+    # plt.scatter(x_vec_no_dist.detach().numpy()[...,0], y_vec_no_dist.detach().numpy()[...,0],label="no dist",color='green')
+    # plt.scatter(x_vec_no_dist.detach().numpy()[...,-1], y_vec_no_dist.detach().numpy()[...,-1],label="no dist",color='green')
 
     plt.legend()
-
     plt.show()
 
 
