@@ -55,8 +55,8 @@ class JointReconstructionModule_V1(pl.LightningModule):
         # process first acquisition with reconstruction model
         # TODO : replace by the real reconstruction model
         # mask_3d = expand_mask_3d(patterns)
-        acquired_cubes = acquired_image1.unsqueeze(1).repeat((1, 28, 1, 1))
-        acquired_cubes = torch.flip(acquired_cubes, dims=(1,)).float().to(self.device) # -1 magnification
+        acquired_cubes = acquired_image1.unsqueeze(1).repeat((1, 28, 1, 1)).float().to(self.device) # b x W x R x C
+        acquired_cubes = torch.flip(acquired_cubes, dims=(2,)) # -1 magnification
 
         #print(acquired_cubes.shape)
         #print(filtering_cubes.shape)
@@ -137,7 +137,7 @@ def expand_mask_3d(mask_batch):
     mask3d = torch.permute(mask3d, (0, 3, 1, 2))
     return mask3d
 
-def shift_back(inputs, step=2):  # input [bs,256,310]  output [bs, 28, 256, 256]
+def shift_back(inputs, d):  # input [bs,256,310], [bs, 28]  output [bs, 28, 256, 256]
     [bs, row, col] = inputs.shape
     nC = 28
     output = torch.zeros(bs, nC, row, col - (nC - 1) * step).cuda().float()
