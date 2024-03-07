@@ -199,9 +199,9 @@ class CassiSystemOptim(pl.LightningModule, CassiSystem):
         # plt.plot(hyperspectral_cube[0,0,0,:].cpu().numpy())
         # plt.title("Original spectrum")
         # plt.show()
-        print("cube shape: ", hyperspectral_cube.shape)
-        print("wavelengths shape: ", wavelengths.shape)
-        print("self.wavelengths shape: ", self.wavelengths.shape)
+        # print("cube shape: ", hyperspectral_cube.shape)
+        # print("wavelengths shape: ", wavelengths.shape)
+        # print("self.wavelengths shape: ", self.wavelengths.shape)
         dataset = self.interpolate_dataset_along_wavelengths_torch(hyperspectral_cube, wavelengths,self.wavelengths, chunck_size)
 
 
@@ -247,8 +247,8 @@ class CassiSystemOptim(pl.LightningModule, CassiSystem):
             self.X_coded_aper_coordinates = X_coded_aper_coordinates_crop
             self.Y_coded_aper_coordinates = Y_coded_aper_coordinates_crop
 
-            print("dataset shape: ", dataset.shape)
-            print("X coded shape: ", X_coded_aper_coordinates_crop.shape)
+            # print("dataset shape: ", dataset.shape)
+            # print("X coded shape: ", X_coded_aper_coordinates_crop.shape)
 
             scene = match_dataset_to_instrument(dataset, X_coded_aper_coordinates_crop)
 
@@ -263,11 +263,11 @@ class CassiSystemOptim(pl.LightningModule, CassiSystem):
             plt.show()
 
             # filtered_scene = scene * pattern_crop[..., None].repeat((1, 1, scene.shape[2]))
-            print(f"scene: {scene.shape}")
-            print(f"pattern_crop: {pattern_crop.shape}")
+            # print(f"scene: {scene.shape}")
+            # print(f"pattern_crop: {pattern_crop.shape}")
             filtered_scene = scene * pattern_crop
             
-            print(f"filtered_scene: {filtered_scene.shape}")
+            # print(f"filtered_scene: {filtered_scene.shape}")
             
 
             plt.imshow(pattern_crop[0,:,:,0].cpu().numpy())
@@ -494,9 +494,13 @@ class CassiSystemOptim(pl.LightningModule, CassiSystem):
         except:
             self.dataset = hyperspectral_cube
             self.dataset_wavelengths = wavelengths
-
             #print(self.dataset.shape)
             #print(self.dataset_wavelengths.shape)
+        
+        self.dataset = hyperspectral_cube
+        self.dataset_wavelengths = wavelengths
+
+        
 
         self.dataset_wavelengths = torch.from_numpy(self.dataset_wavelengths) if isinstance(self.dataset_wavelengths,
                                                                                             np.ndarray) else self.dataset_wavelengths
@@ -547,7 +551,7 @@ class CassiSystemOptim(pl.LightningModule, CassiSystem):
             new_sampling (numpy.ndarray): new sampling for the 3rd axis
             chunk_size (int): size of the chunks to use for the interpolation
         """
-        print(self.device)
+        # print(self.device)
         # Generate the coordinates for the original grid
         x = torch.arange(data.shape[0]).float()
         y = torch.arange(data.shape[1]).float()

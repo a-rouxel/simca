@@ -33,18 +33,18 @@ class JointReconstructionModule_V1(pl.LightningModule):
         print("---FORWARD---")
 
         hyperspectral_cube, wavelengths = x
-        hyperspectral_cube = hyperspectral_cube.permute(0, 3, 2, 1)
+        hyperspectral_cube = hyperspectral_cube.permute(0, 3, 2, 1).to(self.device)
         batch_size, H, W, C = hyperspectral_cube.shape
-        print(f"batch size:{batch_size}")
+        # print(f"batch size:{batch_size}")
         # generate pattern
         pattern = self.cassi_system.generate_2D_pattern(self.config_patterns,nb_of_patterns=batch_size)
         pattern = pattern.to(self.device)
-        print(f"pattern_size: {pattern.shape}")
+        # print(f"pattern_size: {pattern.shape}")
 
         # generate first acquisition with simca
         
         acquired_image1 = self.cassi_system.image_acquisition(hyperspectral_cube, pattern, wavelengths)
-        filtering_cubes = self.cassi_system.filtering_cube.permute(0, 3, 1, 2)[:,:28,:,:].float()
+        filtering_cubes = self.cassi_system.filtering_cube.permute(0, 3, 1, 2)[:,:28,:,:].float().to(self.device)
         displacement_in_pix = self.cassi_system.get_displacement_in_pixels(dataset_wavelengths=wavelengths)
         #print("displacement_in_pix", displacement_in_pix)
 
@@ -56,7 +56,7 @@ class JointReconstructionModule_V1(pl.LightningModule):
         # TODO : replace by the real reconstruction model
         # mask_3d = expand_mask_3d(patterns)
         acquired_cubes = acquired_image1.unsqueeze(1).repeat((1, 28, 1, 1))
-        acquired_cubes = torch.flip(acquired_cubes, dims=(1,)).float() # -1 magnification
+        acquired_cubes = torch.flip(acquired_cubes, dims=(1,)).float().to(self.device) # -1 magnification
 
         #print(acquired_cubes.shape)
         #print(filtering_cubes.shape)
