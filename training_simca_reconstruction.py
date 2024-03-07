@@ -15,7 +15,7 @@ model_name = "mst_plus_plus"
 reconstruction_module = JointReconstructionModule_V1(model_name)
 
 if torch.cuda.is_available():
-    trainer = pl.Trainer( accelerator="cpu",
+    trainer = pl.Trainer( accelerator="gpu",
                             max_epochs=500,
                             log_every_n_steps=10)
 else:
