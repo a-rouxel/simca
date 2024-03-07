@@ -2,18 +2,23 @@ import pytorch_lightning as pl
 import torch
 import torch.nn as nn
 from simca.CassiSystem_lightning import CassiSystemOptim
+from MST.simulation.train_code.architecture import *
 from simca import  load_yaml_config
 import matplotlib.pyplot as plt
 
 
 class JointReconstructionModule_V1(pl.LightningModule):
 
-    def __init__(self):
+    def __init__(self, model_name):
         super().__init__()
 
         # TODO : use a real reconstruction module
-        # self.reconstruction_model = ReconstructionModel()
-        self.reconstruction_model = EmptyModule()
+        self.reconstruction_model = model_generator(model_name, None)
+        """ if torch.cuda.is_available():
+            self.reconstruction_model = self.reconstruction_model.cuda()
+        else:
+            self.reconstruction_model.to('cpu') """
+        #self.reconstruction_model = EmptyModule()
         self.loss_fn = nn.MSELoss()
 
     def on_validation_start(self,stage=None):
@@ -30,15 +35,18 @@ class JointReconstructionModule_V1(pl.LightningModule):
         hyperspectral_cube, wavelengths = x
         hyperspectral_cube = hyperspectral_cube.permute(0, 3, 2, 1)
         batch_size, H, W, C = hyperspectral_cube.shape
-
+        print(f"batch size:{batch_size}")
         # generate pattern
         pattern = self.cassi_system.generate_2D_pattern(self.config_patterns,nb_of_patterns=batch_size)
         pattern = pattern.to(self.device)
+        print(f"pattern_size: {pattern.shape}")
 
         # generate first acquisition with simca
-        acquired_image1 = self.cassi_system.image_acquisition(hyperspectral_cube, pattern,wavelengths)
+        
+        acquired_image1 = self.cassi_system.image_acquisition(hyperspectral_cube, pattern, wavelengths)
+        filtering_cubes = self.cassi_system.filtering_cube.permute(0, 3, 1, 2)[:,:28,:,:].float()
         displacement_in_pix = self.cassi_system.get_displacement_in_pixels(dataset_wavelengths=wavelengths)
-        print("displacement_in_pix", displacement_in_pix)
+        #print("displacement_in_pix", displacement_in_pix)
 
         # vizualize first image acquisition
         plt.imshow(acquired_image1[0, :, :].cpu().detach().numpy())
@@ -46,7 +54,14 @@ class JointReconstructionModule_V1(pl.LightningModule):
 
         # process first acquisition with reconstruction model
         # TODO : replace by the real reconstruction model
-        reconstructed_cube = acquired_image1
+        # mask_3d = expand_mask_3d(patterns)
+        acquired_cubes = acquired_image1.unsqueeze(1).repeat((1, 28, 1, 1))
+        acquired_cubes = torch.flip(acquired_cubes, dims=(1,)).float() # -1 magnification
+
+        #print(acquired_cubes.shape)
+        #print(filtering_cubes.shape)
+        reconstructed_cube = self.reconstruction_model(acquired_cubes, filtering_cubes)
+        # reconstructed_cube = self.reconstruction_model(acquired_cubes, mask_3d)
 
         return reconstructed_cube
 
@@ -103,19 +118,32 @@ class JointReconstructionModule_V1(pl.LightningModule):
         y_hat = self.forward(batch)
 
         hyperspectral_cube, wavelengths = batch
-        hyperspectral_cube = hyperspectral_cube.permute(0, 3, 2, 1)
+        #hyperspectral_cube = hyperspectral_cube.permute(0, 3, 2, 1)
+        hyperspectral_cube = hyperspectral_cube[:,:, 8:-8, 8:-8]
 
-        print("y_hat shape", y_hat.shape)
-        print("hyperspectral_cube shape", hyperspectral_cube.shape)
+        #print("y_hat shape", y_hat.shape)
+        #print("hyperspectral_cube shape", hyperspectral_cube.shape)
 
         loss = self.loss_fn(y_hat, hyperspectral_cube)
 
-        return loss, y_hat
+        return loss, y_hat, hyperspectral_cube
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=1e-3)
         return optimizer
 
+def expand_mask_3d(mask_batch):
+    mask3d = mask_batch.unsqueeze(-1).repeat((1, 1, 1, 28))
+    mask3d = torch.permute(mask3d, (0, 3, 1, 2))
+    return mask3d
+
+def shift_back(inputs, step=2):  # input [bs,256,310]  output [bs, 28, 256, 256]
+    [bs, row, col] = inputs.shape
+    nC = 28
+    output = torch.zeros(bs, nC, row, col - (nC - 1) * step).cuda().float()
+    for i in range(nC):
+        output[:, i, :, :] = inputs[:, :, step * i:step * i + col - (nC - 1) * step]
+    return output
     
 class EmptyModule(nn.Module):
     def __init__(self):

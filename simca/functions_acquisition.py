@@ -75,8 +75,8 @@ def match_dataset_to_instrument(dataset, filtering_cube):
         torch.Tensor: observed scene (shape = R x C x W)
     """
 
-    print("filtering_cube : ", filtering_cube.shape)
-    print("dataset : ", dataset.shape)
+    #print("filtering_cube : ", filtering_cube.shape)
+    #print("dataset : ", dataset.shape)
 
     # Initialize scene as dataset for simplicity
     scene = dataset.clone()
@@ -102,7 +102,7 @@ def match_dataset_to_instrument(dataset, filtering_cube):
             scene = torch.nn.functional.pad(scene, padding, "constant", 0)
 
         # Crop if necessary (this adjusts if the padding made the scene too large)
-        scene = scene[:filtering_cube.shape[0], :filtering_cube.shape[1], :]
+        scene = scene[:, :filtering_cube.shape[0], :filtering_cube.shape[1], :]
 
         print("Dataset Spatial Adjustment: Filtering cube and scene must have the same number of rows and columns.")
 

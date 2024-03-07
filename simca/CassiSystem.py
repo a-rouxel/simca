@@ -52,7 +52,6 @@ class CassiSystem():
             self.system_config = load_yaml_config(system_config_path)
         elif system_config is not None:
             self.system_config = system_config
-
         self.optical_model = OpticalModel(self.system_config)
 
         self.X_coded_aper_coordinates, self.Y_coded_aper_coordinates = self.create_coordinates_grid(

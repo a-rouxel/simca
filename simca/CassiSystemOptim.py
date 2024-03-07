@@ -405,8 +405,8 @@ class CassiSystemOptim(CassiSystem):
             self.dataset = hyperspectral_cube
             self.dataset_wavelengths = wavelengths
 
-            print(self.dataset.shape)
-            print(self.dataset_wavelengths.shape)
+            #print(self.dataset.shape)
+            #print(self.dataset_wavelengths.shape)
         
         self.dataset_wavelengths = torch.from_numpy(self.dataset_wavelengths) if isinstance(self.dataset_wavelengths, np.ndarray) else self.dataset_wavelengths
         new_wavelengths_sampling = torch.from_numpy(new_wavelengths_sampling).float() if isinstance(new_wavelengths_sampling, np.ndarray) else new_wavelengths_sampling

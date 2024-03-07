@@ -29,7 +29,7 @@ class CubesDataset(Dataset):
         else:
             cube = torch.from_numpy(np.transpose(cube, (2, 0, 1))).float()[:,:128,:128] # lambda x H x W
         
-        return cube #, wavelengths
+        return cube, wavelengths
 
     def load_hyperspectral_data(self, idx):
         file_path = os.path.join(self.data_dir, self.data_file_names[idx])

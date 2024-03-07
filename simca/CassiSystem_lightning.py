@@ -23,7 +23,6 @@ class CassiSystemOptim(pl.LightningModule, CassiSystem):
         CassiSystem.__init__(self, system_config=system_config)
 
         self.system_config = system_config
-
         self.X_coded_aper_coordinates, self.Y_coded_aper_coordinates = self.create_coordinates_grid(
             self.system_config["coded aperture"]["number of pixels along X"],
             self.system_config["coded aperture"]["number of pixels along Y"],
@@ -125,8 +124,8 @@ class CassiSystemOptim(pl.LightningModule, CassiSystem):
         n2 = n2.to(self.device)
         n3 = n3.to(self.device)
 
-        print("New X coded aperture_coordinates: ", self.X_coded_aper_coordinates.shape)
-        print("New Y coded aperture_coordinates: ", self.Y_coded_aper_coordinates.shape)
+        #print("New X coded aperture_coordinates: ", self.X_coded_aper_coordinates.shape)
+        #print("New Y coded aperture_coordinates: ", self.Y_coded_aper_coordinates.shape)
 
         X_input_grid = torch.from_numpy(self.X_coded_aper_coordinates) if isinstance(self.X_coded_aper_coordinates, np.ndarray) else self.X_coded_aper_coordinates
         Y_input_grid = torch.from_numpy(self.Y_coded_aper_coordinates) if isinstance(self.Y_coded_aper_coordinates, np.ndarray) else self.Y_coded_aper_coordinates
@@ -143,12 +142,12 @@ class CassiSystemOptim(pl.LightningModule, CassiSystem):
         n3_3D = n3_vec[None,None,:].repeat(X_input_grid.shape[0], X_input_grid.shape[1],1)
 
         starting_time = time.time()
-        print('Propagating the coded aperture grid...')
-        print(X_input_grid_3D.get_device())
-        print(Y_input_grid_3D.get_device())
-        print(lba_3D.get_device())
-        print(n1_3D.get_device())
-        print(n2_3D.get_device())
+        #print('Propagating the coded aperture grid...')
+        #print(X_input_grid_3D.get_device())
+        #print(Y_input_grid_3D.get_device())
+        #print(lba_3D.get_device())
+        #print(n1_3D.get_device())
+        #print(n2_3D.get_device())
 
         self.X_coordinates_propagated_coded_aperture, self.Y_coordinates_propagated_coded_aperture = self.optical_model.propagate(X_input_grid_3D, Y_input_grid_3D, lba_3D, n1_3D, n2_3D, n3_3D)
 
@@ -162,12 +161,11 @@ class CassiSystemOptim(pl.LightningModule, CassiSystem):
         numpy.ndarray: filtering cube generated according to the optical system & the pattern configuration (R x C x W)
 
         """
-
         self.filtering_cube = interpolate_data_on_grid_positions_torch(data=self.pattern,
-                                                                 X_init=self.X_coordinates_propagated_coded_aperture,
-                                                                 Y_init=self.Y_coordinates_propagated_coded_aperture,
-                                                                 X_target=self.X_detector_coordinates_grid,
-                                                                 Y_target=self.Y_detector_coordinates_grid).to(self.device)
+                                                                X_init=self.X_coordinates_propagated_coded_aperture,
+                                                                Y_init=self.Y_coordinates_propagated_coded_aperture,
+                                                                X_target=self.X_detector_coordinates_grid,
+                                                                Y_target=self.Y_detector_coordinates_grid).to(self.device)
 
         return self.filtering_cube
 
@@ -201,7 +199,9 @@ class CassiSystemOptim(pl.LightningModule, CassiSystem):
         # plt.plot(hyperspectral_cube[0,0,0,:].cpu().numpy())
         # plt.title("Original spectrum")
         # plt.show()
-
+        print("cube shape: ", hyperspectral_cube.shape)
+        print("wavelengths shape: ", wavelengths.shape)
+        print("self.wavelengths shape: ", self.wavelengths.shape)
         dataset = self.interpolate_dataset_along_wavelengths_torch(hyperspectral_cube, wavelengths,self.wavelengths, chunck_size)
 
 
@@ -247,23 +247,28 @@ class CassiSystemOptim(pl.LightningModule, CassiSystem):
             self.X_coded_aper_coordinates = X_coded_aper_coordinates_crop
             self.Y_coded_aper_coordinates = Y_coded_aper_coordinates_crop
 
-
+            print("dataset shape: ", dataset.shape)
+            print("X coded shape: ", X_coded_aper_coordinates_crop.shape)
 
             scene = match_dataset_to_instrument(dataset, X_coded_aper_coordinates_crop)
 
             pattern_crop = crop_center_3D(pattern, scene.shape[2], scene.shape[1]).to(self.device)
             pattern_crop = pattern_crop.unsqueeze(-1).repeat(1, 1, 1, scene.size(-1))
 
-            print(scene.get_device())
-            print(pattern_crop.get_device())
+            #print(scene.get_device())
+            #print(pattern_crop.get_device())
 
             plt.imshow(scene[0,:,:,0].cpu().numpy())
             plt.title("scene")
             plt.show()
 
             # filtered_scene = scene * pattern_crop[..., None].repeat((1, 1, scene.shape[2]))
+            print(f"scene: {scene.shape}")
+            print(f"pattern_crop: {pattern_crop.shape}")
             filtered_scene = scene * pattern_crop
-
+            
+            print(f"filtered_scene: {filtered_scene.shape}")
+            
 
             plt.imshow(pattern_crop[0,:,:,0].cpu().numpy())
             plt.title("Pattern crop1")
@@ -275,12 +280,18 @@ class CassiSystemOptim(pl.LightningModule, CassiSystem):
             plt.title("Filtered scene")
             plt.show()
 
-            print("filtered_scene",filtered_scene.shape)
+            #print("filtered_scene",filtered_scene.shape)
 
             self.propagate_coded_aperture_grid()
 
 
             sd_measurement = interpolate_data_on_grid_positions_torch(filtered_scene,
+                                                                self.X_coordinates_propagated_coded_aperture,
+                                                                self.Y_coordinates_propagated_coded_aperture,
+                                                                self.X_detector_coordinates_grid,
+                                                                self.Y_detector_coordinates_grid)
+            
+            self.filtering_cube = interpolate_data_on_grid_positions_torch(pattern_crop,
                                                                 self.X_coordinates_propagated_coded_aperture,
                                                                 self.Y_coordinates_propagated_coded_aperture,
                                                                 self.X_detector_coordinates_grid,
@@ -303,7 +314,8 @@ class CassiSystemOptim(pl.LightningModule, CassiSystem):
         if use_psf:
             self.apply_psf_torch()
         else:
-            print("No PSF was applied")
+            print("")
+            #print("No PSF was applied")
 
         # Calculate the other two arrays
         self.measurement = torch.sum(self.last_filtered_interpolated_scene, dim=3)
@@ -483,8 +495,8 @@ class CassiSystemOptim(pl.LightningModule, CassiSystem):
             self.dataset = hyperspectral_cube
             self.dataset_wavelengths = wavelengths
 
-            print(self.dataset.shape)
-            print(self.dataset_wavelengths.shape)
+            #print(self.dataset.shape)
+            #print(self.dataset_wavelengths.shape)
 
         self.dataset_wavelengths = torch.from_numpy(self.dataset_wavelengths) if isinstance(self.dataset_wavelengths,
                                                                                             np.ndarray) else self.dataset_wavelengths

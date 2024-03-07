@@ -93,6 +93,7 @@ def interpolate_data_on_grid_positions_torch(data, X_init, Y_init, X_target, Y_t
     Y_target = Y_target.to(device).to(dtype).squeeze()
     data = data.to(device).to(dtype)
 
+    #print(data.shape)
     # Unpack the dimensions of the data
     batch_size, y_len, x_len, lambda_size = data.shape
 
@@ -108,11 +109,11 @@ def interpolate_data_on_grid_positions_torch(data, X_init, Y_init, X_target, Y_t
     else:
         raise ValueError("Unsupported grid type")
 
-    print("X_init shape", X_init.shape)
-    print("Y_init shape", Y_init.shape)
-    print("X_target shape", X_target.shape)
-    print("Y_target shape", Y_target.shape)
-    print("data shape", data.shape)
+    #print("X_init shape", X_init.shape)
+    #print("Y_init shape", Y_init.shape)
+    #print("X_target shape", X_target.shape)
+    #print("Y_target shape", Y_target.shape)
+    #print("data shape", data.shape)
 
     for l in range(lambda_size):
 
@@ -194,15 +195,15 @@ def worker_unstructured_torch(args):
 
 
 
-    print("init", init.shape)
-    print("target", target.shape)
-    print("data shape", data.shape)
+    #print("init", init.shape)
+    #print("target", target.shape)
+    #print("data shape", data.shape)
     interpolated_data = knn_interpolate(data,
                                  init,
                                  target,
                                  k=3)
 
-    print("interpolated_data", interpolated_data.shape)
+    #print("interpolated_data", interpolated_data.shape)
     target_shape = [X_target_2D.shape[0], X_target_2D.shape[1],data_2D.shape[0]]
 
     return interpolated_data.reshape(target_shape).permute(2, 0, 1)
