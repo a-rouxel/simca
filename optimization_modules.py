@@ -153,13 +153,16 @@ def shift_back(inputs, d):  # input [bs,256,310], [bs, 28]  output [bs, 28, 256,
     [bs, row, col] = inputs.shape
     nC = 28
     output = torch.zeros(bs, nC, row, row).cuda().float()
+    d = d[0]
+    d -= d.min()
     for i in range(nC):
-        shift = int(np.round(d[0][i]))
+        shift = int(np.round(d[i]))
         #output[:, i, :, :] = inputs[:, :, step * i:step * i + col - 27 * step] step = 2
-        if shift >=0:
-            output[:, i, :, :] = inputs[:, :, shift:row+shift]
-        else:
-            output[:, i, :, :] = inputs[:, :, shift-row:shift]
+        # if shift >=0:
+        #     output[:, i, :, :] = inputs[:, :, shift:row+shift]
+        # else:
+        #     output[:, i, :, :] = inputs[:, :, shift-row:shift]
+        output[:, i, :, :] = inputs[:, :, shift:shift + row]
     return output
     
 class EmptyModule(nn.Module):

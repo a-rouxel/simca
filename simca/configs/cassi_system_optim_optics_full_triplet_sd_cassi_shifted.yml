@@ -32,7 +32,7 @@ system architecture:
         delta beta c: 0
         wavelength center: 550  # central wavelength -- in nm
 detector:
-    number of pixels along X: 130                  # number of pixels along X axis -- no units
+    number of pixels along X: 139                  # number of pixels along X axis -- no units
     number of pixels along Y: 112                  # number of pixels along Y axis -- no units
     pixel size along X: 70                             # pixel size along X       -- in um
     pixel size along Y: 70                              # pixel size along Y       -- in um
