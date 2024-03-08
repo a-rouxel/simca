@@ -99,11 +99,19 @@ class JointReconstructionModule_V1(pl.LightningModule):
             # acquisition = self.acquired_image1.unsqueeze(1)
             acquisition = self.acquired_image1.float()
             filtering_cubes = filtering_cubes.float()
+        elif "dauhst" in self.model_name:
+            acquisition = self.acquired_image1.float()
+
+            filtering_cubes_s = torch.sum(filtering_cubes**2,1)
+            filtering_cubes_s[filtering_cubes_s==0] = 1
+            filtering_cubes = (filtering_cubes.float(), filtering_cubes_s.float())
+            
         elif self.model_name == "mst_plus_plus":
             acquisition = self.acquired_image1.unsqueeze(1).repeat((1, 28, 1, 1)).float().to(self.device)
-        print(f"acquisition shape: {acquisition.shape}")
-        print(f"filtering_cubes shape: {filtering_cubes.shape}")
-        reconstructed_cube = self.reconstruction_model(acquisition, filtering_cubes.to(self.device))
+        #print(f"acquisition shape: {acquisition.shape}")
+        #print(f"filtering_cubes shape: {filtering_cubes.shape}")
+
+        reconstructed_cube = self.reconstruction_model(acquisition, filtering_cubes)
 
 
         return reconstructed_cube
@@ -200,7 +208,12 @@ class JointReconstructionModule_V1(pl.LightningModule):
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=4e-4)
-        return optimizer
+        return { "optimizer":optimizer,
+                "lr_scheduler":{
+                "scheduler":torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, 500, eta_min=1e-6),
+                "interval": "epoch"
+                }
+        }
 
     def _log_images(self, tag, images, global_step):
         # Convert model output to image grid and log to TensorBoard

@@ -50,7 +50,8 @@ class HS_MSA(nn.Module):
     def __init__(
             self,
             dim,
-            window_size=(8, 8),
+            #window_size=(8, 8),
+            window_size=(7, 7),
             dim_head=28,
             heads=8,
             only_local_branch=False
@@ -71,7 +72,8 @@ class HS_MSA(nn.Module):
         else:
             seq_l1 = window_size[0] * window_size[1]
             self.pos_emb1 = nn.Parameter(torch.Tensor(1, 1, heads//2, seq_l1, seq_l1))
-            h,w = 256//self.heads,320//self.heads
+            #h,w = 256//self.heads,320//self.heads
+            h,w = 112//self.heads,112//self.heads
             seq_l2 = h*w//seq_l1
             self.pos_emb2 = nn.Parameter(torch.Tensor(1, 1, heads//2, seq_l2, seq_l2))
             trunc_normal_(self.pos_emb1)
@@ -89,6 +91,7 @@ class HS_MSA(nn.Module):
         """
         b, h, w, c = x.shape
         w_size = self.window_size
+
         assert h % w_size[0] == 0 and w % w_size[1] == 0, 'fmap dimensions must be divisible by the window size'
         if self.only_local_branch:
             x_inp = rearrange(x, 'b (h b0) (w b1) c -> (b h w) (b0 b1) c', b0=w_size[0], b1=w_size[1])
@@ -145,7 +148,8 @@ class HSAB(nn.Module):
     def __init__(
             self,
             dim,
-            window_size=(8, 8),
+            #window_size=(8, 8),
+            window_size=(7, 7),
             dim_head=64,
             heads=8,
             num_blocks=2,
@@ -338,9 +342,10 @@ class DAUHST(nn.Module):
         nC, step = 28, 2
         y = y / nC * 2
         bs,row,col = y.shape
-        y_shift = torch.zeros(bs, nC, row, col).cuda().float()
+        """ y_shift = torch.zeros(bs, nC, row, col).cuda().float()
         for i in range(nC):
-            y_shift[:, i, :, step * i:step * i + col - (nC - 1) * step] = y[:, :, step * i:step * i + col - (nC - 1) * step]
+            y_shift[:, i, :, step * i:step * i + col - (nC - 1) * step] = y[:, :, step * i:step * i + col - (nC - 1) * step] """
+        y_shift = y.unsqueeze(1).repeat((1, 28, 1, 1)).float()
         z = self.fution(torch.cat([y_shift, Phi], dim=1))
         alpha, beta = self.para_estimator(self.fution(torch.cat([y_shift, Phi], dim=1)))
         return z, alpha, beta
@@ -363,5 +368,5 @@ class DAUHST(nn.Module):
             z = self.denoisers[i](torch.cat([x, beta_repeat],dim=1))
             if i<self.num_iterations-1:
                 z = shift_3d(z)
-        return z[:, :, :, 0:256]
+        return z[:, :, :, 0:112]
 

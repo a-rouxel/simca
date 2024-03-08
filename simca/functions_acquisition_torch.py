@@ -82,7 +82,7 @@ def interpolate_data_on_grid_positions_torch(data, X_init, Y_init, X_target, Y_t
         torch.Tensor: Interpolated 4D data on the target grid.
     """
 
-    print(data.shape)
+    #print(data.shape)
 
     # Ensure tensors are on the correct device and data type
     device = data.device

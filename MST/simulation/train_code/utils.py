@@ -25,7 +25,6 @@ def generate_shift_masks(mask_path, batch_size):
     Phi_batch = mask_3d_shift.expand([batch_size, nC, H, W]).cuda().float()
     Phi_s_batch = torch.sum(Phi_batch**2,1)
     Phi_s_batch[Phi_s_batch==0] = 1
-    # print(Phi_batch.shape, Phi_s_batch.shape)
     return Phi_batch, Phi_s_batch
 
 def LoadTraining(path):

@@ -7,12 +7,12 @@ import torch
 
 
 
-data_dir = "./datasets_reconstruction/cave_1024_28"
-datamodule = CubesDataModule(data_dir, batch_size=2, num_workers=1)
+data_dir = "./datasets_reconstruction/mst_datasets/cave_1024_28"
+datamodule = CubesDataModule(data_dir, batch_size=4, num_workers=11)
 
 
 name = "testing_simca_reconstruction"
-model_name = "birnat"
+model_name = "dauhst_5"
 
 log_dir = 'tb_logs'
 
