@@ -161,7 +161,7 @@ class CassiSystemOptim(pl.LightningModule, CassiSystem):
         numpy.ndarray: filtering cube generated according to the optical system & the pattern configuration (R x C x W)
 
         """
-        self.filtering_cube = interpolate_data_on_grid_positions_torch(data=self.pattern,
+        self.filtering_cube = interpolate_data_on_grid_positions_torch(data=self.pattern.unsqueeze(-1).repeat(1, 1, 1, self.wavelengths.shape[0]),
                                                                 X_init=self.X_coordinates_propagated_coded_aperture,
                                                                 Y_init=self.Y_coordinates_propagated_coded_aperture,
                                                                 X_target=self.X_detector_coordinates_grid,
@@ -193,23 +193,7 @@ class CassiSystemOptim(pl.LightningModule, CassiSystem):
         """
         self.wavelengths= self.wavelengths.to(self.device)
 
-
-
-        #
-        # plt.plot(hyperspectral_cube[0,0,0,:].cpu().numpy())
-        # plt.title("Original spectrum")
-        # plt.show()
-        # print("cube shape: ", hyperspectral_cube.shape)
-        # print("wavelengths shape: ", wavelengths.shape)
-        # print("self.wavelengths shape: ", self.wavelengths.shape)
         dataset = self.interpolate_dataset_along_wavelengths_torch(hyperspectral_cube, wavelengths,self.wavelengths, chunck_size)
-
-
-        # plt.plot(dataset[0,0,0,:].cpu().numpy())
-        # plt.title("Interpolated spectrum")
-        # plt.show()
-
-
 
         if dataset is None:
             return None
@@ -226,8 +210,10 @@ class CassiSystemOptim(pl.LightningModule, CassiSystem):
             except:
                 return print("Please generate filtering cube first")
 
-            scene = match_dataset_to_instrument(dataset, self.filtering_cube)
-            scene = torch.from_numpy(match_dataset_to_instrument(dataset, self.filtering_cube)).to(self.device) if isinstance(scene, np.ndarray) else scene.to(self.device)
+
+            scene = match_dataset_to_instrument(dataset, self.filtering_cube[0,:,:,0])
+
+            # scene = torch.from_numpy(match_dataset_to_instrument(dataset, self.filtering_cube)).to(self.device) if isinstance(scene, np.ndarray) else scene.to(self.device)
 
             measurement_in_3D = generate_dd_measurement_torch(scene, self.filtering_cube, chunck_size)
 
@@ -249,6 +235,7 @@ class CassiSystemOptim(pl.LightningModule, CassiSystem):
 
             # print("dataset shape: ", dataset.shape)
             # print("X coded shape: ", X_coded_aper_coordinates_crop.shape)
+
 
             scene = match_dataset_to_instrument(dataset, X_coded_aper_coordinates_crop)
 

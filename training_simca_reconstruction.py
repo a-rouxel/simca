@@ -1,26 +1,43 @@
 import pytorch_lightning as pl
 from data_handler import CubesDataModule
 from optimization_modules import JointReconstructionModule_V1
-import torch
+from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
+from pytorch_lightning.loggers import TensorBoardLogger
 
-data_dir = "./datasets_reconstruction/mst_datasets/cave_1024_28"
+
+data_dir = "./datasets_reconstruction/"
 #data_dir = "/local/users/ademaio/lpaillet/mst_datasets/cave_1024_28"
 
-datamodule = CubesDataModule(data_dir, batch_size=2, num_workers=5)
+datamodule = CubesDataModule(data_dir, batch_size=32, num_workers=1)
 
 name = "testing_simca_reconstruction"
-
 model_name = "mst_plus_plus"
 
-reconstruction_module = JointReconstructionModule_V1(model_name)
+log_dir = 'tb_logs'
 
-if torch.cuda.is_available():
-    trainer = pl.Trainer( accelerator="gpu",
-                            max_epochs=500,
-                            log_every_n_steps=5)
-else:
-    trainer = pl.Trainer( accelerator="cpu",
-                            max_epochs=500,
-                            log_every_n_steps=5)
+logger = TensorBoardLogger(log_dir, name=name)
+
+early_stop_callback = EarlyStopping(
+                            monitor='val_loss',  # Metric to monitor
+                            patience=15,        # Number of epochs to wait for improvement
+                            verbose=True,
+                            mode='min'          # 'min' for metrics where lower is better, 'max' for vice versa
+                            )
+
+checkpoint_callback = ModelCheckpoint(
+    monitor='val_loss',      # Metric to monitor
+    dirpath='checkpoints/',  # Directory path for saving checkpoints
+    filename='best-checkpoint',  # Checkpoint file name
+    save_top_k=1,            # Save the top k models
+    mode='min',              # 'min' for metrics where lower is better, 'max' for vice versa
+    save_last=True           # Additionally, save the last checkpoint to a file named 'last.ckpt'
+)
+
+reconstruction_module = JointReconstructionModule_V1(model_name,log_dir=log_dir+'/'+ name)
+
+trainer = pl.Trainer( logger=logger,
+                        accelerator="gpu",
+                        max_epochs=500,
+                        log_every_n_steps=1)
 
 trainer.fit(reconstruction_module, datamodule)
