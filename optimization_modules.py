@@ -25,13 +25,17 @@ class JointReconstructionModule_V1(pl.LightningModule):
     def on_validation_start(self,stage=None):
         print("---VALIDATION START---")
         self.config = "simca/configs/cassi_system_optim_optics_full_triplet_sd_cassi.yml"
-        self.shift_bool = True
+        self.shift_bool = False
         if self.shift_bool:
             self.crop_value_left = 8
             self.crop_value_right = 8
+            self.crop_value_up = 8
+            self.crop_value_down = 8
         else:
             self.crop_value_left = 8
             self.crop_value_right = 8
+            self.crop_value_up = 8
+            self.crop_value_down = 8
         config_system = load_yaml_config(self.config)
         self.config_patterns = load_yaml_config("simca/configs/pattern.yml")
         self.cassi_system = CassiSystemOptim(system_config=config_system)
@@ -76,18 +80,18 @@ class JointReconstructionModule_V1(pl.LightningModule):
             acquired_cubes = torch.flip(acquired_cubes, dims=(2,3)) # -1 magnification
             fig, ax = plt.subplots(1, 2)
             plt.title(f"true cube cropped vs measurement")
-            ax[0].imshow(hyperspectral_cube[0, self.crop_value_left:-self.crop_value_right, self.crop_value_left:-self.crop_value_right, 0].cpu().detach().numpy())
+            ax[0].imshow(hyperspectral_cube[0, self.crop_value_up:-self.crop_value_down, self.crop_value_left:-self.crop_value_right, 0].cpu().detach().numpy())
             ax[1].imshow(acquired_cubes[0, 0, :, :].cpu().detach().numpy())
             plt.show()
 
             reconstructed_cube = self.reconstruction_model(acquired_cubes, filtering_cubes)
         else:
-            mask_3d = expand_mask_3d(pattern.flip(dims=(1, 2))).float().to(self.device)
             shifted_image = self.shift_back(acquired_image1.flip(dims=(1, 2)), displacement_in_pix).float().to(self.device)
+            mask_3d = expand_mask_3d(self.cassi_system.pattern_crop.flip(dims=(1, 2))[:, self.crop_value_up:-self.crop_value_down, self.crop_value_left:-self.crop_value_right]).float().to(self.device)
 
             fig,ax = plt.subplots(1,2)
             plt.title(f"true cube cropped vs measurement")
-            ax[0].imshow(hyperspectral_cube[0, 8:-8, self.crop_value_left:-self.crop_value_right, 0].cpu().detach().numpy())
+            ax[0].imshow(hyperspectral_cube[0, self.crop_value_up:-self.crop_value_down, self.crop_value_left:-self.crop_value_right, 0].cpu().detach().numpy())
             ax[1].imshow(shifted_image[0, 0, :, :].cpu().detach().numpy())
             plt.show()
 
@@ -156,10 +160,10 @@ class JointReconstructionModule_V1(pl.LightningModule):
 
         hyperspectral_cube, wavelengths = batch
         #hyperspectral_cube = hyperspectral_cube.permute(0, 3, 2, 1)
-        hyperspectral_cube = hyperspectral_cube[:,:, self.crop_value_left:-self.crop_value_right, self.crop_value_left:-self.crop_value_right]
+        hyperspectral_cube = hyperspectral_cube[:,:, self.crop_value_up:-self.crop_value_down, self.crop_value_left:-self.crop_value_right]
 
         fig, ax = plt.subplots(1, 2)
-        plt.title(f"cubes")
+        plt.title(f"true cube vs reconstructed cube")
         ax[0].imshow(hyperspectral_cube[0, 0, :, :].cpu().detach().numpy())
         ax[1].imshow(y_hat[0, 0, :, :].cpu().detach().numpy())
         plt.show()
@@ -180,7 +184,7 @@ class JointReconstructionModule_V1(pl.LightningModule):
         nC = 28
         d = d[0]
         d -= d.min()
-        self.crop_value_right += int(np.round(d.max()))
+        self.crop_value_right = 8+int(np.round(d.max()))
         output = torch.zeros(bs, nC, row, col - int(np.round(d.max()))).float().to(self.device)
         for i in range(nC):
             shift = int(np.round(d[i]))

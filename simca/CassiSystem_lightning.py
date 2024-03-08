@@ -254,14 +254,9 @@ class CassiSystemOptim(pl.LightningModule, CassiSystem):
 
             pattern_crop = crop_center_3D(pattern, scene.shape[2], scene.shape[1]).to(self.device)
             
-            self.pattern_crop_dataset = interpolate_data_on_grid_positions_torch(pattern_crop.unsqueeze(-1),
-                                                                self.X_coordinates_propagated_coded_aperture,
-                                                                self.Y_coordinates_propagated_coded_aperture,
-                                                                self.X_detector_coordinates_grid,
-                                                                self.Y_detector_coordinates_grid)
+            self.pattern_crop = pattern_crop
             
             pattern_crop = pattern_crop.unsqueeze(-1).repeat(1, 1, 1, scene.size(-1))
-           
 
             #print(scene.get_device())
             #print(pattern_crop.get_device())
