@@ -48,7 +48,7 @@ class JointReconstructionModule_V1(pl.LightningModule):
         acquired_image1 = self.cassi_system.image_acquisition(hyperspectral_cube, pattern, wavelengths)
         filtering_cubes = subsample(self.cassi_system.filtering_cube, np.linspace(450, 650, self.cassi_system.filtering_cube.shape[-1]), np.linspace(450, 650, 28))
         filtering_cubes = filtering_cubes.permute(0, 3, 1, 2).float().to(self.device)
-        filtering_cubes = torch.flip(filtering_cubes, dims=(2,)) # -1 magnification
+        filtering_cubes = torch.flip(filtering_cubes, dims=(2,3)) # -1 magnification
         displacement_in_pix = self.cassi_system.get_displacement_in_pixels(dataset_wavelengths=wavelengths)
         #print("displacement_in_pix", displacement_in_pix)
 
@@ -60,7 +60,7 @@ class JointReconstructionModule_V1(pl.LightningModule):
         # TODO : replace by the real reconstruction model
         if self.config == "simca/configs/cassi_system_optim_optics_full_triplet_sd_cassi.yml":
             acquired_cubes = acquired_image1.unsqueeze(1).repeat((1, 28, 1, 1)).float().to(self.device) # b x W x R x C
-            acquired_cubes = torch.flip(acquired_cubes, dims=(2,)) # -1 magnification
+            acquired_cubes = torch.flip(acquired_cubes, dims=(2,3)) # -1 magnification
             reconstructed_cube = self.reconstruction_model(acquired_cubes, filtering_cubes)
         else:
             mask_3d = expand_mask_3d(pattern).float().to(self.device)
@@ -140,7 +140,7 @@ class JointReconstructionModule_V1(pl.LightningModule):
         return loss, y_hat, hyperspectral_cube
 
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.parameters(), lr=1e-3)
+        optimizer = torch.optim.Adam(self.parameters(), lr=4e-4)
         return optimizer
 
 def subsample(input, origin_sampling, target_sampling):

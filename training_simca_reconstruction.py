@@ -6,7 +6,7 @@ import torch
 data_dir = "./datasets_reconstruction/mst_datasets/cave_1024_28"
 #data_dir = "/local/users/ademaio/lpaillet/mst_datasets/cave_1024_28"
 
-datamodule = CubesDataModule(data_dir, batch_size=16, num_workers=11)
+datamodule = CubesDataModule(data_dir, batch_size=5, num_workers=11)
 
 name = "testing_simca_reconstruction"
 
