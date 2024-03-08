@@ -308,10 +308,6 @@ class CassiSystemOptim(pl.LightningModule, CassiSystem):
             self.last_filtered_interpolated_scene = sd_measurement
             self.interpolated_scene = scene
 
-            for i in range(5):
-                plt.imshow(sd_measurement[0,:,:,i*8].cpu().numpy())
-                plt.title("SD measurement")
-                plt.show()
 
             if dataset_labels is not None:
                 scene_labels = torch.from_numpy(match_dataset_labels_to_instrument(dataset_labels, self.last_filtered_interpolated_scene))
