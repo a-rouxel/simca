@@ -3,12 +3,13 @@ from data_handler import CubesDataModule
 from optimization_modules import JointReconstructionModule_V1
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 from pytorch_lightning.loggers import TensorBoardLogger
+import torch
 
 
-# data_dir = "./datasets_reconstruction/"
-data_dir = "/local/users/ademaio/lpaillet/mst_datasets/cave_1024_28"
 
-datamodule = CubesDataModule(data_dir, batch_size=2, num_workers=3)
+data_dir = "./datasets_reconstruction/cave_1024_28"
+datamodule = CubesDataModule(data_dir, batch_size=2, num_workers=1)
+
 
 name = "testing_simca_reconstruction"
 model_name = "birnat"
@@ -35,9 +36,16 @@ checkpoint_callback = ModelCheckpoint(
 
 reconstruction_module = JointReconstructionModule_V1(model_name,log_dir=log_dir+'/'+ name)
 
-trainer = pl.Trainer( logger=logger,
-                        accelerator="cpu",
-                        max_epochs=500,
-                        log_every_n_steps=1)
+
+if torch.cuda.is_available():
+    trainer = pl.Trainer( logger=logger,
+                            accelerator="gpu",
+                            max_epochs=500,
+                            log_every_n_steps=1)
+else:
+    trainer = pl.Trainer( logger=logger,
+                            accelerator="cpu",
+                            max_epochs=500,
+                            log_every_n_steps=1)
 
 trainer.fit(reconstruction_module, datamodule)
