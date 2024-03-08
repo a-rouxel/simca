@@ -19,8 +19,9 @@ class JointReconstructionModule_V1(pl.LightningModule):
     def __init__(self, model_name,log_dir="tb_logs"):
         super().__init__()
 
+        self.model_name = model_name
         # TODO : use a real reconstruction module
-        self.reconstruction_model = model_generator(model_name, None)
+        self.reconstruction_model = model_generator(self.model_name, None)
         """ if torch.cuda.is_available():
             self.reconstruction_model = self.reconstruction_model.cuda()
         else:
@@ -88,12 +89,20 @@ class JointReconstructionModule_V1(pl.LightningModule):
         self.acquired_image1 = self.cassi_system.image_acquisition(hyperspectral_cube, self.pattern, wavelengths).to(self.device)
 
 
-        self.acquired_image1 = self._normalize_data_by_itself(self.acquired_image1)
-        acquired_cubes = self.acquired_image1.unsqueeze(1).repeat((1, 28, 1, 1)).float().to(self.device) # b x W x R x C
+        # self.acquired_image1 = self._normalize_data_by_itself(self.acquired_image1)
+        # acquired_cubes = self.acquired_image1.unsqueeze(1).repeat((1, 28, 1, 1)).float().to(self.device) # b x W x R x C
 
         filtering_cubes = subsample(filtering_cube, np.linspace(450, 650, filtering_cube.shape[-1]), np.linspace(450, 650, 28)).permute((0, 3, 1, 2))
 
-        reconstructed_cube = self.reconstruction_model(acquired_cubes, filtering_cubes.to(self.device))
+        if self.model_name == "birnat":
+            # acquisition = self.acquired_image1.unsqueeze(1)
+            acquisition = self.acquired_image1.float()
+            filtering_cubes = filtering_cubes.float()
+        elif self.model_name == "mst_plus_plus":
+            acquisition = self.acquired_image1.unsqueeze(1).repeat((1, 28, 1, 1)).float().to(self.device)
+        print(f"acquisition shape: {acquisition.shape}")
+        print(f"filtering_cubes shape: {filtering_cubes.shape}")
+        reconstructed_cube = self.reconstruction_model(acquisition, filtering_cubes.to(self.device))
 
 
         return reconstructed_cube
@@ -104,20 +113,18 @@ class JointReconstructionModule_V1(pl.LightningModule):
 
         loss,reconstructed_cube, ref_cube = self._common_step(batch, batch_idx)
 
-        hyperspectral_cube, wavelengths = batch
-        hyperspectral_cube = hyperspectral_cube.permute(0, 2, 3, 1).to(self.device)
 
         output_images = self._convert_output_to_images(self.acquired_image1)
         patterns = self._convert_output_to_images(self.pattern)
-        input_images = self._convert_output_to_images(hyperspectral_cube[:,:,:,0])
+        input_images = self._convert_output_to_images(ref_cube[:,:,:,0])
 
+        if self.global_step % 100 == 0:
+            self._log_images('train/output_images', output_images, self.global_step)
+            self._log_images('train/input_images', input_images, self.global_step)
+            self._log_images('train/patterns', patterns, self.global_step)
 
-        self._log_images('train/output_images', output_images, self.global_step)
-        self._log_images('train/input_images', input_images, self.global_step)
-        self._log_images('train/patterns', patterns, self.global_step)
-
-        spectral_filter_plot = self.plot_spectral_filter(ref_cube,reconstructed_cube)
-        self.writer.add_image('Spectral Filter', spectral_filter_plot, self.global_step)
+            spectral_filter_plot = self.plot_spectral_filter(ref_cube,reconstructed_cube)
+            self.writer.add_image('Spectral Filter', spectral_filter_plot, self.global_step)
 
         self.log_dict(
             { "train_loss": loss,

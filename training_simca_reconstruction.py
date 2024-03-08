@@ -5,13 +5,13 @@ from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 from pytorch_lightning.loggers import TensorBoardLogger
 
 
-data_dir = "./datasets_reconstruction/"
-#data_dir = "/local/users/ademaio/lpaillet/mst_datasets/cave_1024_28"
+# data_dir = "./datasets_reconstruction/"
+data_dir = "/local/users/ademaio/lpaillet/mst_datasets/cave_1024_28"
 
-datamodule = CubesDataModule(data_dir, batch_size=32, num_workers=1)
+datamodule = CubesDataModule(data_dir, batch_size=2, num_workers=3)
 
 name = "testing_simca_reconstruction"
-model_name = "mst_plus_plus"
+model_name = "birnat"
 
 log_dir = 'tb_logs'
 
@@ -36,7 +36,7 @@ checkpoint_callback = ModelCheckpoint(
 reconstruction_module = JointReconstructionModule_V1(model_name,log_dir=log_dir+'/'+ name)
 
 trainer = pl.Trainer( logger=logger,
-                        accelerator="gpu",
+                        accelerator="cpu",
                         max_epochs=500,
                         log_every_n_steps=1)
 
