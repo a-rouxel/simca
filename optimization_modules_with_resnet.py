@@ -32,12 +32,14 @@ class JointReconstructionModule_V2(pl.LightningModule):
         super().__init__()
 
         self.model_name = model_name
-        # TODO : use a real reconstruction module
-        self.reconstruction_model = model_generator(self.model_name, pretrained_model_path=reconstruction_checkpoint)
+        self.reconstruction_model = model_generator(self.model_name, pretrained_model_path=None)
+        if reconstruction_checkpoint is not None:
+            #self.reconstruction_model = model_generator(self.model_name, pretrained_model_path=reconstruction_checkpoint)
+            self.reconstruction_model.load_state_dict(torch.load(reconstruction_checkpoint), strict=False)
         self.mask_generation = UnetModel(classes=1,encoder_weights=None,in_channels=1)
 
         self.loss_fn = nn.MSELoss()
-        self.ssim_loss = SSIM(window_size=11, size_average=True)
+        self.ssim_loss = SSIM(window_size=11, n_channels=28)
 
         self.writer = SummaryWriter(log_dir)
 
@@ -82,6 +84,8 @@ class JointReconstructionModule_V2(pl.LightningModule):
         self.acquired_image1 = self.acquired_image1.flip(1)
         self.acquired_image1 = self.acquired_image1.flip(2) 
         self.acquired_image1 = self.acquired_image1.unsqueeze(1).float()
+        #self.acquired_image1 = self._normalize_data_by_itself(self.acquired_image1)
+
 
         self.pattern = self.mask_generation(self.acquired_image1).squeeze(1)
         self.pattern = BinarizeFunction.apply(self.pattern)
@@ -120,7 +124,7 @@ class JointReconstructionModule_V2(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         print("Training step")
 
-        loss,reconstructed_cube, ref_cube = self._common_step(batch, batch_idx)
+        loss, ssim_loss, reconstructed_cube, ref_cube = self._common_step(batch, batch_idx)
         
 
 
@@ -151,6 +155,14 @@ class JointReconstructionModule_V2(pl.LightningModule):
             prog_bar=True,
         )
 
+        self.log_dict(
+            { "train_ssim_loss": ssim_loss,
+            },
+            on_step=True,
+            on_epoch=True,
+            prog_bar=True,
+        )
+
         return {"loss": loss}
 
     def _normalize_image_tensor(self, tensor):
@@ -163,10 +175,18 @@ class JointReconstructionModule_V2(pl.LightningModule):
     def validation_step(self, batch, batch_idx):
 
         print("Validation step")
-        loss,reconstructed_cube, ref_cube= self._common_step(batch, batch_idx)
+        loss, ssim_loss, reconstructed_cube, ref_cube= self._common_step(batch, batch_idx)
 
         self.log_dict(
             { "val_loss": loss,
+            },
+            on_step=True,
+            on_epoch=True,
+            prog_bar=True,
+        )
+
+        self.log_dict(
+            { "val_ssim_loss": ssim_loss,
             },
             on_step=True,
             on_epoch=True,
@@ -177,7 +197,7 @@ class JointReconstructionModule_V2(pl.LightningModule):
 
     def test_step(self, batch, batch_idx):
         print("Test step")
-        loss,reconstructed_cube, ref_cube= self._common_step(batch, batch_idx)
+        loss, ssim_loss, reconstructed_cube, ref_cube= self._common_step(batch, batch_idx)
         self.log_dict(
             { "test_loss": loss,
             },
@@ -185,12 +205,23 @@ class JointReconstructionModule_V2(pl.LightningModule):
             on_epoch=True,
             prog_bar=True,
         )
+
+        self.log_dict(
+            { "test_ssim_loss": ssim_loss,
+            },
+            on_step=True,
+            on_epoch=True,
+            prog_bar=True,
+        )
+
         return {"loss": loss}
 
     def predict_step(self, batch, batch_idx):
         print("Predict step")
-        loss,reconstructed_cube, ref_cube= self._common_step(batch, batch_idx)
-        self.log('predict_step', loss,on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        loss, ssim_loss, reconstructed_cube, ref_cube= self._common_step(batch, batch_idx)
+        print("Predict loss: ", loss.item())
+        print("Predict ssim loss: ", ssim_loss)
+        #self.log('predict_step', loss,on_step=True, on_epoch=True, prog_bar=True, logger=True)
         return loss
 
     def _common_step(self, batch, batch_idx):
@@ -220,9 +251,10 @@ class JointReconstructionModule_V2(pl.LightningModule):
         loss2 = torch.sum(torch.abs((total_sum_pattern - total_half_pattern_equal_1)/(self.pattern.shape[1]*self.pattern.shape[2]))**2)
         loss = loss1 + loss2
 
+        ssim_loss = self.ssim_loss(torch.clamp(reconstructed_cube.permute(0, 3, 1, 2), 0, 1), ref_cube.permute(0, 3, 1, 2))
         print(f"loss1 {loss1}")
         print(f"loss2 {loss2}")
-        return loss,reconstructed_cube, ref_cube
+        return loss, ssim_loss, reconstructed_cube, ref_cube
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=4e-4)
