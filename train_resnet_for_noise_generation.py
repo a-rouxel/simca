@@ -7,7 +7,7 @@ import torch
 import datetime
 
 
-data_dir = "./datasets_reconstruction/mst_datasets/cave_1024_28"
+data_dir = "/local/users/ademaio/lpaillet/mst_datasets/cave_1024_28/"
 datamodule = CubesDataModule(data_dir, batch_size=4, num_workers=11)
 
 datetime_ = datetime.datetime.now().strftime('%y-%m-%d_%Hh%M')
@@ -37,7 +37,7 @@ checkpoint_callback = ModelCheckpoint(
     save_last=True           # Additionally, save the last checkpoint to a file named 'last.ckpt'
 )
 
-reconstruction_module = ResnetOnly(log_dir=log_dir+'/'+ name,t)
+reconstruction_module = ResnetOnly(log_dir=log_dir+'/'+ name)
 
 
 if torch.cuda.is_available():

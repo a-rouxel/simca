@@ -17,11 +17,10 @@ from optimization_modules_with_resnet import UnetModel
 
 class ResnetOnly(pl.LightningModule):
 
-    def __init__(self, model_name,log_dir="tb_logs", reconstruction_checkpoint=None):
+    def __init__(self,log_dir="tb_logs"):
         super().__init__()
 
         self.mask_generation = UnetModel(classes=1,encoder_weights=None,in_channels=1)
-        self.loss_fn = nn.MSELoss()
         self.writer = SummaryWriter(log_dir)
 
 
@@ -49,15 +48,16 @@ class ResnetOnly(pl.LightningModule):
         self.acquisition = self.acquisition.flip(2) 
         self.acquisition = self.acquisition.unsqueeze(1).float()
 
-        print("acquisition shape: ", self.acquisition.shape)
-        plt.imshow(self.acquisition[0,0,:,:].cpu().numpy())
-        plt.show()
+        # print("acquisition shape: ", self.acquisition.shape)
+        # plt.imshow(self.acquisition[0,0,:,:].cpu().numpy())
+        # plt.show()
 
         self.pattern = self.mask_generation(self.acquisition)
+        self.pattern = BinarizeFunction.apply(self.pattern)
 
-        print("pattern shape: ", self.pattern.shape)
-        plt.imshow(self.pattern[0,0,:,:].cpu().numpy())
-        plt.show()
+        # print("pattern shape: ", self.pattern.shape)
+        # plt.imshow(self.pattern[0,0,:,:].detach().cpu().numpy())
+        # plt.show()
 
         return self.pattern
 
@@ -67,8 +67,8 @@ class ResnetOnly(pl.LightningModule):
 
         loss = self._common_step(batch, batch_idx)
 
-        input_images = self._convert_output_to_images(self._normalize_image_tensor(self.input_image))
-        patterns = self._convert_output_to_images(self._normalize_image_tensor(self.pattern))
+        input_images = self._convert_output_to_images(self._normalize_image_tensor(self.acquisition[:,0,:,:]))
+        patterns = self._convert_output_to_images(self._normalize_image_tensor(self.pattern[:,0,:,:]))
 
         if self.global_step % 30 == 0:
             self._log_images('train/input_images', input_images, self.global_step)
@@ -129,8 +129,9 @@ class ResnetOnly(pl.LightningModule):
 
         output_pattern = self.forward(batch)
 
-        sum_result = torch.mean(output_pattern,dim=(1,2))
-        sum_final = torch.sum(sum_result - 0.5)
+        sum_result = torch.mean(output_pattern,dim=(2,3))
+        print("sum_result: ", sum_result)
+        sum_final = torch.sum(torch.abs(sum_result - 0.5))
         loss1 = sum_final
 
         loss2 = calculate_spectral_flatness(output_pattern)
@@ -256,3 +257,14 @@ def calculate_spectral_flatness(pattern):
     spectral_flatness = geometric_mean / arithmetic_mean
 
     return spectral_flatness
+
+class BinarizeFunction(torch.autograd.Function):
+    @staticmethod
+    def forward(ctx, input):
+        # Forward pass is the binary threshold operation
+        return (input > 0.5).float()
+
+    @staticmethod
+    def backward(ctx, grad_output):
+        # For backward pass, just pass the gradients through unchanged
+        return grad_output

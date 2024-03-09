@@ -26,11 +26,26 @@ class UnetModel(nn.Module):
         return x
     
 class JointReconstructionModule_V3(pl.LightningModule):
-    def __init__(self, recon_lightning_module, log_dir="tb_logs",reconstruction_checkpoint=None):
+    def __init__(self, recon_lightning_module, log_dir="tb_logs",resnet_checkpoint=None):
         super().__init__()
 
         self.reconstruction_module = recon_lightning_module
         self.mask_generation = UnetModel(classes=1,encoder_weights=None,in_channels=1)
+
+        if resnet_checkpoint is not None:
+            # Load the weights from the checkpoint into self.seg_model
+            checkpoint = torch.load(resnet_checkpoint, map_location=self.device)
+            # Adjust the keys
+            adjusted_state_dict = {key.replace('mask_generation.', ''): value
+                                   for key, value in checkpoint['state_dict'].items()}
+            # Filter out unexpected keys
+            model_keys = set(self.mask_generation.state_dict().keys())
+            filtered_state_dict = {k: v for k, v in adjusted_state_dict.items() if k in model_keys}
+            self.mask_generation.load_state_dict(filtered_state_dict)
+
+        # Freeze the seg_model parameters
+        # for param in self.mask_generation.parameters():
+        #     param.requires_grad = False
 
         self.loss_fn = nn.MSELoss()
         self.ssim_loss = SSIM(window_size=11, n_channels=28)
