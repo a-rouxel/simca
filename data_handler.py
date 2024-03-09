@@ -1,4 +1,5 @@
 import os
+from pytorch_lightning.utilities.types import EVAL_DATALOADERS
 import torch
 import scipy.io as sio
 from torch.utils.data import Dataset, DataLoader
@@ -96,6 +97,12 @@ class CubesDataModule(LightningDataModule):
 
     def test_dataloader(self):
         return DataLoader(self.test_ds,
+                            batch_size=self.batch_size,
+                            num_workers=self.num_workers,
+                            shuffle=False)
+    
+    def predict_dataloader(self):
+        return DataLoader(self.train_ds,
                             batch_size=self.batch_size,
                             num_workers=self.num_workers,
                             shuffle=False)
