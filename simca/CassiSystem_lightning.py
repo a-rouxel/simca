@@ -161,7 +161,8 @@ class CassiSystemOptim(pl.LightningModule, CassiSystem):
         numpy.ndarray: filtering cube generated according to the optical system & the pattern configuration (R x C x W)
 
         """
-        self.filtering_cube = interpolate_data_on_grid_positions_torch(data=self.pattern.unsqueeze(-1).repeat(1, 1, 1, self.wavelengths.shape[0]),
+
+        self.filtering_cube = interpolate_data_on_grid_positions_torch(data=self.pattern.unsqueeze(-1).repeat(1, 1, 1, self.wavelengths.shape[0]).to(self.device),
                                                                 X_init=self.X_coordinates_propagated_coded_aperture,
                                                                 Y_init=self.Y_coordinates_propagated_coded_aperture,
                                                                 X_target=self.X_detector_coordinates_grid,

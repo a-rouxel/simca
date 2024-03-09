@@ -84,6 +84,11 @@ def interpolate_data_on_grid_positions_torch(data, X_init, Y_init, X_target, Y_t
 
     #print(data.shape)
 
+
+    # Ensure tensors are on the correct device and data type
+    device = data.device
+    dtype = torch.float64  # Using double precision for interpolation calculations
+
     # Ensure tensors are on the correct device and data type
     device = data.device
     dtype = torch.float64  # Using double precision for interpolation calculations

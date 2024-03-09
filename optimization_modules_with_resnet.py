@@ -13,40 +13,40 @@ from torch.utils.tensorboard import SummaryWriter
 import io
 import torchvision.transforms as transforms
 from PIL import Image
+import segmentation_models_pytorch as smp
+import torch.nn.functional as F
 
-class JointReconstructionModule_V1(pl.LightningModule):
+class UnetModel(nn.Module):
+    def __init__(self,encoder_name="resnet18",encoder_weights="",in_channels=1,classes=2,index=0):
+        super().__init__()
+        self.i= index
+        self.model= smp.Unet(encoder_name= encoder_name, in_channels=in_channels,encoder_weights=encoder_weights,classes=classes,activation='sigmoid')
+    def forward(self,x):
+        x= self.model(x)
+        return x
 
-    def __init__(self, model_name,log_dir="tb_logs"):
+
+class JointReconstructionModule_V2(pl.LightningModule):
+
+    def __init__(self, model_name,log_dir="tb_logs",reconstruction_checkpoint=None):
         super().__init__()
 
         self.model_name = model_name
         # TODO : use a real reconstruction module
-        self.reconstruction_model = model_generator(self.model_name, None)
-        """ if torch.cuda.is_available():
-            self.reconstruction_model = self.reconstruction_model.cuda()
-        else:
-            self.reconstruction_model.to('cpu') """
-        #self.reconstruction_model = EmptyModule()
+        self.reconstruction_model = model_generator(self.model_name, pretrained_model_path=reconstruction_checkpoint)
+        self.mask_generation = UnetModel(classes=1,encoder_weights=None,in_channels=1)
 
         self.loss_fn = nn.MSELoss()
         self.ssim_loss = SSIM(window_size=11, size_average=True)
 
         self.writer = SummaryWriter(log_dir)
 
+        # for param in self.reconstruction_model.parameters():
+        #     param.requires_grad = False
+
     def on_validation_start(self,stage=None):
         print("---VALIDATION START---")
         self.config = "simca/configs/cassi_system_optim_optics_full_triplet_dd_cassi.yml"
-        self.shift_bool = False
-        if self.shift_bool:
-            self.crop_value_left = 8
-            self.crop_value_right = 8
-            self.crop_value_up = 8
-            self.crop_value_down = 8
-        else:
-            self.crop_value_left = 8
-            self.crop_value_right = 8
-            self.crop_value_up = 8
-            self.crop_value_down = 8
         config_system = load_yaml_config(self.config)
         self.config_patterns = load_yaml_config("simca/configs/pattern.yml")
         self.cassi_system = CassiSystemOptim(system_config=config_system)
@@ -70,24 +70,26 @@ class JointReconstructionModule_V1(pl.LightningModule):
         hyperspectral_cube = hyperspectral_cube.permute(0, 2, 3, 1).to(self.device)
         batch_size, H, W, C = hyperspectral_cube.shape
 
-        # fig, ax = plt.subplots(1, 1)
-        # plt.title(f"entry cube")
-        # ax.imshow(hyperspectral_cube[0, :, :, 0].cpu().detach().numpy())
-        # plt.show()
-        # print(f"batch size:{batch_size}")
-        # generate pattern
+
         self.pattern = self.cassi_system.generate_2D_pattern(self.config_patterns,nb_of_patterns=batch_size)
         self.pattern = self.pattern.to(self.device)
-
-        # plt.imshow(pattern[0, :, :].cpu().detach().numpy())
-        # plt.show()
-
-        # print(f"pattern_size: {pattern.shape}")
-
-        # generate first acquisition with simca
-
         filtering_cube = self.cassi_system.generate_filtering_cube().to(self.device)
         self.acquired_image1 = self.cassi_system.image_acquisition(hyperspectral_cube, self.pattern, wavelengths).to(self.device)
+
+        self.acquired_image1 = pad_tensor(self.acquired_image1, (128, 128))
+
+        # flip along second and thrid axis
+        self.acquired_image1 = self.acquired_image1.flip(1)
+        self.acquired_image1 = self.acquired_image1.flip(2) 
+        self.acquired_image1 = self.acquired_image1.unsqueeze(1).float()
+
+        self.pattern = self.mask_generation(self.acquired_image1).squeeze(1)
+        self.pattern = BinarizeFunction.apply(self.pattern)
+        self.pattern = pad_tensor(self.pattern, (131, 131))
+        self.cassi_system.pattern = self.pattern.to(self.device)
+
+        filtering_cube = self.cassi_system.generate_filtering_cube().to(self.device)
+        self.acquired_image2 = self.cassi_system.image_acquisition(hyperspectral_cube, self.pattern, wavelengths).to(self.device)
 
 
         # self.acquired_image1 = self._normalize_data_by_itself(self.acquired_image1)
@@ -97,19 +99,17 @@ class JointReconstructionModule_V1(pl.LightningModule):
 
         if self.model_name == "birnat":
             # acquisition = self.acquired_image1.unsqueeze(1)
-            acquisition = self.acquired_image1.float()
+            acquisition = self.acquired_image2.float()
             filtering_cubes = filtering_cubes.float()
         elif "dauhst" in self.model_name:
-            acquisition = self.acquired_image1.float()
-
+            acquisition = self.acquired_image2.float()
             filtering_cubes_s = torch.sum(filtering_cubes**2,1)
             filtering_cubes_s[filtering_cubes_s==0] = 1
             filtering_cubes = (filtering_cubes.float(), filtering_cubes_s.float())
             
         elif self.model_name == "mst_plus_plus":
-            acquisition = self.acquired_image1.unsqueeze(1).repeat((1, 28, 1, 1)).float().to(self.device)
-        #print(f"acquisition shape: {acquisition.shape}")
-        #print(f"filtering_cubes shape: {filtering_cubes.shape}")
+            acquisition = self.acquired_image2.unsqueeze(1).repeat((1, 28, 1, 1)).float().to(self.device)
+
 
         reconstructed_cube = self.reconstruction_model(acquisition, filtering_cubes)
 
@@ -121,21 +121,26 @@ class JointReconstructionModule_V1(pl.LightningModule):
         print("Training step")
 
         loss,reconstructed_cube, ref_cube = self._common_step(batch, batch_idx)
+        
 
 
-        output_images = self._convert_output_to_images(self._normalize_image_tensor(self.acquired_image1))
+        output_images = self._convert_output_to_images(self._normalize_image_tensor(self.acquired_image2))
         patterns = self._convert_output_to_images(self._normalize_image_tensor(self.pattern))
         input_images = self._convert_output_to_images(self._normalize_image_tensor(ref_cube[:,:,:,0]))
         reconstructed_image = self._convert_output_to_images(self._normalize_image_tensor(reconstructed_cube[:,:,:,0]))
 
         if self.global_step % 30 == 0:
-            self._log_images('train/acquisition', output_images, self.global_step)
+            self._log_images('train/acquisition2', output_images, self.global_step)
             self._log_images('train/ground_truth', input_images, self.global_step)
             self._log_images('train/reconstructed', reconstructed_image, self.global_step)
             self._log_images('train/patterns', patterns, self.global_step)
 
-            spectral_filter_plot = self.plot_spectral_filter(ref_cube,reconstructed_cube)
+            plt.imshow(self.pattern[0,:,:].cpu().detach().numpy())
+            plt.colorbar()
+            plt.savefig('./pattern.png')
 
+            spectral_filter_plot = self.plot_spectral_filter(ref_cube,reconstructed_cube)
+            self.log_gradients(self.global_step)
             self.writer.add_image('Spectral Filter', spectral_filter_plot, self.global_step)
 
         self.log_dict(
@@ -203,10 +208,20 @@ class JointReconstructionModule_V1(pl.LightningModule):
         # ax[0].imshow(hyperspectral_cube[0, :, :, 0].cpu().detach().numpy())
         # ax[1].imshow(reconstructed_cube[0, :, :, 0].cpu().detach().numpy())
         # plt.show()
+        total_sum_pattern = torch.sum(self.pattern, dim=(1, 2))
+        total_half_pattern_equal_1 = torch.sum(torch.ones_like(self.pattern), dim=(1, 2)) / 2
+
+        print(f"total_sum_pattern {total_sum_pattern}")
+        print(f"total_half_pattern_equal_1 {total_half_pattern_equal_1}")
 
 
-        loss = torch.sqrt(self.loss_fn(reconstructed_cube, ref_cube))
 
+        loss1 = torch.sqrt(self.loss_fn(reconstructed_cube, ref_cube))
+        loss2 = torch.sum(torch.abs((total_sum_pattern - total_half_pattern_equal_1)/(self.pattern.shape[1]*self.pattern.shape[2]))**2)
+        loss = loss1 + loss2
+
+        print(f"loss1 {loss1}")
+        print(f"loss2 {loss2}")
         return loss,reconstructed_cube, ref_cube
 
     def configure_optimizers(self):
@@ -230,6 +245,12 @@ class JointReconstructionModule_V1(pl.LightningModule):
         # Create a grid of images for visualization
         img_grid = torchvision.utils.make_grid(acquired_images)
         return img_grid
+    
+    def log_gradients(self, step):
+        for name, param in self.mask_generation.named_parameters():
+            if param.grad is not None:
+                self.writer.add_scalar(f"Gradients/{name}", param.grad.norm(), step)
+
 
     def plot_spectral_filter(self,ref_hyperspectral_cube,recontructed_hyperspectral_cube):
 
@@ -302,3 +323,53 @@ class EmptyModule(nn.Module):
         self.useless_linear = nn.Linear(1, 1)
     def forward(self, x):
         return x
+
+
+def pad_tensor(input_tensor, target_shape):
+    [bs, row, col] = input_tensor.shape
+    [target_row, target_col] = target_shape
+
+    # Calculate padding for rows
+    pad_row_total = max(target_row - row, 0)
+    pad_row_top = pad_row_total // 2
+    pad_row_bottom = pad_row_total - pad_row_top
+
+    # Calculate padding for columns
+    pad_col_total = max(target_col - col, 0)
+    pad_col_left = pad_col_total // 2
+    pad_col_right = pad_col_total - pad_col_left
+
+    # Apply padding
+    padded_tensor = F.pad(input_tensor, (pad_col_left, pad_col_right, pad_row_top, pad_row_bottom), 'constant', 0)
+    return padded_tensor
+
+def crop_tensor(input_tensor, target_shape):
+    [bs, row, col] = input_tensor.shape
+    [target_row, target_col] = target_shape
+    crop_row = (row-target_row)//2
+    crop_col = (col-target_col)//2
+    return input_tensor[:,crop_row:crop_row+target_row,crop_col:crop_col+target_col]
+
+# img = torch.randn(3, 112, 112)  # Example tensor
+# target_height = 128
+# target_width = 128
+#
+# plt.imshow(img[0,...].cpu().detach().numpy())
+# plt.show()
+#
+# zda = pad_tensor(img, (target_height, target_width))
+#
+# plt.imshow(zda[0,...].cpu().detach().numpy())
+# plt.show()
+
+
+class BinarizeFunction(torch.autograd.Function):
+    @staticmethod
+    def forward(ctx, input):
+        # Forward pass is the binary threshold operation
+        return (input > 0.5).float()
+
+    @staticmethod
+    def backward(ctx, grad_output):
+        # For backward pass, just pass the gradients through unchanged
+        return grad_output
