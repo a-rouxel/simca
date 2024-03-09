@@ -123,16 +123,19 @@ class JointReconstructionModule_V1(pl.LightningModule):
         loss,reconstructed_cube, ref_cube = self._common_step(batch, batch_idx)
 
 
-        output_images = self._convert_output_to_images(self.acquired_image1)
-        patterns = self._convert_output_to_images(self.pattern)
-        input_images = self._convert_output_to_images(ref_cube[:,:,:,0])
+        output_images = self._convert_output_to_images(self._normalize_image_tensor(self.acquired_image1))
+        patterns = self._convert_output_to_images(self._normalize_image_tensor(self.pattern))
+        input_images = self._convert_output_to_images(self._normalize_image_tensor(ref_cube[:,:,:,0]))
+        reconstructed_image = self._convert_output_to_images(self._normalize_image_tensor(reconstructed_cube[:,:,:,0]))
 
-        if self.global_step % 100 == 0:
-            self._log_images('train/output_images', output_images, self.global_step)
-            self._log_images('train/input_images', input_images, self.global_step)
+        if self.global_step % 30 == 0:
+            self._log_images('train/acquisition', output_images, self.global_step)
+            self._log_images('train/ground_truth', input_images, self.global_step)
+            self._log_images('train/reconstructed', reconstructed_image, self.global_step)
             self._log_images('train/patterns', patterns, self.global_step)
 
             spectral_filter_plot = self.plot_spectral_filter(ref_cube,reconstructed_cube)
+
             self.writer.add_image('Spectral Filter', spectral_filter_plot, self.global_step)
 
         self.log_dict(

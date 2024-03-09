@@ -7,7 +7,7 @@ import torch
 
 
 
-data_dir = "./datasets_reconstruction/mst_datasets/cave_1024_28"
+data_dir = "./datasets_reconstruction/"
 datamodule = CubesDataModule(data_dir, batch_size=4, num_workers=11)
 
 
