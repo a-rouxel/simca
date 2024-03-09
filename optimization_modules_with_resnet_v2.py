@@ -239,7 +239,7 @@ class JointReconstructionModule_V3(pl.LightningModule):
 
         loss1 = torch.sqrt(self.loss_fn(reconstructed_cube, ref_cube))
         loss2 = torch.sum(torch.abs((total_sum_pattern - total_half_pattern_equal_1)/(self.pattern.shape[1]*self.pattern.shape[2]))**2)
-        loss = loss1 + loss2
+        loss = loss1
 
         ssim_loss = self.ssim_loss(torch.clamp(reconstructed_cube.permute(0, 3, 1, 2), 0, 1), ref_cube.permute(0, 3, 1, 2))
         print(f"loss1 {loss1}")
@@ -247,7 +247,7 @@ class JointReconstructionModule_V3(pl.LightningModule):
         return loss, ssim_loss, reconstructed_cube, ref_cube
     
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.parameters(), lr=4e-4)
+        optimizer = torch.optim.Adam(self.parameters(), lr=1e-4)
         return { "optimizer":optimizer,
                 "lr_scheduler":{
                 "scheduler":torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, 500, eta_min=1e-6),

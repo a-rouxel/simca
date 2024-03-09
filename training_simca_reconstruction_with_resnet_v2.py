@@ -11,20 +11,20 @@ import datetime
 
 # data_dir = "./datasets_reconstruction/"
 data_dir = "/local/users/ademaio/lpaillet/mst_datasets/cave_1024_28"
-data_dir = "./datasets_reconstruction/mst_datasets/cave_1024_28"
+# data_dir = "./datasets_reconstruction/mst_datasets/cave_1024_28"
 datamodule = CubesDataModule(data_dir, batch_size=4, num_workers=5)
 
 datetime_ = datetime.datetime.now().strftime('%y-%m-%d_%Hh%M')
 
 name = "testing_simca_reconstruction_full"
 model_name = "dauhst_9"
-reconstruction_checkpoint = "/home/lpaillet/Documents/simca/tb_logs/testing_simca_reconstruction/version_24/checkpoints/epoch=499-step=18000.ckpt"
+reconstruction_checkpoint = "./checkpoints/epoch=499-step=18000.ckpt"
 resnet_checkpoint = None
 
 log_dir = 'tb_logs'
 
 train = True
-retrain_recons = False
+retrain_recons = True
 
 logger = TensorBoardLogger(log_dir, name=name)
 
@@ -49,12 +49,15 @@ checkpoint = torch.load(reconstruction_checkpoint)
 sub_module = JointReconstructionModule_V1(model_name, log_dir)
 sub_module.load_state_dict(checkpoint["state_dict"])
 
+
+resnet_checkpoint = "./checkpoints/best-checkpoint_resnet_only_24-03-09_18h05.ckpt"
+
 if not retrain_recons or not train:
     sub_module.eval()
 
 reconstruction_module = JointReconstructionModule_V3(sub_module,
                                                      log_dir=log_dir+'/'+ name,
-                                                     reconstruction_checkpoint = reconstruction_checkpoint)
+                                                     resnet_checkpoint=resnet_checkpoint)
 
 
 if torch.cuda.is_available():
