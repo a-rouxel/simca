@@ -41,6 +41,9 @@ class JointReconstructionModule_V2(pl.LightningModule):
 
         self.writer = SummaryWriter(log_dir)
 
+        # for param in self.reconstruction_model.parameters():
+        #     param.requires_grad = False
+
     def on_validation_start(self,stage=None):
         print("---VALIDATION START---")
         self.config = "simca/configs/cassi_system_optim_optics_full_triplet_dd_cassi.yml"
