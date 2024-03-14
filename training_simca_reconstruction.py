@@ -4,14 +4,11 @@ from optimization_modules import JointReconstructionModule_V1
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 from pytorch_lightning.loggers import TensorBoardLogger
 import torch
-import datetime
 
 
 data_dir = "./datasets_reconstruction/mst_datasets/cave_1024_28_train" # Folder where the train dataset is
 
 datamodule = CubesDataModule(data_dir, batch_size=4, num_workers=11)
-
-datetime_ = datetime.datetime.now().strftime('%y-%m-%d_%Hh%M')
 
 name = "training_simca_reconstruction"
 model_name = "dauhst_9"
@@ -35,7 +32,7 @@ early_stop_callback = EarlyStopping(
 checkpoint_callback = ModelCheckpoint(
     monitor='val_loss',      # Metric to monitor
     dirpath='checkpoints/',  # Directory path for saving checkpoints
-    filename=f'best-checkpoint_{model_name}_{datetime_}',  # Checkpoint file name
+    filename=f'best-checkpoint_{model_name}',  # Checkpoint file name
     save_top_k=1,            # Save the top k models
     mode='min',              # 'min' for metrics where lower is better, 'max' for vice versa
     save_last=True           # Additionally, save the last checkpoint to a file named 'last.ckpt'

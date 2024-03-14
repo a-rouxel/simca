@@ -1,84 +1,118 @@
 [![pages-build-deployment](https://github.com/a-rouxel/simca/actions/workflows/pages/pages-build-deployment/badge.svg)](https://github.com/a-rouxel/simca/actions/workflows/pages/pages-build-deployment)
 
-
 # SIMCA: Coded Aperture Snapshot Spectral Imaging (CASSI) Simulator
 
-SIMCA is a Python/Qt application designed to perform optical simulations for Coded Aperture Snapshot Spectral Imaging (CASSI). 
+SIMCA is a Python/Qt application designed to perform optical simulations for Coded Aperture Snapshot Spectral Imaging (CASSI).
 
 Go check the documentation page [here](https://a-rouxel.github.io/simca/)
 
 ## Installation
 
-To install SIMCA, follow the steps below:
+To perform again our experiments on SIMCA for the Optical Sensing Congress 2024, follow the steps below:
 
 1. Clone the repository from Github:
 
 ```bash
-git clone https://github.com/a-rouxel/simca.git
+git clone -b optica-sensing-congress https://github.com/a-rouxel/simca.git
 cd simca
 ```
 
 2. Create a dedicated Python environment using Miniconda. If you don't have Miniconda installed, you can find the instructions [here](https://docs.conda.io/projects/conda/en/latest/user-guide/install/linux.html).
 
 ```bash
-# Create a new Python environment
-conda create -n simca-env python=3.9
-
-# Activate the environment
-conda activate simca-env
+# Create a new Python environment with the required packages
+conda env create -f environment.yml
 ```
 
-3. Install the necessary Python packages that SIMCA relies on. These are listed in the `requirements.txt` file in the repository.
+3. Activate the environment
 
 ```bash
-# Install necessary Python packages with pip
-pip install -r requirements.txt
+conda activate simca
 ```
 
 ## Download datasets
 
-4. Download the standard datasets from this [link](https://cloud.laas.fr/index.php/s/LQjWVsZgeq27Wz6/download), then unzip and paste the `datasets` folder in the root directory of SIMCA.
-
-## Quick Start with GUI (option 1)
-
-5. Start the application:
-
+4. Download the standard datasets from this [link (soon)](https://placeholder), then unzip and paste the `datasets_reconstruction` folder in the root directory of SIMCA.
 ```bash
-# run the app
-python main.py
+|--simca
+    |--MST
+    |--simca
+    |--utils
+    |--datasets_reconstruction
+        |--mst_datasets
+            |--cave_1024_28_test
+                |--scene2.mat
+                ：  
+                |--scene191.mat
+            |--cave_1024_28_train
+                |--scene1.mat
+                ：  
+                |--scene205.mat
 ```
 
-## Quick Start from script (option 2)
+## Download the checkpoints
 
-5. Run the example script :
-
+5. If you want to use our saved checkpoints to run the architecture on the test dataset, download the checkpoints from this [link (soon)](https://placeholder), then unzip and paste the `saved_checkpoints` folder in the root directory of SIMCA.
 ```bash
-# run the script
-python simple_script.py
+|--simca
+    |--MST
+    |--simca
+    |--utils
+    |--datasets_reconstruction
+        |--mst_datasets
+            |--cave_1024_28_test
+                |--scene2.mat
+                ：  
+                |--scene191.mat
+            |--cave_1024_28_train
+                |--scene1.mat
+                ：  
+                |--scene205.mat
+    |--saved_checkpoints
 ```
 
-## Main Features
+## Train the framework from scratch
 
-SIMCA includes four main features:
+If you wish to train the framework again :
+1. Run the training_simca_reconstruction.py script, this corresponds to the reconstruction with random masks:
+```bash
+python training_simca_reconstruction.py
+```
+The checkpoints will be saved in the ```checkpoints``` folder.
 
-- **Scene Analysis**: This module is used to analyze input multi- or hyper-spectral input scenes. It includes data slices, spectrum analysis, and ground truth labeling.
+2. Run the training_simca_reconstruction_full scripts, this corresponds to the reconstruction either with fine-tuned float or binary masks:
+```bash
+python training_simca_reconstruction_full_binary.py
+python training_simca_reconstruction_full_float.py
+```
+The checkpoints will be saved in the ```checkpoints_full_binary``` and ```checkpoints_full_float``` folders .
 
-- **Optical Design**: This module is used to compare the performances of various optical systems.
+## Testing the framework
 
-- **Coded Aperture Patterns Generation**: This module is used to generate spectral and/or spatial filtering, based on the optical design.
+If you wish to test the framework:
 
-- **Acquisition Coded Images**: This module is used to encode and acquire images.
+0. If you want to use other checkpoints than the ones provided, change the value of the following variables with the path of your checkpoints:
+```bash
+test_simca_reconstruction.py > reconstruction_checkpoint
+test_simca_reconstruction_full_binary.py > reconstruction_checkpoint, full_model_checkpoint
+test_simca_reconstruction_full_float.py > reconstruction_checkpoint, full_model_checkpoint
+```
+```reconstruction_checkpoint``` is the path to the checkpoint generated in the ```checkpoints``` folder.
+```full_model_checkpoint``` is the path to the checkpoint generated in the ```checkpoints_full_binary``` and  ```checkpoints_full_float``` folders respectively.
 
-For more detailed information about each feature and further instructions, please visit our [documentation website](https://a-rouxel.github.io/simca/).
-
-## Testing the package
-
-If you wish to run tests on the simca package functionnalities: 
-
-1. Run the tests.py script:
+1. Run the test scripts:
 
 ```bash
-python tests.py
+python test_simca_reconstruction.py
+python test_simca_reconstruction_full_binary.py
+python test_simca_reconstruction_full_float.py
+```
+The results will be saved in the ```results``` folder. Afterwards, you can also run the ```summarize_results.py``` script to average results over the runs and per scene. 
+
+2. (Optional) Run the visualization script:
+With this script you will be able to compare the reconstruction spectra of a few points in a scene.
+```bash
+python show_spectrum.py
 ```
 
 ## Building Documentation
@@ -115,4 +149,4 @@ SIMCA is licensed under the [GNU General Public License](https://www.gnu.org/lic
 
 ## Contact
 
-For any questions or feedback, please contact us at arouxel@laas.fr
+For any questions or feedback, please contact us at lpaillet@laas.fr
