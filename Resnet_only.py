@@ -1,19 +1,16 @@
 import pytorch_lightning as pl
 import torch
 import torch.nn as nn
-from simca.CassiSystem_lightning import CassiSystemOptim
 from MST.simulation.train_code.architecture import *
-from simca import  load_yaml_config
 import matplotlib.pyplot as plt
 import torchvision
 import numpy as np
 from simca.functions_acquisition import *
-from piqa import SSIM
 from torch.utils.tensorboard import SummaryWriter
 import io
 import torchvision.transforms as transforms
 from PIL import Image
-from optimization_modules_with_resnet import UnetModel
+from optimization_modules_full import UnetModel
 
 class ResnetOnly(pl.LightningModule):
 
@@ -48,16 +45,9 @@ class ResnetOnly(pl.LightningModule):
         self.acquisition = self.acquisition.flip(2) 
         self.acquisition = self.acquisition.unsqueeze(1).float()
 
-        # print("acquisition shape: ", self.acquisition.shape)
-        # plt.imshow(self.acquisition[0,0,:,:].cpu().numpy())
-        # plt.show()
-
         self.pattern = self.mask_generation(self.acquisition)
         self.pattern = BinarizeFunction.apply(self.pattern)
 
-        # print("pattern shape: ", self.pattern.shape)
-        # plt.imshow(self.pattern[0,0,:,:].detach().cpu().numpy())
-        # plt.show()
 
         return self.pattern
 

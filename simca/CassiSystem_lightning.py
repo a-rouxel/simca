@@ -234,9 +234,6 @@ class CassiSystemOptim(pl.LightningModule, CassiSystem):
             self.X_coded_aper_coordinates = X_coded_aper_coordinates_crop
             self.Y_coded_aper_coordinates = Y_coded_aper_coordinates_crop
 
-            # print("dataset shape: ", dataset.shape)
-            # print("X coded shape: ", X_coded_aper_coordinates_crop.shape)
-
 
             scene = match_dataset_to_instrument(dataset, X_coded_aper_coordinates_crop)
 
@@ -246,32 +243,9 @@ class CassiSystemOptim(pl.LightningModule, CassiSystem):
             
             pattern_crop = pattern_crop.unsqueeze(-1).repeat(1, 1, 1, scene.size(-1))
 
-            #print(scene.get_device())
-            #print(pattern_crop.get_device())
 
-            plt.imshow(scene[0,:,:,0].cpu().numpy())
-            plt.title("scene")
-            plt.show()
-
-            # filtered_scene = scene * pattern_crop[..., None].repeat((1, 1, scene.shape[2]))
-            # print(f"scene: {scene.shape}")
-            # print(f"pattern_crop: {pattern_crop.shape}")
             filtered_scene = scene * pattern_crop
-            
-            # print(f"filtered_scene: {filtered_scene.shape}")
-            
 
-            plt.imshow(pattern_crop[0,:,:,0].cpu().numpy())
-            plt.title("Pattern crop1")
-            plt.show()
-
-
-
-            plt.imshow(filtered_scene[0,:,:,0].cpu().numpy())
-            plt.title("Filtered scene")
-            plt.show()
-
-            #print("filtered_scene",filtered_scene.shape)
 
             self.propagate_coded_aperture_grid()
 
@@ -372,25 +346,8 @@ class CassiSystemOptim(pl.LightningModule, CassiSystem):
                         # Set the position of the slit (j,i)
                         bottom_pad = (nb_rows - i-1)*height_slits + self.system_config["coded aperture"]["number of pixels along Y"] % nb_rows # Padding necessary below slit (j,i)
                         top_pad = i*height_slits
-                    """ array_x_pos = torch.tensor(start_position[i])
-
-                    # Create a grid to represent positions
-                    grid_positions = torch.arange(self.empty_grid.shape[1], dtype=torch.float32)
-                    # Expand dimensions for broadcasting
-                    expanded_x_positions = (array_x_pos.unsqueeze(-1)) * (self.empty_grid.shape[1]-1)
-                    expanded_grid_positions = grid_positions.unsqueeze(0)
-
-                    # Apply Gaussian-like function
-                    sigma = (self.array_x_positions[j,i]+1)/2
-                    gaussian = torch.exp(-(((expanded_grid_positions - expanded_x_positions)) ** 2) / (2 * sigma ** 2))
-
-                    padded = torch.nn.functional.pad(gaussian, (0,0,top_pad,bottom_pad)) # padding: left - right - top - bottom
-
-                    # Normalize to make sure the maximum value is 1
-                    self.pattern = self.pattern + padded/padded.max() """
 
                     c = start_position[i].clone().detach() # center of the slit
-                    #d = ((torch.tanh(1.1*self.array_x_positions[j,i])+1)/2)/2 # width of the slit at pos 
                     d = self.array_x_positions[j,i]/2 # width of the slit at pos 
                     m = (c-d)*(self.system_config["coded aperture"]["number of pixels along X"]-1) # left bound
                     M = (c+d)*(self.system_config["coded aperture"]["number of pixels along X"]-1) # right bound
@@ -408,7 +365,6 @@ class CassiSystemOptim(pl.LightningModule, CassiSystem):
                     rect = clamp_M - clamp_m +1
                     rect = torch.where(rect!=2, rect, 0)
                     rect = torch.where(rect <= 1, rect, rect-1)
-                    #rect = torch.clamp(-(rect-m)*(rect-M)+1,0,1).to(self.device)
 
                     gaussian_range = torch.arange(self.system_config["coded aperture"]["number of pixels along X"], dtype=torch.float32)
                     center_pos = 0.5*(len(gaussian_range)-1)
@@ -443,26 +399,6 @@ class CassiSystemOptim(pl.LightningModule, CassiSystem):
         return self.pattern
 
 
-    
-    # def generate_custom_slit_pattern(self):
-    #     """
-    #     Generate a custom slit pattern
-
-    #     Args:
-    #         array_x_positions (numpy.ndarray): array of the x positions of the slits between -1 and 1
-
-    #     Returns:
-    #         numpy.ndarray: generated slit pattern
-    #     """
-    #     pattern = torch.clone(self.empty_grid)
-    #     self.array_x_positions += 1
-    #     self.array_x_positions *= self.empty_grid.shape[1] // 2
-    #     self.array_x_positions = self.array_x_positions.type(torch.int32)
-    #     for i in range(self.array_x_positions.shape[0]):
-    #         pattern[0, self.array_x_positions[i]] = 1
-
-    #     return self.pattern
-
     def interpolate_dataset_along_wavelengths_torch(self, hyperspectral_cube, wavelengths, new_wavelengths_sampling,
                                                     chunk_size):
         """
@@ -481,8 +417,6 @@ class CassiSystemOptim(pl.LightningModule, CassiSystem):
         except:
             self.dataset = hyperspectral_cube
             self.dataset_wavelengths = wavelengths
-            #print(self.dataset.shape)
-            #print(self.dataset_wavelengths.shape)
         
         self.dataset = hyperspectral_cube
         self.dataset_wavelengths = wavelengths

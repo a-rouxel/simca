@@ -144,7 +144,7 @@ class CassiSystem():
         else:
             raise ValueError("The new wavelengths sampling must be inside the dataset wavelengths range")
 
-    def generate_2D_pattern(self, config_pattern, nb_of_patterns=1):
+    def generate_2D_pattern(self, config_pattern, nb_of_patterns=1, fix_random_pattern=False):
         """
         Generate multiple coded aperture 2D patterns based on the "pattern" configuration file
         and stack them to match the desired number of patterns.
@@ -165,7 +165,7 @@ class CassiSystem():
             if pattern_type == "random":
                 pattern = generate_random_pattern((self.system_config["coded aperture"]["number of pixels along Y"],
                                                    self.system_config["coded aperture"]["number of pixels along X"]),
-                                                  config_pattern['pattern']['ROM'])
+                                                  config_pattern['pattern']['ROM'], fix_random_pattern)
             elif pattern_type == "slit":
                 pattern = generate_slit_pattern((self.system_config["coded aperture"]["number of pixels along Y"],
                                                  self.system_config["coded aperture"]["number of pixels along X"]),

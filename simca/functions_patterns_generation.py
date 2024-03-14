@@ -110,7 +110,7 @@ def generate_ln_orthogonal_pattern(size, W, N):
 
     return list_of_patterns
 
-def generate_random_pattern(shape, ROM):
+def generate_random_pattern(shape, ROM, fix_random_pattern=False):
     """
     Generate a random pattern with a given rate of open/close mirrors
 
@@ -121,8 +121,13 @@ def generate_random_pattern(shape, ROM):
     Returns:
         numpy.ndarray: random pattern
     """
-
+    if fix_random_pattern:
+        np.random.seed(0)
+        
     pattern = np.random.choice([0, 1], size=shape, p=[1 - ROM, ROM])
+
+    if fix_random_pattern:
+        np.random.seed()
 
     return pattern
 

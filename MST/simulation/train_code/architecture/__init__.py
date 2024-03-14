@@ -58,10 +58,19 @@ def model_generator(method, pretrained_model_path=None):
     else:
         print(f'Method {method} is not defined !!!!')
     if pretrained_model_path is not None:
-        print(f'load model from {pretrained_model_path}')
+        # print(f'load model from {pretrained_model_path}')
+        # checkpoint = torch.load(pretrained_model_path)
+        # model.load_state_dict({k.replace('reconstruction_model.', ''): v for k, v in checkpoint.items()},
+        #                       strict=False)
+        
         checkpoint = torch.load(pretrained_model_path)
-        model.load_state_dict({k.replace('module.', ''): v for k, v in checkpoint.items()},
-                              strict=False)
+        
+        adjusted_state_dict = {key.replace('reconstruction_module.reconstruction_model.', '').replace('reconstruction_model.', ''): value
+                                   for key, value in checkpoint['state_dict'].items()}
+        # Filter out unexpected keys
+        model_keys = set(model.state_dict().keys())
+        filtered_state_dict = {k: v for k, v in adjusted_state_dict.items() if k in model_keys}
+        model.load_state_dict(filtered_state_dict)
     if method == 'hdnet':
         return model,fdl_loss
     return model

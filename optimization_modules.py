@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 from simca.CassiSystem_lightning import CassiSystemOptim
 from MST.simulation.train_code.architecture import *
-from simca import  load_yaml_config
+from simca import  load_yaml_config, save_config_file
 import matplotlib.pyplot as plt
 import torchvision
 import numpy as np
@@ -12,19 +12,24 @@ from piqa import SSIM
 from torch.utils.tensorboard import SummaryWriter
 import io
 import torchvision.transforms as transforms
+from torchmetrics.image import PeakSignalNoiseRatio
+import os
 from PIL import Image
 
 class JointReconstructionModule_V1(pl.LightningModule):
 
-    def __init__(self, model_name,log_dir="tb_logs", reconstruction_checkpoint=None):
+    def __init__(self, model_name,log_dir="tb_logs", reconstruction_checkpoint=None, fix_random_pattern=False):
         super().__init__()
 
         self.model_name = model_name
         self.reconstruction_model = model_generator(self.model_name, reconstruction_checkpoint)
+        self.fix_random_pattern = fix_random_pattern
 
         self.loss_fn = nn.MSELoss()
-        #self.ssim_loss = SSIM(window_size=11, n_channels=28)
-        self.ssim_loss = SSIM(window_size=11, n_channels=3)
+        self.ssim_loss = SSIM(window_size=11, n_channels=28)
+
+        # for param in self.reconstruction_model.parameters():
+        #     param.requires_grad = False
 
         self.writer = SummaryWriter(log_dir)
 
@@ -39,12 +44,37 @@ class JointReconstructionModule_V1(pl.LightningModule):
 
     def on_predict_start(self,stage=None):
         print("---PREDICT START---")
+
+        if not os.path.exists('./results'):
+            os.makedirs('./results')
+
+        if self.ssim_loss.kernel.shape[0]!=28:
+            self.ssim_loss = SSIM(window_size=11, n_channels=28).to(self.device)
+        
+        self.psnr = PeakSignalNoiseRatio().to(self.device)
+
         self.config = "simca/configs/cassi_system_optim_optics_full_triplet_dd_cassi.yml"
 
         config_system = load_yaml_config(self.config)
         self.config_patterns = load_yaml_config("simca/configs/pattern.yml")
         self.cassi_system = CassiSystemOptim(system_config=config_system)
         self.cassi_system.propagate_coded_aperture_grid()
+
+        try:
+            if self.fix_random_pattern:
+                file_name = "predict_results_recons_fixed_random.yml"
+            else:
+                file_name = "predict_results_recons.yml"
+            self.predict_results = load_yaml_config(file_name)
+        except:
+            self.predict_results = {}
+
+    def on_predict_end(self):
+        if self.fix_random_pattern:
+            file_name = "predict_results_recons_fixed_random"
+        else:
+            file_name = "predict_results_recons"
+        save_config_file('./results/' + file_name,self.predict_results,".")
 
     def _normalize_data_by_itself(self, data):
         # Calculate the mean and std for each batch individually
@@ -64,38 +94,22 @@ class JointReconstructionModule_V1(pl.LightningModule):
         hyperspectral_cube = hyperspectral_cube.permute(0, 2, 3, 1).to(self.device)
         batch_size, H, W, C = hyperspectral_cube.shape
 
-        # fig, ax = plt.subplots(1, 1)
-        # plt.title(f"entry cube")
-        # ax.imshow(hyperspectral_cube[0, :, :, 0].cpu().detach().numpy())
-        # plt.show()
-        # print(f"batch size:{batch_size}")
-        # generate pattern
-
+        # Generate pattern
         if pattern is None:
-            self.pattern = self.cassi_system.generate_2D_pattern(self.config_patterns,nb_of_patterns=batch_size)
+            self.pattern = self.cassi_system.generate_2D_pattern(self.config_patterns,nb_of_patterns=batch_size, fix_random_pattern=self.fix_random_pattern)
             self.pattern = self.pattern.to(self.device)
         else:
             self.pattern = pattern.to(self.device)
             self.cassi_system.pattern = pattern.to(self.device)
 
-        # plt.imshow(pattern[0, :, :].cpu().detach().numpy())
-        # plt.show()
-
-        # print(f"pattern_size: {pattern.shape}")
-
-        # generate first acquisition with simca
-
+        # Generate first acquisition with simca
         filtering_cube = self.cassi_system.generate_filtering_cube().to(self.device)
         self.acquired_image1 = self.cassi_system.image_acquisition(hyperspectral_cube, self.pattern, wavelengths).to(self.device)
 
 
-        # self.acquired_image1 = self._normalize_data_by_itself(self.acquired_image1)
-        # acquired_cubes = self.acquired_image1.unsqueeze(1).repeat((1, 28, 1, 1)).float().to(self.device) # b x W x R x C
-
         filtering_cubes = subsample(filtering_cube, torch.linspace(450, 650, filtering_cube.shape[-1]), torch.linspace(450, 650, 28)).permute((0, 3, 1, 2)).float().to(self.device)
 
         if self.model_name == "birnat":
-            # acquisition = self.acquired_image1.unsqueeze(1)
             acquisition = self.acquired_image1.float()
             filtering_cubes = filtering_cubes.float()
         elif "dauhst" in self.model_name:
@@ -107,8 +121,6 @@ class JointReconstructionModule_V1(pl.LightningModule):
             
         elif self.model_name == "mst_plus_plus":
             acquisition = self.acquired_image1.unsqueeze(1).repeat((1, 28, 1, 1)).float().to(self.device)
-        #print(f"acquisition shape: {acquisition.shape}")
-        #print(f"filtering_cubes shape: {filtering_cubes.shape}")
 
         reconstructed_cube = self.reconstruction_model(acquisition, filtering_cubes)
 
@@ -175,6 +187,14 @@ class JointReconstructionModule_V1(pl.LightningModule):
             prog_bar=True,
         )
 
+        self.log_dict(
+            { "val_ssim_loss": ssim_loss,
+            },
+            on_step=True,
+            on_epoch=True,
+            prog_bar=True,
+        )
+
         return {"loss": loss}
 
     def test_step(self, batch, batch_idx):
@@ -192,13 +212,29 @@ class JointReconstructionModule_V1(pl.LightningModule):
     def predict_step(self, batch, batch_idx):
         print("Predict step")
         loss, ssim_loss, reconstructed_cube, ref_cube = self._common_step(batch, batch_idx)
-        print("Predict loss: ", loss.item())
-        print("Predict ssim loss: ", ssim_loss)
-        #self.log('predict_step', loss,on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        psnr_loss = self.psnr(reconstructed_cube.permute(0, 3, 1, 2), ref_cube.permute(0, 3, 1, 2))
+
+        print("Predict PSNR loss: ", psnr_loss.item())
+        print("Predict RMSE loss: ", loss.item())
+        print("Predict SSIM loss: ", ssim_loss.item())
+
+        ignored_ids = [2, 3, 9, 10, 11, 12, 13, 17] # Those contain a low amount of signal and are thus less interesting
+        if (batch_idx+1) not in ignored_ids:
+            try:
+                self.predict_results[f"RMSE_scene{batch_idx+1}"].append(loss.item())
+                self.predict_results[f"SSIM_scene{batch_idx+1}"].append(ssim_loss.item())
+                self.predict_results[f"PSNR_scene{batch_idx+1}"].append(psnr_loss.item())
+            except:
+                self.predict_results[f"RMSE_scene{batch_idx+1}"] = [loss.item()]
+                self.predict_results[f"SSIM_scene{batch_idx+1}"] = [ssim_loss.item()]
+                self.predict_results[f"PSNR_scene{batch_idx+1}"] = [psnr_loss.item()]
+
+        if batch_idx == 19-1:
+            torch.save(reconstructed_cube, f'./results/recons_cube_random.pt')
+
         return loss
 
     def _common_step(self, batch, batch_idx):
-
 
         reconstructed_cube = self.forward(batch)
         hyperspectral_cube, wavelengths = batch
@@ -207,16 +243,8 @@ class JointReconstructionModule_V1(pl.LightningModule):
         reconstructed_cube = reconstructed_cube.permute(0, 2, 3, 1).to(self.device)
         ref_cube = match_dataset_to_instrument(hyperspectral_cube, reconstructed_cube[0, :, :,0])
 
-        # fig, ax = plt.subplots(1, 2)
-        # plt.title(f"true cube vs reconstructed cube")
-        # ax[0].imshow(hyperspectral_cube[0, :, :, 0].cpu().detach().numpy())
-        # ax[1].imshow(reconstructed_cube[0, :, :, 0].cpu().detach().numpy())
-        # plt.show()
-
-
         loss = torch.sqrt(self.loss_fn(reconstructed_cube, ref_cube))
         ssim_loss = self.ssim_loss(torch.clamp(reconstructed_cube.permute(0, 3, 1, 2), 0, 1), ref_cube.permute(0, 3, 1, 2))
-        #ssim_loss = 0
 
         return loss, ssim_loss, reconstructed_cube, ref_cube
 
@@ -245,7 +273,7 @@ class JointReconstructionModule_V1(pl.LightningModule):
     def plot_spectral_filter(self,ref_hyperspectral_cube,recontructed_hyperspectral_cube):
 
 
-        batch_size, y,x, lmabda_ = ref_hyperspectral_cube.shape
+        batch_size, y,x, lambda_ = ref_hyperspectral_cube.shape
 
         # Create a figure with subplots arranged horizontally
         fig, axs = plt.subplots(1, batch_size, figsize=(batch_size * 5, 4))  # Adjust figure size as needed
@@ -291,25 +319,10 @@ class JointReconstructionModule_V1(pl.LightningModule):
 
 
 def subsample(input, origin_sampling, target_sampling):
-    [bs, row, col, nC] = input.shape
+    # Subsample input from origin_sampling to target_sampling
     indices = torch.zeros(len(target_sampling), dtype=torch.int)
     for i in range(len(target_sampling)):
         sample = target_sampling[i]
         idx = torch.abs(origin_sampling-sample).argmin()
         indices[i] = idx
     return input[:,:,:,indices]
-
-def expand_mask_3d(mask_batch):
-    if len(mask_batch.shape)==3:
-        mask3d = mask_batch.unsqueeze(-1).repeat((1, 1, 1, 28))
-    else:
-        mask3d = mask_batch.repeat((1, 1, 1, 28))
-    mask3d = torch.permute(mask3d, (0, 3, 1, 2))
-    return mask3d
-    
-class EmptyModule(nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.useless_linear = nn.Linear(1, 1)
-    def forward(self, x):
-        return x
