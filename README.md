@@ -32,7 +32,7 @@ conda activate simca
 
 ## Download datasets
 
-4. Download the standard datasets from this [link (soon)](https://placeholder), then unzip and paste the `datasets_reconstruction` folder in the root directory of SIMCA.
+4. Download the standard datasets from this [link](https://partage.laas.fr/owncloud/index.php/s/geUrFeV1tI32pCr), then unzip and paste the `datasets_reconstruction` folder in the root directory of SIMCA.
 ```bash
 |--simca
     |--MST
@@ -52,7 +52,7 @@ conda activate simca
 
 ## Download the checkpoints
 
-5. If you want to use our saved checkpoints to run the architecture on the test dataset, download the checkpoints from this [link (soon)](https://placeholder), then unzip and paste the `saved_checkpoints` folder in the root directory of SIMCA.
+5. If you want to use our saved checkpoints to run the architecture on the test dataset, download the checkpoints from this [link](https://partage.laas.fr/owncloud/index.php/s/IMtIe5IKeyvf2E0), then unzip and paste the `saved_checkpoints` folder in the root directory of SIMCA.
 ```bash
 |--simca
     |--MST
