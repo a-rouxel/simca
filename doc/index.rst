@@ -7,10 +7,10 @@ SIMCA : optical simulations for coded spectral imaging
 =======================================================
 
 
-.. image:: ./resources/SIMCA_logo-2-cropped.png
+.. image:: ./resources/simca_logo.png
 
 SIMCA is a python-based tool designed to perform optical simulations of Coded Aperture Snapshot Spectral Imaging (CASSI) systems.
-We provide a python package and a graphical user-interface developed in PyQt5.
+We provide a python package available on Pypi.
 
 It is built upon ray-tracing equations and interpolation methods to estimate the image formation process and generate realistic measurements of various cassi instruments.
 
@@ -21,16 +21,17 @@ Available **system architectures** are:
 
 Available **propagation models** are:
 
+- Ray-tracing from :cite:`Rouxel2024`
 - Higher-Order from :cite:`Arguello2013`
-- Ray-tracing (first implementation in :cite:`Hemsley2020a`, another paper will be submitted soon)
 
 Available **optical components** and related characteristics are:
 
 - Lens (params: focal length)
-- Prism (params: apex angle, glass type, orientation misalignments)
+- Simple Prism (params: apex angle, glass type, orientation misalignments)
+- Doublet Prism (params: apex angle, glass type, orientation misalignments)
+- Amici Prism (params: apex angle, glass type, orientation misalignments)
+- Triple Prism (params: apex angle, glass type, orientation misalignments) 
 - Grating (params: groove density, orientation misalignments)
-
-More system architectures and optical components will be added in the future.
 
 
 Main Features
@@ -42,7 +43,7 @@ SIMCA includes four main features:
 
 - **Optical Design**: for evaluating and comparing the performances of various optical systems.
 
-- **Coded Aperture patterns Generation**: for generating various patterns and corresponding filtering cubes.
+- **Coded Aperture patterns Generation**: for generating various patterns and corresponding sensing matrix.
 
 - **Acquisition Coded Images**: for simulating the acquisition process
 
