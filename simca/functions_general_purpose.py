@@ -4,6 +4,7 @@ import os
 import numpy as np
 from datetime import datetime
 import h5py
+import torch
 
 def load_yaml_config(file_path):
     """
@@ -65,56 +66,96 @@ def save_config_file(config_file_name,config_file,result_directory):
 
 def rotation_z(theta):
     """
-    Rotate 3D matrix around the Z axis
+    Rotate 3D matrix around the Z axis using PyTorch
 
     Args:
-        theta (float): Input angle (in rad)
+        theta (torch.Tensor): Input angle (in rad)
 
     Returns:
-        numpy.ndarray : 2D rotation matrix
-
+        torch.Tensor: 3D rotation matrix
     """
+    # Ensure theta is a tensor with requires_grad=True
+    if not isinstance(theta, torch.Tensor):
+        theta = torch.tensor(theta, requires_grad=True)
 
-    r = np.array(((np.cos(theta), -np.sin(theta), 0),
-                  (np.sin(theta), np.cos(theta), 0),
-                  (0, 0, 1)))
+    cos_theta = torch.cos(theta)
+    sin_theta = torch.sin(theta)
+
+    # Construct the rotation matrix using torch.stack to support gradient computation
+    # For rotation around the Z axis, the changes affect the first two rows
+    row1 = torch.stack([cos_theta, -sin_theta, torch.zeros_like(theta)])
+    row2 = torch.stack([sin_theta, cos_theta, torch.zeros_like(theta)])
+    row3 = torch.stack([torch.zeros_like(theta), torch.zeros_like(theta), torch.ones_like(theta)])
+
+    # Concatenate the rows to form the rotation matrix
+    r = torch.stack([row1, row2, row3], dim=0)
+
+    # Adjust the matrix to have the correct shape (3, 3) for each theta
+    r = r.transpose(0, 1)  # This may need adjustment based on how you intend to use r
 
     return r
+
 
 def rotation_y(theta):
     """
-    Rotate 3D matrix around the Y axis
+    Rotate 3D matrix around the Y axis using PyTorch
 
     Args:
-        theta (float): Input angle (in rad)
+        theta (torch.Tensor): Input angle (in rad)
 
     Returns:
-        numpy.ndarray : 2D rotation matrix
-
+        torch.Tensor: 3D rotation matrix
     """
+    # Ensure theta is a tensor with requires_grad=True
+    if not isinstance(theta, torch.Tensor):
+        theta = torch.tensor(theta, requires_grad=True, dtype=torch.float32)
 
-    r = np.array(((np.cos(theta), 0, np.sin(theta)),
-                  (0, 1, 0),
-                  (-np.sin(theta), 0, np.cos(theta))))
+    cos_theta = torch.cos(theta)
+    sin_theta = torch.sin(theta)
+
+    # Construct the rotation matrix using torch.stack to support gradient computation
+    # For rotation around the Y axis, the changes affect the first and third rows
+    row1 = torch.stack([cos_theta, torch.zeros_like(theta), -sin_theta])  # Note the change to -sin_theta for correct Y-axis rotation
+    row2 = torch.stack([torch.zeros_like(theta), torch.ones_like(theta), torch.zeros_like(theta)])
+    row3 = torch.stack([sin_theta, torch.zeros_like(theta), cos_theta])
+
+    # Concatenate the rows to form the rotation matrix
+    r = torch.stack([row1, row2, row3], dim=0)
+
+    # Adjust the matrix to have the correct shape (3, 3) for each theta
+    r = r.transpose(0, 1)  # Adjust transpose for consistency with your requirements
 
     return r
-
 
 
 def rotation_x(theta):
     """
-    Rotate 3D matrix around the X axis
+    Rotate 3D matrix around the X axis using PyTorch
 
     Args:
-        theta (float): Input angle (in rad)
+        theta (tensor): Input angle (in rad)
 
     Returns:
-        numpy.ndarray : 2D rotation matrix
-
+        torch.Tensor: 3D rotation matrix
     """
+    # Ensure theta is a tensor with requires_grad=True
+    if not isinstance(theta, torch.Tensor):
+        theta = torch.tensor(theta, requires_grad=True, dtype=torch.float32)
 
-    r = np.array(((1, 0, 0),
-                  (0, math.cos(theta), -math.sin(theta)),
-                  (0, math.sin(theta), math.cos(theta))))
+    cos_theta = torch.cos(theta)
+    sin_theta = torch.sin(theta)
+
+    # Use torch.stack and torch.cat to construct the rotation matrix
+    row1 = torch.stack([torch.ones_like(theta), torch.zeros_like(theta), torch.zeros_like(theta)])
+    row2 = torch.stack([torch.zeros_like(theta), cos_theta, -sin_theta])
+    row3 = torch.stack([torch.zeros_like(theta), sin_theta, cos_theta])
+
+    # Concatenate the rows to form the rotation matrix
+    r = torch.stack([row1, row2, row3], dim=0)
+
+    # Transpose the matrix to match the expected shape
+    r = r.transpose(0, 1)
 
     return r
+
+

@@ -13,10 +13,15 @@ from pytorch_lightning import LightningDataModule
 
 
 class CubesDataset(Dataset):
-    def __init__(self, data_dir, augment=True):
+    def __init__(self, data_dir, cassi_system,augment=True,crop=True,crop_size_x=128,crop_size_y=128):
         self.data_dir = data_dir
         self.augment_ = augment
+        self.crop_size_x = crop_size_x
+        self.crop_size_y = crop_size_y
+        self.crop = crop
         self.data_file_names = sorted(os.listdir(self.data_dir))
+
+        self.cassi_system = cassi_system
 
     def __len__(self):
         return len(self.data_file_names)
@@ -28,9 +33,16 @@ class CubesDataset(Dataset):
         if self.augment_:
             cube = self.augment(cube, 128) # lambda x H x W
         else:
-            cube = torch.from_numpy(np.transpose(cube, (2, 0, 1))).float()[:,:128,:128] # lambda x H x W
+            cube = torch.from_numpy(np.transpose(cube, (2, 0, 1))).float()
         
-        return cube, wavelengths
+        if self.crop:
+            cube = cube[:,:self.crop_size_y,:self.crop_size_x] # lambda x H x W
+
+
+        cube = self.cassi_system.interpolate_and_crop_scene(cube, wavelengths,chunk_size=56)
+        new_wavelengths = self.cassi_system.wavelengths
+
+        return cube, new_wavelengths
 
     def load_hyperspectral_data(self, idx):
         file_path = os.path.join(self.data_dir, self.data_file_names[idx])
@@ -77,7 +89,7 @@ class CubesDataModule(LightningDataModule):
 
     def setup(self, stage=None):
         dataset_size = len(self.dataset)
-        train_size = int(0.7 * dataset_size)
+        train_size = int(0.79 * dataset_size)
         val_size = int(0.2 * dataset_size)
         test_size = dataset_size - train_size - val_size
 

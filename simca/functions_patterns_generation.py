@@ -35,6 +35,22 @@ def generate_blue_noise_type_1_pattern(shape):
 
     return binary_pattern
 
+def generate_ones_pattern(shape):
+    """
+    Generate a pattern with all ones
+
+    Args:
+        shape (tuple of int): shape of the pattern
+
+    Returns:
+        numpy.ndarray: ones pattern
+    """
+
+    pattern = np.ones(shape)
+
+    return pattern
+
+
 def generate_orthogonal_pattern(size, W, N):
     """
     Generate an orthogonal pattern according to https://hal.laas.fr/hal-02993037

@@ -1,0 +1,33 @@
+#####  Configuration file for the chosen optical system
+
+infos:
+    system name: HYACAMEO
+
+system architecture:
+    system type: SD-CASSI
+    propagation type: simca
+    focal lens: 75000
+    dispersive element:
+    # dispersive element caracteristics
+        type: grating        # name of the dispersive element
+        G: 100             # grating density                   (only used if type == 'grating')       -- in lines/mm
+        m: 1               # grating order to consider         (only used if type == 'grating')       -- no units
+        alpha_c: 0
+        delta alpha c: 0
+        delta beta c: 0
+        wavelength center: 520  # central wavelength -- in nm
+detector:
+    number of pixels along X: 511                  # number of pixels along X axis -- no units
+    number of pixels along Y: 511                  # number of pixels along Y axis -- no units
+    pixel size along X: 10                            # pixel size along X       -- in um
+    pixel size along Y: 10                            # pixel size along Y       -- in um
+coded aperture:
+    number of pixels along X: 1501                  # number of pixels along X axis -- no units
+    number of pixels along Y: 1201                  # number of pixels along Y axis -- no units
+    pixel size along X: 5                              # pixel size along X       -- in um
+    pixel size along Y: 5                              # pixel size along Y       -- in um
+
+spectral range:
+    wavelength min: 450     # minimum wavelength -- in nm
+    wavelength max: 650      # maximum wavelength -- in nm
+    number of spectral samples: 101

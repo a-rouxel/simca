@@ -12,6 +12,6 @@ matplotlib
 opticalglass
 pyyaml
 snoop
-#torch
-#torch-geometric
-#torch-cluster
+torch
+torch-geometric
+torch-cluster

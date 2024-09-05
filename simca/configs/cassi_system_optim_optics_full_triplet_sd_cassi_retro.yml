@@ -9,7 +9,8 @@ system architecture:
     focal lens: 75000
     dispersive element:
     # dispersive element caracteristics
-        type: tripleprism        # name of the dispersive element
+        catalog: Schott
+        type: amici        # name of the dispersive element
         glass1: N-SK2       # glass type of the dispersive element (only used if type == 'prism')
         glass2: N-SF4      # glass type of the dispersive element (only used if type == 'prism')
         glass3: N-SK2       # glass type of the dispersive element (only used if type == 'prism')
@@ -30,19 +31,19 @@ system architecture:
         alpha_c: 0
         delta alpha c: 0
         delta beta c: 0
-        wavelength center: 550  # central wavelength -- in nm
+        wavelength center: 520  # central wavelength -- in nm
 detector:
-    number of pixels along X: 139                  # number of pixels along X axis -- no units
-    number of pixels along Y: 112                  # number of pixels along Y axis -- no units
-    pixel size along X: 70                             # pixel size along X       -- in um
-    pixel size along Y: 70                              # pixel size along Y       -- in um
+    number of pixels along X: 511                  # number of pixels along X axis -- no units
+    number of pixels along Y: 511                  # number of pixels along Y axis -- no units
+    pixel size along X: 10                            # pixel size along X       -- in um
+    pixel size along Y: 10                            # pixel size along Y       -- in um
 coded aperture:
-    number of pixels along X: 112                  # number of pixels along X axis -- no units
-    number of pixels along Y: 112                  # number of pixels along Y axis -- no units
-    pixel size along X: 80                              # pixel size along X       -- in um
-    pixel size along Y: 80                              # pixel size along Y       -- in um
+    number of pixels along X: 1501                  # number of pixels along X axis -- no units
+    number of pixels along Y: 1201                  # number of pixels along Y axis -- no units
+    pixel size along X: 5                              # pixel size along X       -- in um
+    pixel size along Y: 5                              # pixel size along Y       -- in um
 
 spectral range:
     wavelength min: 450     # minimum wavelength -- in nm
     wavelength max: 650      # maximum wavelength -- in nm
-    number of spectral samples: 55
+    number of spectral samples: 151

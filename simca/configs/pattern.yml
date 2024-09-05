@@ -4,8 +4,8 @@ infos:
     results directory: ./data/patterns/
 
 pattern:
-    type: random
+    type: slit
     slit position: 0
-    slit width: 1
-    ROM : 0.5
+    slit width: 10
+    ROM : 0.8
 

@@ -1,0 +1,34 @@
+#####  Configuration file for the chosen optical system
+
+infos:
+    system name: HYACAMEO
+
+system architecture:
+    system type: DD-CASSI
+    focal lens: 75000
+    dispersive element:
+    # dispersive element caracteristics
+        catalog: Schott
+        type: prism        # name of the dispersive element
+        glass1: N-BK7       # glass type of the dispersive element (only used if type == 'prism')
+        A1: 50             # apex angle of the prism in degrees      (only used if type == 'prism')   -- in degrees
+        alpha_c: 40.9
+        delta alpha c: 0
+        delta beta c: 0
+        wavelength center: 520  # central wavelength -- in nm
+detector:
+    number of pixels along X: 112                  # number of pixels along X axis -- no units
+    number of pixels along Y: 112                  # number of pixels along Y axis -- no units
+    pixel size along X: 71                             # pixel size along X       -- in um
+    pixel size along Y: 71                              # pixel size along Y       -- in um
+
+coded aperture:
+    number of pixels along X: 21                  # number of pixels along X axis -- no units
+    number of pixels along Y: 21                  # number of pixels along Y axis -- no units
+    pixel size along X: 400                              # pixel size along X       -- in um
+    pixel size along Y: 400                              # pixel size along Y       -- in um
+
+spectral range:
+    wavelength min: 450     # minimum wavelength -- in nm
+    wavelength max: 650      # maximum wavelength -- in nm
+    number of spectral samples: 10
