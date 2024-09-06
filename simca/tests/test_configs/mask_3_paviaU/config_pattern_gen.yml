@@ -1,3 +1,0 @@
-pattern:
-  type: custom h5 pattern
-  file path: "./simca/tests/test_configs/mask_3_paviaU/pattern.h5"

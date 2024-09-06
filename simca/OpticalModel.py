@@ -1,380 +1,316 @@
-from simca.functions_general_purpose import *
-from opticalglass.glassfactory import create_glass
+import torch
 import snoop
+import opticalglass as og
+from simca.helper import *
+# import snoop
+import torch
+from opticalglass.glassfactory import create_glass
+import pytorch_lightning as pl
+from torch import nn
+from opticalglass.glassfactory import get_glass_catalog
 
 
-class OpticalModel:
+class OpticalModel(pl.LightningModule):
     """
     Class that contains the optical model caracteristics and propagation models
     """
-    def __init__(self, system_config):
-        self.set_optical_config(system_config)
+    def __init__(self, config,index_estimation_method="cauchy",device="cpu"):
+        super().__init__()
 
-    def update_config(self, new_config):
-        """
-        Update the optical model configuration
-
-        Args:
-            new_config (dict): new configuration
-
-        """
-        self.set_optical_config(new_config)
-
-    def set_optical_config(self, config):
-        """
-        Set the optical model configuration
-
-        Args:
-            config (dict): configuration file
-
-        """
-
+        self.to(device)
         self.system_config = config
+        self.index_estimation_method = index_estimation_method
 
-        self.dispersive_element_type = config["system architecture"]["dispersive element"]["type"]
-        self.glass1 = config["system architecture"]["dispersive element"]["glass1"]
-        self.A1 = math.radians(config["system architecture"]["dispersive element"]["A1"])
-        self.glass2 = config["system architecture"]["dispersive element"]["glass2"]
-        self.A2 = math.radians(config["system architecture"]["dispersive element"]["A2"])
-        self.glass3 = config["system architecture"]["dispersive element"]["glass3"]
-        self.A3 = math.radians(config["system architecture"]["dispersive element"]["A3"])
-        self.G = config["system architecture"]["dispersive element"]["G"]
-        self.lba_c = config["system architecture"]["dispersive element"]["wavelength center"]
-        self.m = config["system architecture"]["dispersive element"]["m"]
-        self.F = config["system architecture"]["focal lens"]
-        self.delta_alpha_c = math.radians(config["system architecture"]["dispersive element"]["delta alpha c"])
-        self.delta_beta_c = math.radians(config["system architecture"]["dispersive element"]["delta beta c"])
+        self.lba_c = nn.Parameter(torch.tensor(config["system architecture"]["dispersive element"]["wavelength center"], dtype=torch.float,device=self.device,requires_grad=True))
 
-        self.nb_of_det_pixels_X = config["detector"]["number of pixels along X"]
-        self.nb_of_det_pixels_Y = config["detector"]["number of pixels along Y"]
-        self.nb_of_coded_apert_pixels_X = config["coded aperture"]["number of pixels along X"]
-        self.nb_of_coded_apert_pixels_Y = config["coded aperture"]["number of pixels along Y"]
-
-        self.set_wavelengths(config["spectral range"]["wavelength min"],
-                             config["spectral range"]["wavelength max"],
-                             config["spectral range"]["number of spectral samples"])
+        self.define_lenses_carac()
+        self.define_dispersive_element_carac()
 
 
-    def propagation_with_distorsions(self, X_input_grid, Y_input_grid):
-        """
-        Propagate the coded aperture coded_aperture through one CASSI system
+    def define_lenses_carac(self):
 
-        Args:
-            X_input_grid (numpy.ndarray): x coordinates grid
-            Y_input_grid (numpy.ndarray): y coordinates grid
-
-        Returns:
-            tuple: X coordinates of the propagated coded aperture grids, Y coordinates of the propagated coded aperture grids
-        """
-
-        self.calculate_central_dispersion()
-
-        # X_coordinates_propagated_coded_aperture = np.zeros((X_input_grid.shape[0],X_input_grid.shape[1],
-        #                                                     self.nb_of_spectral_samples))
-        # Y_coordinates_propagated_coded_aperture = np.zeros((X_input_grid.shape[0],X_input_grid.shape[1],
-        #                                                     self.nb_of_spectral_samples))
-        #
-        # X_input_grid_flatten = X_input_grid.flatten()
-        # Y_input_grid_flatten = Y_input_grid.flatten()
-        #
-        # glass = create_glass(self.glass1, 'Schott')
-        # print(glass)
-        #
-        #
-        # n1 = 1.5
-        # n2 = 1.8
-        # n3 = 1.5
-        #
-        # for idx,lba in enumerate(np.linspace(self.system_wavelengths[0], self.system_wavelengths[-1],self.nb_of_spectral_samples)):
-        #
-        #     prism_index = glass.calc_rindex(lba)
-        #     # n_array_flatten = np.full(X_input_grid_flatten.shape, prism_index)
-        #     # n_array_flatten = np.full(X_input_grid_flatten.shape, self.sellmeier(lba))
-        #     n1_flatten = np.full(X_input_grid_flatten.shape, n1)
-        #     n2_flatten = np.full(X_input_grid_flatten.shape, n2)
-        #     n3_flatten = np.full(X_input_grid_flatten.shape, n3)
-        #
-        #     lba_array_flatten = np.full(X_input_grid_flatten.shape, lba)
-        #
-        #     X_propagated_coded_aperture, Y_propagated_coded_aperture = self.propagate_through_arm(X_input_grid_flatten,Y_input_grid_flatten,
-        #                                                                                           n1=n1_flatten,
-        #                                                                                           n2=n2_flatten,
-        #                                                                                           n3=n3_flatten,
-        #                                                                                           lba=lba_array_flatten)
-        #
-        #     X_coordinates_propagated_coded_aperture[:,:,idx] = X_propagated_coded_aperture.reshape(X_input_grid.shape)
-        #     Y_coordinates_propagated_coded_aperture[:,:,idx] = Y_propagated_coded_aperture.reshape(Y_input_grid.shape)
-        #
-        # return X_coordinates_propagated_coded_aperture, Y_coordinates_propagated_coded_aperture
-
-    def propagation_with_no_distorsions(self, X_input_grid, Y_input_grid):
-        """
-        Vanilla Propagation model used in most cassi acquisitions simulation.
-
-        Args:
-            X_input_grid (numpy.ndarray): X coordinates of the grid to be propagated (2D)
-            Y_input_grid (numpy.ndarray): Y coordinates of the grid to be propagated (2D)
-
-        Returns:
-            tuple: X coordinates grids of the propagated coded apertures, Y coordinates grids of the propagated coded apertures
-        """
-
-        self.calculate_central_dispersion()
-
-        X_coordinates_propagated_coded_aperture = np.zeros((X_input_grid.shape[0],X_input_grid.shape[1],
-                                                            self.nb_of_spectral_samples))
-        Y_coordinates_propagated_coded_aperture = np.zeros((X_input_grid.shape[0],X_input_grid.shape[1],
-                                                            self.nb_of_spectral_samples))
-
-        for idx, wav in enumerate(self.system_wavelengths):
-
-            X_ref = -1 * X_input_grid + self.X0_propagated[idx]
-            Y_ref = -1 * Y_input_grid + self.Y0_propagated[idx]
-
-            X_coordinates_propagated_coded_aperture[:,:,idx] = X_ref
-            Y_coordinates_propagated_coded_aperture[:,:,idx] = Y_ref
-
-        return X_coordinates_propagated_coded_aperture, Y_coordinates_propagated_coded_aperture
-
-    def set_wavelengths(self, wavelength_min, wavelength_max, nb_of_spectral_samples):
-        """
-        Set the wavelengths range of the optical system
-
-        Args:
-            wavelength_min (float): minimum wavelength of the system
-            wavelength_max (float): maximum wavelength of the system
-            nb_of_spectral_samples (int): number of spectral samples of the system
-        Returns:
-
-        """
-        self.wavelength_min = wavelength_min
-        self.wavelength_max = wavelength_max
-        self.nb_of_spectral_samples = nb_of_spectral_samples
-
-        self.system_wavelengths = np.linspace(self.wavelength_min,self.wavelength_max,self.nb_of_spectral_samples)
-
-    @snoop
-    def calculate_central_dispersion(self):
-        """
-        Calculate the dispersion related to the central pixel of the coded aperture
-
-        Returns:
-            numpy.float: spectral dispersion of the central pixel of the coded aperture
-        """
-
-        # self.alpha_c = self.calculate_alpha_c()
-        self.alpha_c = 55*np.pi/180
-        X0_coordinates_array_flatten = np.zeros(self.system_wavelengths.shape[0])
-        Y0_coordinates_array_flatten = np.zeros(self.system_wavelengths.shape[0])
-        lba_array_flatten = self.system_wavelengths
-
-        n1_array_flatten = np.full(lba_array_flatten.shape, 1.5)
-        n2_array_flatten = np.full(lba_array_flatten.shape, 1.8)
-        n3_array_flatten = np.full(lba_array_flatten.shape, 1.5)
-
-        # n_array_flatten = np.full(lba_array_flatten.shape, self.sellmeier(lba_array_flatten))
-
-        X0_propagated, Y0_propagated = self.propagate_through_arm(X_vec_in=X0_coordinates_array_flatten,Y_vec_in=Y0_coordinates_array_flatten,
-                                                                  n1=n1_array_flatten,
-                                                                  n2=n2_array_flatten,
-                                                                  n3=n3_array_flatten,
-                                                                  lba=lba_array_flatten)
-
-        self.X0_propagated, self.Y0_propagated = X0_propagated, Y0_propagated
-
-        self.central_distorsion_in_X = np.abs(self.X0_propagated[-1] - self.X0_propagated[0])
-
-        return self.central_distorsion_in_X
-    
-    @snoop
-    def propagate_through_simple_prism(self,k,n,A):
-
-        norm_k = np.sqrt(k[0] ** 2 + k[1] ** 2 + k[2] ** 2)
-        k /= norm_k
-
-        k_out = self.model_Prism_angle_to_angle(k, n, A)
-        k_out = k_out * norm_k
-
-        return k_out
-    
-    def propagate_through_double_prism(self,k,n1,n2,A1,A2):
-
-        norm_k = np.sqrt(k[0] ** 2 + k[1] ** 2 + k[2] ** 2)
-        k /= norm_k
-
-        k = self.model_Prism_angle_to_angle(k, n1, A1)
-        k = k * norm_k
-
-        k = rotation_z(np.pi) @ k
-
-        k_out = self.model_Prism_angle_to_angle(k, n2, A2)
-        k_out = k_out * norm_k
-
-        return k_out
-
-    @snoop
-    def propagate_through_triple_prism(self,k,n1,n2,n3,A1,A2,A3):
-
-        norm_k = np.sqrt(k[0] ** 2 + k[1] ** 2 + k[2] ** 2)
-
-        k /= norm_k
-        k = self.model_Prism_angle_to_angle(k, n1, A1)
-        k *= norm_k
-        k = rotation_z(np.pi) @ k
-        k = self.model_Prism_angle_to_angle(k, n2, A2)
-        k *= norm_k
-        k = rotation_z(np.pi) @ k
-        k_out = self.model_Prism_angle_to_angle(k, n3, A3)
-        k_out *= norm_k
-
-        print('alpha', np.arctan(k_out[0, 0] / k_out[2, 0]) * 180 / np.pi)
-        print('beta', np.arctan(k_out[1, 0] / k_out[2, 0]) * 180 / np.pi)
-
-        return k_out
-
-    @snoop
-    def rotate_from_lens_to_dispersive_element(self,k,alpha_c,delta_alpha_c,delta_beta_c,alpha_1):
-
-        angle_with_P1 = alpha_c - alpha_1 + delta_alpha_c
-
-        print('angle_with_P1',angle_with_P1*180/np.pi)
+        config = self.system_config
+        self.F = torch.tensor(config["system architecture"]["focal lens"],
+                              dtype=torch.float,device=self.device)  # If F needs to be optimized, wrap with nn.Parameter as well
         
-        k = rotation_y(angle_with_P1) @ k[:, 0, :]
-        # Rotation in relation to P1 around the X axis
-        k = rotation_x(delta_beta_c) @ k
-        # Rotation of P1 in relation to frame_in along the new Y axis
-        k = rotation_y(alpha_1) @ k
+        return self.F
 
-        print('alpha', np.arctan(k[0, 0] / k[2, 0]) * 180 / np.pi)
-        # print('beta', np.arctan(k[0, 0] / k[2, 0]) * 180 / np.pi)
+
+    def define_dispersive_element_carac(self):
+
+        config = self.system_config 
+        self.dispersive_element_type = config["system architecture"]["dispersive element"]["type"]
+
+        if self.dispersive_element_type == "grating":
+            self.G = torch.tensor(config["system architecture"]["dispersive element"]["G"], dtype=torch.float,device=self.device)
+            self.m = torch.tensor(config["system architecture"]["dispersive element"]["m"], dtype=torch.float,device=self.device)
+            if self.index_estimation_method == "cauchy":
+                self.nd1, self.vd1 = (nn.Parameter(torch.tensor(1, dtype=torch.float,device=self.device)),nn.Parameter(torch.tensor(1, dtype=torch.float,device=self.device)))
+                self.nd2, self.vd2 = (nn.Parameter(torch.tensor(1, dtype=torch.float,device=self.device)),nn.Parameter(torch.tensor(1, dtype=torch.float,device=self.device)))
+                self.nd3, self.vd3 = (nn.Parameter(torch.tensor(1, dtype=torch.float,device=self.device)),nn.Parameter(torch.tensor(1, dtype=torch.float,device=self.device)))
+            self.delta_beta_c = nn.Parameter(torch.tensor(math.radians(config["system architecture"]["dispersive element"]["delta beta c"]), dtype=torch.float,device=self.device))
+
+
+        elif self.dispersive_element_type in ["prism", "doubleprism", "amici", "tripleprism"]:
+            self.catalog = config["system architecture"]["dispersive element"]["catalog"]
+            self.glass1 = config["system architecture"]["dispersive element"]["glass1"]
+            self.A1 = nn.Parameter(torch.tensor(math.radians(config["system architecture"]["dispersive element"]["A1"]), dtype=torch.float,device=self.device))
+            self.A2 = nn.Parameter(torch.tensor(0, dtype=torch.float,device=self.device))
+            self.A3 = nn.Parameter(torch.tensor(0, dtype=torch.float,device=self.device))
+            if self.index_estimation_method == "cauchy":
+                self.nd1, self.vd1 = self.get_corresponding_nd_vd(self.glass1,self.catalog)
+                self.nd2, self.vd2 = (nn.Parameter(torch.tensor(1, dtype=torch.float,device=self.device)),nn.Parameter(torch.tensor(1, dtype=torch.float,device=self.device)))
+                self.nd3, self.vd3 = (nn.Parameter(torch.tensor(1, dtype=torch.float,device=self.device)),nn.Parameter(torch.tensor(1, dtype=torch.float,device=self.device)))
+            # only used for prisms
+            self.delta_beta_c = nn.Parameter(torch.tensor(math.radians(config["system architecture"]["dispersive element"]["delta beta c"]), dtype=torch.float,device=self.device))
+        
+        if self.dispersive_element_type in ["doubleprism", "amici", "tripleprism"]:
+        
+            self.glass2 = config["system architecture"]["dispersive element"]["glass2"]
+            self.A2 = nn.Parameter(torch.tensor(math.radians(config["system architecture"]["dispersive element"]["A2"]), dtype=torch.float,device=self.device))
+            if self.index_estimation_method == "cauchy":
+                self.nd2, self.vd2 = self.get_corresponding_nd_vd(self.glass2,self.catalog)
+                self.nd3, self.vd3 = (nn.Parameter(torch.tensor(1, dtype=torch.float,device=self.device)),nn.Parameter(torch.tensor(1, dtype=torch.float,device=self.device)))
+
+        
+        if self.dispersive_element_type in ["amici", "tripleprism"]:
+            
+            self.glass3 = config["system architecture"]["dispersive element"]["glass3"]
+            self.A3 = nn.Parameter(torch.tensor(math.radians(config["system architecture"]["dispersive element"]["A3"]), dtype=torch.float,device=self.device))
+            if self.index_estimation_method == "cauchy":
+                self.nd3, self.vd3 = self.get_corresponding_nd_vd(self.glass3,self.catalog)
+        
+        if self.dispersive_element_type =="amici":
+            self.A3 = self.A1
+            self.glass3 = self.glass1
+            if self.index_estimation_method == "cauchy":
+                self.nd3 = self.nd1
+                self.vd3 = self.vd1
+
+        self.alpha_c = nn.Parameter(
+            torch.tensor(math.radians(config["system architecture"]["dispersive element"]["alpha_c"]),
+                         dtype=torch.float,device=self.device))
+        self.delta_alpha_c = nn.Parameter(torch.tensor(
+            math.radians(config["system architecture"]["dispersive element"]["delta alpha c"]), dtype=torch.float,device=self.device))
+        
+        # Calculation based on the above parameters
+        alpha_c_transmis = -1 * self.propagate_central_microm_through_disperser(self.lba_c)
+        self.alpha_c_transmis = alpha_c_transmis[0,0,0]
+        # print(self.alpha_c_transmis.detach().cpu().numpy()*180/np.pi)
+
+    
+    def get_corresponding_nd_vd(self,glass_name,catalog):
+        glass_pd = get_glass_catalog(catalog)
+        list_of_glasses = glass_pd.df.iloc[:, 0].index.tolist()
+
+        idx_glass = list_of_glasses.index(glass_name)
+        tuple_glass_data = glass_pd.glass_map_data("d")
+
+        nd = tuple_glass_data[0][idx_glass]
+        vd = tuple_glass_data[1][idx_glass]
+
+        nd = nn.Parameter(torch.tensor(nd, dtype=torch.float,device=self.device))
+        vd = nn.Parameter(torch.tensor(vd, dtype=torch.float,device=self.device))
+
+        # print(f"nd = {nd}, vd = {vd}")
+
+        return nd, vd
+
+    def rerun_central_dispersion(self):
+        alpha_c_transmis = -1 * self.propagate_central_microm_through_disperser(self.lba_c.detach().cpu().numpy())
+        self.alpha_c_transmis = alpha_c_transmis
+
+        return alpha_c_transmis
+    
+
+    def propagate(self,X,Y,lba,n1,n2,n3):
+
+        k = self.model_Lens_pos_to_angle(X, Y, self.F)
+
+        alpha_1 = self.define_alpha_1()
+
+        k = self.rotate_from_lens_to_dispersive_element(k,self.alpha_c,self.delta_alpha_c,self.delta_beta_c,alpha_1)
+
+        if self.dispersive_element_type in ["prism", "doubleprism", "amici", "tripleprism"]:
+            k, list_theta_in, list_theta_out = self.propagate_through_triple_prism(k,n1,n2,n3,self.A1,self.A2,self.A3)
+        elif self.dispersive_element_type == "grating":
+            k = self.model_Grating_angle_to_angle(k, lba, self.m, self.G)
+
+        k = self.rotate_from_dispersive_element_to_lens(k,self.alpha_c_transmis,self.delta_alpha_c,self.delta_beta_c,alpha_1)
+
+        X_vec_out, Y_vec_out = self.model_Lens_angle_to_position(k, self.F)
+
+        return X_vec_out, Y_vec_out
+    
+    
+    def repropagate(self,X,Y,lba,n1,n2,n3):
+
+        k = self.model_Lens_pos_to_angle(X, Y, self.F)
+
+        alpha_1 = self.define_alpha_1()
+
+        k = self.rotate_from_lens_to_dispersive_element(k,self.alpha_c_transmis,-1*self.delta_alpha_c,-1*self.delta_beta_c,alpha_1)
+
+        if self.dispersive_element_type in ["prism", "doubleprism", "amici", "tripleprism"]:
+            k, list_theta_in, list_theta_out = self.propagate_through_triple_prism(k,n1,n2,n3,self.A1,self.A2,self.A3)
+        elif self.dispersive_element_type == "grating":
+            k = self.model_Grating_angle_to_angle(k, lba, self.m, self.G)
+
+        
+        k = self.rotate_from_dispersive_element_to_lens(k,self.alpha_c,-1*self.delta_alpha_c,-1*self.delta_beta_c,alpha_1)
+
+        # print(k)
+        X_vec_out, Y_vec_out = self.model_Lens_angle_to_position(k, self.F)
+
+        return X_vec_out, Y_vec_out
+
+    def calculate_dispersion_with_cauchy(self,lambda_vec, nD, V):
+
+        lambda_vec = lambda_vec * 1e-9  # Convert nm to meters for calculation
+        lambda_D = 589.3e-9  # D line wavelength in meters
+        lambda_F = 486.1e-9  # F line wavelength in meters
+        lambda_C = 656.3e-9  # C line wavelength in meters
+
+        # Calculate B using the given formula
+        B = (nD - 1) / (V * (1 / lambda_F ** 2 - 1 / lambda_C ** 2))
+
+        # Calculate A using the given formula
+        A = nD - B / lambda_D ** 2
+
+        # Calculate n for each wavelength in lambda_vec
+        n = A + B / lambda_vec ** 2  # Note: lambda_vec is already in meters
+        
+        # print("lambda_vec = ",lambda_vec)
+        # print("n_cauchy = ",n)
+        # print("n sellemeir = ",self.sellmeir_NSF4(lambda_vec))
+
+
+        # return self.sellmeir_NSF4(lambda_vec)
+        return n
+    
+    def sellmeier(self,lambda_vec,glass_name):
+
+        glass_pd = get_glass_catalog(self.catalog)
+        df = glass_pd.df["dispersion coefficients"]
+
+        B1 = df.loc[glass_name]["B1"]
+        B2 = df.loc[glass_name]["B2"]
+        B3 = df.loc[glass_name]["B3"]
+        C1 = df.loc[glass_name]["C1"]
+        C2 = df.loc[glass_name]["C2"]
+        C3 = df.loc[glass_name]["C3"]
+
+        # print(glass_name)
+        # print("B1,B2,B3,C1,C2,C3 = ",B1,B2,B3,C1,C2,C3)
+
+        lambda_vec = lambda_vec * 1e-3
+
+        index_square = 1 + B1*lambda_vec**2/(lambda_vec**2-C1) + B2*lambda_vec**2/(lambda_vec**2-C2)
+
+        index_square = torch.tensor(index_square,dtype=torch.float32)
+
+        index = torch.sqrt(index_square)
+
+        # print(lambda_vec)
+        # print("index = ",index)
+
+        return index
+
+
+    def rotate_from_lens_to_dispersive_element(self,k,alpha_c,delta_alpha_c,delta_beta_c,alpha_1):
+        angle_with_P1 = alpha_c - alpha_1 + delta_alpha_c
+        #TODO : check the type of k
+        k = k.to(dtype=torch.float32)
+        # k_1 = rotation_y(angle_with_P1) @ k
+        k = torch.matmul(k,rotation_y(angle_with_P1).T)
+        # Rotation in relation to P1 around the X axis
+        k = k.to(dtype=torch.float32)
+
+        k = torch.matmul(k,rotation_x(delta_beta_c).T)
+        # Rotation of P1 in relation to frame_in along the new Y axis
+        k = k.to(dtype=torch.float32)
+
+        k = torch.matmul(k,rotation_y(alpha_1).T)
 
         return k
     
     def rotate_from_dispersive_element_to_lens(self,k,alpha_c_transmis,delta_alpha_c,delta_beta_c,alpha_1):
 
         angle_with_P2 = alpha_c_transmis - alpha_1 - delta_alpha_c
-        
-        k = np.dot(rotation_y(alpha_1), k)
+        k = torch.matmul(k,rotation_y(alpha_1).T)
         # Rotation in relation to P2 around the X axis
-        k = np.dot(rotation_x(-delta_beta_c), k)
+        k = torch.matmul(k,rotation_x(-delta_beta_c).T)
         # Rotation in relation to P2 around the Y axis
-        k = np.dot(rotation_y(angle_with_P2), k)
-
+        k = torch.matmul(k,rotation_y(angle_with_P2).T)
+        #print(k.shape)
         return k
 
-    def propagate_through_arm(self, X_vec_in, Y_vec_in, n1, n2,n3,lba):
-
-        """
-        Propagate the light through one system arm : (lens + dispersive element + lens)
-
-        Args:
-            X_vec_in (numpy.ndarray) : X coordinates of the coded aperture pixels (1D array)
-            Y_vec_in (numpy.ndarray) : Y coordinates of the coded aperture pixels (1D array)
-            n (numpy.ndarray) : refractive indexes of the system (at the corresponding wavelength)
-            lba (numpy.ndarray) : wavelengths
-
-        Returns:
-            tuple: flatten arrays corresponding to the propagated X and Y coordinates
-        """
-
-        dispersive_element_type = self.dispersive_element_type
-        A1 = self.A1
-        A2 = self.A2
-        A3 = self.A3
-        G = self.G
-        m = self.m
-        F = self.F
-        delta_alpha_c = self.delta_alpha_c
-        delta_beta_c = self.delta_beta_c
-        alpha_c = self.alpha_c
-        # alpha_c_transmis = self.alpha_c_transmis
-
-        # alpha_c = 50*np.pi/180
 
 
-        k = self.model_Lens_pos_to_angle(X_vec_in, Y_vec_in, F)
+    def propagate_through_triple_prism(self,k,n1,n2,n3,A1,A2,A3):
 
-        if dispersive_element_type == "prism":
-            alpha_1 = A1 - A1/2
-            k = self.rotate_from_lens_to_dispersive_element(k,alpha_c,delta_alpha_c,delta_beta_c,alpha_1)
-            k = self.propagate_through_simple_prism(k,n1,A1)
-            k = self.rotate_from_dispersive_element_to_lens(k,alpha_c_transmis,delta_alpha_c,delta_beta_c,alpha_1)
+        norm_k = torch.sqrt(k[...,0] ** 2 + k[...,1] ** 2 + k[...,2] ** 2)
+        norm_k = norm_k.unsqueeze(-1)
+        norm_k = norm_k.repeat(1, 1, 1,3)
+        k_normalized = k / norm_k
 
-        elif dispersive_element_type == "doubleprism":
-            alpha_1 = A1 - A2/2
-            k = self.rotate_from_lens_to_dispersive_element(k,alpha_c,delta_alpha_c,delta_beta_c,alpha_1)
-            k = self.propagate_through_double_prism(k,n1,n2,A1,A2)
-            k = self.rotate_from_dispersive_element_to_lens(k,alpha_c_transmis,delta_alpha_c,delta_beta_c,alpha_1)
+        k,theta_in_1, theta_out_1,distance_from_total_intern_reflection1 = self.model_Prism_angle_to_angle_torch(k_normalized, n1, A1)
+        k = k * norm_k
+        k = torch.matmul(k,rotation_z(torch.tensor(np.pi,device=self.device)).T)
+        k,theta_in_2, theta_out_2,distance_from_total_intern_reflection2 = self.model_Prism_angle_to_angle_torch(k, n2, A2)
+        k = k * norm_k
+        k = torch.matmul(k,rotation_z(torch.tensor(np.pi,device=self.device)).T)
+        k,theta_in_3, theta_out_3,distance_from_total_intern_reflection3 = self.model_Prism_angle_to_angle_torch(k, n3, A3)
+        k = k * norm_k
 
-        elif dispersive_element_type == "tripleprism":
-            alpha_1 = A1 - A2/2
-            k = self.rotate_from_lens_to_dispersive_element(k,alpha_c,delta_alpha_c,delta_beta_c,alpha_1)
-            k = self.propagate_through_triple_prism(k,n1,n2,n3,A1,A2,A3)
-            k = self.rotate_from_dispersive_element_to_lens(k,alpha_c_transmis,delta_alpha_c,delta_beta_c,alpha_1)
-        
-        elif dispersive_element_type == "grating":
-            alpha_1 = 0
-            k = self.rotate_from_lens_to_dispersive_element(k,alpha_c,delta_alpha_c,delta_beta_c,alpha_1)
-            k = self.model_Grating_angle_to_angle(k, lba, m, G)
-            k = self.rotate_from_dispersive_element_to_lens(k,alpha_c_transmis,delta_alpha_c,delta_beta_c,alpha_1)
+        list_theta_in = [theta_in_1,theta_in_2,theta_in_3]
+        list_theta_out = [theta_out_1,theta_out_2,theta_out_3]
 
-        X_vec_out, Y_vec_out = self.model_Lens_angle_to_position(k, F)
+        self.min_distance_from_total_intern_reflection = min(torch.min(distance_from_total_intern_reflection1),
+                                                             torch.min(distance_from_total_intern_reflection2),
+                                                             torch.min(distance_from_total_intern_reflection3))
 
-        return X_vec_out, Y_vec_out
+        return k, list_theta_in, list_theta_out
 
-    def model_Grating_angle_to_angle(self,k_in, lba, m, G):
+
+
+    
+    def model_Grating_angle_to_angle(self, k_in, lba, m, G):
         """
         Model of the grating
 
         Args:
-            k_in (numpy.ndarray) : wave vector of the incident ray (shape = 3 x N)
-            lba (numpy.ndarray) : wavelengths (shape = N) -- in nm
+            k_in (torch.Tensor) : wave vector of the incident ray (shape = 3 x N)
+            lba (torch.Tensor) : wavelengths (shape = N) -- in nm
             m (float) : diffraction order of the grating -- no units
             G (float) : lines density of the grating -- in lines/mm
 
         Returns:
-            numpy.ndarray: wave vector of the outgoing ray (shape = 3 x N)
-
+            torch.Tensor: wave vector of the outgoing ray (shape = 3 x N)
         """
 
-        alpha_in = np.arctan(k_in[0]) * np.sqrt(1 + np.tan(k_in[0])**2 + np.tan(k_in[1])**2)
-        beta_in = np.arctan(k_in[1]) * np.sqrt(1 + np.tan(k_in[0])**2 + np.tan(k_in[1])**2)
 
-        alpha_out = -1*np.arcsin(m * lba*10**-9  * G * 10**3 - np.sin(alpha_in))
+        alpha_in = torch.atan(k_in[...,0]) * torch.sqrt(1 + torch.tan(k_in[...,0])**2 + torch.tan(k_in[...,1])**2)
+        beta_in = torch.atan(k_in[...,1]) * torch.sqrt(1 + torch.tan(k_in[...,0])**2 + torch.tan(k_in[...,1])**2)
+
+        alpha_out = -1 * torch.asin(m * lba * 10**-9 * G * 10**3 - torch.sin(alpha_in))
         beta_out = beta_in
 
-
-        k_out = [np.sin(alpha_out) * np.cos(beta_out),
-                 np.sin(beta_out)*np.cos(alpha_out),
-                 np.cos(alpha_out) * np.cos(beta_out)]
+        k_out = torch.stack([
+            torch.sin(alpha_out) * torch.cos(beta_out),
+            torch.sin(beta_out) * torch.cos(alpha_out),
+            torch.cos(alpha_out) * torch.cos(beta_out)
+        ], dim=-1)
 
         return k_out
 
-    def simplified_grating_in_out(self, alpha,lba,m,G):
-        """
-        Model 1D of the grating in the dispersion direction
-
-        Args:
-            alpha (numpy.ndarray or float) : angle of the incident ray (shape = N) -- in radians
-            lba (numpy.ndarray or float) : wavelengths (shape = N) -- in nm
-            m (float) : diffraction order of the grating -- no units
-            G (float) : lines density of the grating -- in lines/mm
-
-        Returns:
-            numpy.ndarray: angle of the outgoing ray (shape = N) -- in radians
-
-        """
-
-        alpha_out = np.arcsin(m * lba * 10 ** -9 * G * 10 ** 3 - np.sin(alpha))
-
-        return alpha_out
 
     def model_Lens_angle_to_position(self,k_in,F):
         """
         Model of the lens : angle to position
 
         Args:
-            k_in (numpy.ndarray) : wave vector of the incident ray (shape = 3 x N)
+            k_in (torch.tensor) : wave vector of the incident ray (shape = 3 x N)
             F (float) : focal length of the lens -- in um
 
         Returns:
@@ -382,15 +318,14 @@ class OpticalModel:
 
         """
 
-        alpha = np.arctan(k_in[0] / k_in[2])
-        beta = np.arctan(k_in[1] / k_in[2])
+        alpha = torch.arctan(k_in[...,0] / k_in[...,2])
+        beta = torch.arctan(k_in[...,1] / k_in[...,2])
 
-        x = F * np.tan(alpha)
-        y = F * np.tan(beta)
+        x = F * torch.tan(alpha)
+        y = F * torch.tan(beta)
 
         return x, y
 
-    @snoop
     def model_Prism_angle_to_angle(self,k0, n,A):
         """
         Ray tracing through the prism
@@ -413,109 +348,74 @@ class OpticalModel:
 
         return kout
 
+
+    def model_Prism_angle_to_angle_torch(self,k0, n,A):
+        """
+        Ray tracing through the prism
+
+        Args:
+            k0 (torch.tensor) : wave vector of the incident ray
+            n (torch.tensor) : refractive index of the prism
+            A (float) : angle of the prism -- in radians
+
+        Returns:
+            torch.tensor: wave vector of the outgoing ray
+
+        """
+        kp = torch.zeros_like(k0,device=k0.device)
+        kout = torch.zeros_like(k0,device=k0.device)
+
+        theta_in = torch.atan2(k0[...,0], k0[...,2])
+
+        kp[...,0] = k0[...,0]
+        kp[...,1] = k0[...,1]
+
+        # compare = n ** 2 - k0[...,0] ** 2 - k0[...,1] ** 2
+
+
+        kp[...,2] = torch.sqrt(n ** 2 - k0[...,0] ** 2 - k0[...,1] ** 2)
+
+        theta_out = torch.atan2(kp[...,0], kp[...,2])
+
+        kp_r = torch.matmul(kp, rotation_y(-A).T)
+
+        kout[...,0] = kp_r[...,0]
+        kout[...,1] = kp_r[...,1]
+        kout[...,2] = torch.sqrt(1 - kp_r[...,0] ** 2 - kp_r[...,1] ** 2)
+
+        distance_from_total_intern_reflection = 1 - kp_r[...,0] ** 2 - kp_r[...,1] ** 2
+
+        return kout, theta_in, theta_out,distance_from_total_intern_reflection
+    
+
     def model_Lens_pos_to_angle(self,x_obj, y_obj, F):
         """
         Model of the lens : position to angle
 
         Args:
-            x_obj (numpy.ndarray) : position X in the image plane (shape = N) -- in um
-            y_obj (numpy.ndarray) : position Y in the image plane (shape = N) -- in um
-            F (float) : focal length of the lens -- in um
+            x_obj (torch.tensor) : position X in the image plane -- in um
+            y_obj (torch.tensor) : position Y in the image plane  -- in um
+            F (torch.tensor) : focal length of the lens -- in um
 
         Returns:
-            numpy.ndarray: wave vector of the outgoing ray (shape = 3 x N)
+            torch.tensor: wave vector of the outgoing ray
 
         """
+        alpha = -1 * torch.atan(x_obj / F)
+        beta = -1 * torch.atan(y_obj / F)
 
-        alpha = -1*np.arctan(x_obj / F)
-        beta  = -1*np.arctan(y_obj / F)
+        # Adjusting the dimension for k_out to make it a 4D tensor
+        #TODO : verify that float64 is the right type
+        k_out = torch.zeros(size=(x_obj.shape[0], x_obj.shape[1], x_obj.shape[2], 3),dtype=torch.float64,device=x_obj.device)
 
-        k_out = np.array([[np.sin(alpha) * np.cos(beta)],
-                       [np.sin(beta)*np.cos(alpha)],
-                       [np.cos(alpha) * np.cos(beta)]])
+        # the fourth dimension should have 3 components
+        k_out[...,0] = torch.sin(alpha) * torch.cos(beta)
+        k_out[...,1] = torch.sin(beta) * torch.cos(alpha)
+        k_out[...,2] = torch.cos(alpha) * torch.cos(beta)
 
         return k_out
 
-    def calculate_alpha_c(self):
-        """
-        Calculate the relative angle of incidence between the lenses and the dispersive element
 
-        Returns:
-            float: angle of incidence
-        """
-        if self.dispersive_element_type == "prism":
-            self.Dm = self.calculate_minimum_deviation(self.sellmeier(self.lba_c), self.A1)
-            self.alpha_c = self.get_incident_angle_min_dev(self.A1,self.Dm)
-            self.alpha_c_transmis = self.alpha_c
-        
-        if self.dispersive_element_type == "doubletprism":
-            self.Dm = self.calculate_minimum_deviation(self.sellmeier(self.lba_c), self.A1)
-            self.alpha_c = self.get_incident_angle_min_dev(self.A1,self.Dm)
-            self.alpha_c_transmis = self.alpha_c
-
-        if self.dispersive_element_type == "grating":
-            self.alpha_c = 0
-            self.alpha_c_transmis = self.simplified_grating_in_out(self.alpha_c,self.lba_c,self.m,self.G)
-
-        return self.alpha_c
-
-
-    def calculate_minimum_deviation(self,n, A):
-        """
-        minimum deviation angle of a prism of index n and apex angle A
-
-        Args:
-            n (float or numpy.ndarray): index of the prism -- no units
-            A (float): apex angle of the prism -- in radians
-
-        Returns:
-            float or numpy.ndarray: minimum deviation angle -- in radians
-        """
-        return 2 * np.arcsin(n * np.sin(A / 2)) - A
-
-    def get_incident_angle_min_dev(self,A, D_m):
-        """
-        Calculate the angle of incidence corresponding to the minimum deviation angle
-
-        Args:
-            A (float): apex angle of the prism -- in radians
-            D_m (float): minimum deviation angle -- in radians
-
-        Returns:
-            float: angle of incidence corresponding to minimum of deviation -- in radians
-        """
-        return (A + D_m) / 2
-
-
-    def sellmeier(self,lambda_, glass_type="BK7"):
-        """
-        Evaluating the refractive index value of a prism for a given lambda based on Sellmeier equation
-
-        Args:
-            lambda_ (numpy.ndarray of float) : wavelength in nm
-
-        Returns:
-            numpy.ndarray of float: index value corresponding to the input wavelength
-
-        """
-
-        if glass_type == "BK7":
-            B1 = 1.03961212
-            B2 = 0.231792344
-            B3 = 1.01046945
-            C1 = 6.00069867 * (10 ** -3)
-            C2 = 2.00179144 * (10 ** -2)
-            C3 = 1.03560653 * (10 ** 2)
-
-        else :
-            raise Exception("glass_type is Unknown")
-
-        lambda_in_mm = lambda_ / 1000
-
-        n = np.sqrt(1 + B1 * lambda_in_mm ** 2 / (lambda_in_mm ** 2 - C1) + B2 * lambda_in_mm ** 2 / (
-                    lambda_in_mm ** 2 - C2) + B3 * lambda_in_mm ** 2 / (lambda_in_mm ** 2 - C3))
-
-        return n
 
     def generate_2D_gaussian(self,radius, sample_size_x, sample_size_y, nb_of_samples):
         """
@@ -582,3 +482,165 @@ class OpticalModel:
             print("The 'number of spectral samples' (cf. system config) is not sufficiant to avoid weird sampling effect( aliasing ?). RAISE IT !")
 
         return nb_of_sample_points_per_pix
+    
+    
+
+    def propagate_central_microm_through_disperser(self,lambda_):
+
+        if self.index_estimation_method == "cauchy":
+            n1 = self.calculate_dispersion_with_cauchy(lambda_,self.nd1,self.vd1).clone().detach().requires_grad_(True).to(device=self.device)
+            n2 = self.calculate_dispersion_with_cauchy(lambda_,self.nd2,self.vd2).clone().detach().requires_grad_(True).to(device=self.device)
+            n3 = self.calculate_dispersion_with_cauchy(lambda_,self.nd3,self.vd3).clone().detach().requires_grad_(True).to(device=self.device)
+        if self.index_estimation_method == "sellmeier":
+            n1 = self.sellmeier(lambda_,self.glass1).clone().detach().requires_grad_(True).to(device=self.device)
+            try:
+                n2 = self.sellmeier(lambda_,self.glass2).clone().detach().requires_grad_(True).to(device=self.device)
+            except:
+                n2 = torch.tensor(1,device=self.device)
+            try:
+                n3 = self.sellmeier(lambda_,self.glass3).clone().detach().requires_grad_(True).to(device=self.device)
+            except:
+                n3 = torch.tensor(1,device=self.device)
+
+        x0 = torch.zeros((1,1,1,1)).to(device=self.device)
+        y0 = torch.zeros((1,1,1,1)).to(device=self.device)
+
+        k = self.model_Lens_pos_to_angle(x0, y0, self.F)
+
+        alpha_1 = self.define_alpha_1()
+
+        k = self.rotate_from_lens_to_dispersive_element(k,self.alpha_c,self.delta_alpha_c,self.delta_beta_c,alpha_1)
+
+        if self.dispersive_element_type in ["prism", "doubleprism", "amici", "tripleprism"]:
+            k, list_theta_in, list_theta_out = self.propagate_through_triple_prism(k,n1,n2,n3,self.A1,self.A2,self.A3)
+            self.list_theta_in = list_theta_in
+            self.list_theta_out = list_theta_out
+        elif self.dispersive_element_type == "grating":
+            k = self.model_Grating_angle_to_angle(k, lambda_, self.m, self.G)
+
+        alpha = torch.arctan(k[...,0] / k[...,2])
+        beta = torch.arctan(k[...,1] / k[...,2])
+
+
+
+        return alpha
+    
+
+
+    def define_alpha_1(self):
+        """
+        Define the angle alpha_1 depending on the type of dispersive element
+
+        Returns:
+            float: angle alpha_1
+        """
+
+        if self.dispersive_element_type == "prism":
+            alpha_1 = self.A1 / 2
+        elif self.dispersive_element_type in ["doubleprism", "amici", "tripleprism"]:
+            alpha_1 = self.A1 - self.A2 / 2
+        elif self.dispersive_element_type == "grating":
+            alpha_1 = torch.tensor(0,device=self.device)
+        else:
+            raise Exception("dispersive_element_type should be prism or grating")
+
+        return alpha_1
+    
+
+
+    
+
+
+def rotation_z(theta):
+    """
+    Rotate 3D matrix around the Z axis using PyTorch
+
+    Args:
+        theta (torch.Tensor): Input angle (in rad)
+
+    Returns:
+        torch.Tensor: 3D rotation matrix
+    """
+    # Ensure theta is a tensor with requires_grad=True
+    if not isinstance(theta, torch.Tensor):
+        theta = torch.tensor(theta, requires_grad=True)
+
+    cos_theta = torch.cos(theta)
+    sin_theta = torch.sin(theta)
+
+    # Construct the rotation matrix using torch.stack to support gradient computation
+    # For rotation around the Z axis, the changes affect the first two rows
+    row1 = torch.stack([cos_theta, -sin_theta, torch.zeros_like(theta)])
+    row2 = torch.stack([sin_theta, cos_theta, torch.zeros_like(theta)])
+    row3 = torch.stack([torch.zeros_like(theta), torch.zeros_like(theta), torch.ones_like(theta)])
+
+    # Concatenate the rows to form the rotation matrix
+    r = torch.stack([row1, row2, row3], dim=0)
+
+    # Adjust the matrix to have the correct shape (3, 3) for each theta
+    r = r.transpose(0, 1)  # This may need adjustment based on how you intend to use r
+
+    return r
+
+
+def rotation_y(theta):
+    """
+    Rotate 3D matrix around the Y axis using PyTorch
+
+    Args:
+        theta (torch.Tensor): Input angle (in rad)
+
+    Returns:
+        torch.Tensor: 3D rotation matrix
+    """
+    # Ensure theta is a tensor with requires_grad=True
+    if not isinstance(theta, torch.Tensor):
+        theta = torch.tensor(theta, requires_grad=True, dtype=torch.float32)
+
+    cos_theta = torch.cos(theta)
+    sin_theta = torch.sin(theta)
+
+    # Construct the rotation matrix using torch.stack to support gradient computation
+    # For rotation around the Y axis, the changes affect the first and third rows
+    row1 = torch.stack([cos_theta, torch.zeros_like(theta), -sin_theta])  # Note the change to -sin_theta for correct Y-axis rotation
+    row2 = torch.stack([torch.zeros_like(theta), torch.ones_like(theta), torch.zeros_like(theta)])
+    row3 = torch.stack([sin_theta, torch.zeros_like(theta), cos_theta])
+
+    # Concatenate the rows to form the rotation matrix
+    r = torch.stack([row1, row2, row3], dim=0)
+
+    # Adjust the matrix to have the correct shape (3, 3) for each theta
+    r = r.transpose(0, 1)  # Adjust transpose for consistency with your requirements
+
+    return r
+
+
+def rotation_x(theta):
+    """
+    Rotate 3D matrix around the X axis using PyTorch
+
+    Args:
+        theta (tensor): Input angle (in rad)
+
+    Returns:
+        torch.Tensor: 3D rotation matrix
+    """
+    # Ensure theta is a tensor with requires_grad=True
+    if not isinstance(theta, torch.Tensor):
+        theta = torch.tensor(theta, requires_grad=True, dtype=torch.float32)
+
+    cos_theta = torch.cos(theta)
+    sin_theta = torch.sin(theta)
+
+    # Use torch.stack and torch.cat to construct the rotation matrix
+    row1 = torch.stack([torch.ones_like(theta), torch.zeros_like(theta), torch.zeros_like(theta)])
+    row2 = torch.stack([torch.zeros_like(theta), cos_theta, -sin_theta])
+    row3 = torch.stack([torch.zeros_like(theta), sin_theta, cos_theta])
+
+    # Concatenate the rows to form the rotation matrix
+    r = torch.stack([row1, row2, row3], dim=0)
+
+    # Transpose the matrix to match the expected shape
+    r = r.transpose(0, 1)
+
+    return r

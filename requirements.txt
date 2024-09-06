@@ -1,6 +1,4 @@
 h5py
-pyqt5
-pyqtgraph
 pyyaml
 scipy
 seaborn
@@ -12,6 +10,6 @@ matplotlib
 opticalglass
 pyyaml
 snoop
-#torch
-#torch-geometric
-#torch-cluster
+torch
+torch-geometric
+torch-cluster

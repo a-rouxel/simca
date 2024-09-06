@@ -1,7 +1,4 @@
 ./datasets
 */__pycache__/
 */.idea
-docs/_build/
-docs/_cache/
-docs/_templates/
-docs/_static
+./outputs

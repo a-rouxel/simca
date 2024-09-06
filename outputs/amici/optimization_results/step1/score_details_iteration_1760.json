@@ -1,0 +1,63 @@
+{
+    "components non weights": {
+        "cost_dispersion": 1.0,
+        "cost_distance_glasses": 1.0,
+        "cost_deviation": 1,
+        "cost_distorsion": 1.0,
+        "cost_thickness": 1.0,
+        "cost_beam_compression": 1.0,
+        "cost_non_linearity": 1.0,
+        "cost_distance_total_intern_reflection": 1.0
+    },
+    "components with weights": {
+        "cost_dispersion": 21.42281723022461,
+        "cost_distance_glasses": 699.9730520875654,
+        "cost_deviation": 20.907033920288086,
+        "cost_distorsion": 20.9132137298584,
+        "cost_thickness": 3728.8466796875,
+        "cost_beam_compression": 2.132720947265625,
+        "cost_non_linearity": 959.9085693359375,
+        "cost_distance_total_intern_reflection": 13551.4765625
+    },
+    "weighted components": {
+        "cost_dispersion": 21.42281723022461,
+        "cost_distance_glasses": 699.9730520875654,
+        "cost_deviation": 20.907033920288086,
+        "cost_distorsion": 20.9132137298584,
+        "cost_thickness": 3728.8466796875,
+        "cost_beam_compression": 2.132720947265625,
+        "cost_non_linearity": 959.9085693359375,
+        "cost_distance_total_intern_reflection": 13551.4765625
+    }
+}{
+    "components non weights": {
+        "cost_dispersion": 1.0,
+        "cost_distance_glasses": 1.0,
+        "cost_deviation": 1,
+        "cost_distorsion": 1.0,
+        "cost_thickness": 1.0,
+        "cost_beam_compression": 1.0,
+        "cost_non_linearity": 1.0,
+        "cost_distance_total_intern_reflection": 1.0
+    },
+    "components with weights": {
+        "cost_dispersion": 21.42281723022461,
+        "cost_distance_glasses": 699.9730520875654,
+        "cost_deviation": 20.907033920288086,
+        "cost_distorsion": 20.9132137298584,
+        "cost_thickness": 3728.8466796875,
+        "cost_beam_compression": 2.132720947265625,
+        "cost_non_linearity": 959.9085693359375,
+        "cost_distance_total_intern_reflection": 13551.4765625
+    },
+    "weighted components": {
+        "cost_dispersion": 21.42281723022461,
+        "cost_distance_glasses": 699.9730520875654,
+        "cost_deviation": 20.907033920288086,
+        "cost_distorsion": 20.9132137298584,
+        "cost_thickness": 3728.8466796875,
+        "cost_beam_compression": 2.132720947265625,
+        "cost_non_linearity": 959.9085693359375,
+        "cost_distance_total_intern_reflection": 13551.4765625
+    }
+}

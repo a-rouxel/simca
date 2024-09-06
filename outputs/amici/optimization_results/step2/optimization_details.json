@@ -1,0 +1,1997 @@
+[
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 0,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 24.33140144638986,
+            "A2": 35.55279436588468,
+            "delta_beta_c": 0.0,
+            "alpha_c": 6.308127075897412,
+            "delta_alpha_c": 0.0,
+            "A3": 24.33140144638986
+        },
+        "optical system values": {
+            "dispersion [um]": 1051.659912109375,
+            "deviation [deg]": 6.273587663038303,
+            "max distortion [um]": 5.154808044433594,
+            "mean distortion [um]": 1.127838134765625,
+            "beam_compression [no units]": 0.7870163917541504
+        },
+        "current_loss": 23446.462890625
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 10,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 23.555211918920445,
+            "A2": 34.13577941501174,
+            "delta_beta_c": 0.0,
+            "alpha_c": 6.395074103371204,
+            "delta_alpha_c": 0.0,
+            "A3": 23.555211918920445
+        },
+        "optical system values": {
+            "dispersion [um]": 998.51953125,
+            "deviation [deg]": 20.12285232323957,
+            "max distortion [um]": 5.634846210479736,
+            "mean distortion [um]": 1.3060555458068848,
+            "beam_compression [no units]": 0.8045390248298645
+        },
+        "current_loss": 18189.498046875
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 20,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.76255822045671,
+            "A2": 33.46359659312869,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.311494900513123,
+            "delta_alpha_c": 0.0,
+            "A3": 22.76255822045671
+        },
+        "optical system values": {
+            "dispersion [um]": 987.5653076171875,
+            "deviation [deg]": -1.5567545381541716,
+            "max distortion [um]": 5.085597515106201,
+            "mean distortion [um]": 0.9875859022140503,
+            "beam_compression [no units]": 0.8130146861076355
+        },
+        "current_loss": 17307.126953125
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 30,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.702858952016214,
+            "A2": 33.485029726744195,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.963685331808723,
+            "delta_alpha_c": 0.0,
+            "A3": 22.702858952016214
+        },
+        "optical system values": {
+            "dispersion [um]": 990.442138671875,
+            "deviation [deg]": -6.509076790807887,
+            "max distortion [um]": 3.740971326828003,
+            "mean distortion [um]": 0.8839882612228394,
+            "beam_compression [no units]": 0.8129552006721497
+        },
+        "current_loss": 17185.357421875
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 40,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.95234527182927,
+            "A2": 33.79937552291569,
+            "delta_beta_c": 0.0,
+            "alpha_c": 6.042784898812994,
+            "delta_alpha_c": 0.0,
+            "A3": 22.95234527182927
+        },
+        "optical system values": {
+            "dispersion [um]": 999.5855712890625,
+            "deviation [deg]": -4.419707409549001,
+            "max distortion [um]": 3.9143898487091064,
+            "mean distortion [um]": 0.9221357703208923,
+            "beam_compression [no units]": 0.8091400265693665
+        },
+        "current_loss": 17112.1015625
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 50,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 23.10756132071781,
+            "A2": 33.878189075748466,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.871191336955233,
+            "delta_alpha_c": 0.0,
+            "A3": 23.10756132071781
+        },
+        "optical system values": {
+            "dispersion [um]": 998.9478759765625,
+            "deviation [deg]": 2.254613215066063,
+            "max distortion [um]": 4.756382942199707,
+            "mean distortion [um]": 1.0294955968856812,
+            "beam_compression [no units]": 0.808061420917511
+        },
+        "current_loss": 17102.693359375
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 60,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 23.026763597931144,
+            "A2": 33.80720291970452,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.892077628550309,
+            "delta_alpha_c": 0.0,
+            "A3": 23.026763597931144
+        },
+        "optical system values": {
+            "dispersion [um]": 997.6258544921875,
+            "deviation [deg]": 0.1591779454733306,
+            "max distortion [um]": 4.524998188018799,
+            "mean distortion [um]": 0.993888258934021,
+            "beam_compression [no units]": 0.8089701533317566
+        },
+        "current_loss": 17029.751953125
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 70,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.96069517808961,
+            "A2": 33.75170763269817,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.887905663627901,
+            "delta_alpha_c": 0.0,
+            "A3": 22.96069517808961
+        },
+        "optical system values": {
+            "dispersion [um]": 996.7281494140625,
+            "deviation [deg]": -1.671319542258617,
+            "max distortion [um]": 4.342216968536377,
+            "mean distortion [um]": 0.9648770689964294,
+            "beam_compression [no units]": 0.8096792697906494
+        },
+        "current_loss": 17007.931640625
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 80,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.983144302344147,
+            "A2": 33.75533104805286,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.919147802665186,
+            "delta_alpha_c": 0.0,
+            "A3": 22.983144302344147
+        },
+        "optical system values": {
+            "dispersion [um]": 996.1979370117188,
+            "deviation [deg]": -0.3484891647804501,
+            "max distortion [um]": 4.410593032836914,
+            "mean distortion [um]": 0.9824711680412292,
+            "beam_compression [no units]": 0.8096080422401428
+        },
+        "current_loss": 17013.3046875
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 90,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 23.016171682075747,
+            "A2": 33.7680317848145,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.962706053436472,
+            "delta_alpha_c": 0.0,
+            "A3": 23.016171682075747
+        },
+        "optical system values": {
+            "dispersion [um]": 995.811767578125,
+            "deviation [deg]": 1.2590418534372427,
+            "max distortion [um]": 4.4845075607299805,
+            "mean distortion [um]": 1.0110962390899658,
+            "beam_compression [no units]": 0.8094210624694824
+        },
+        "current_loss": 17033.2421875
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 100,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.990999019889664,
+            "A2": 33.78613861630421,
+            "delta_beta_c": 0.0,
+            "alpha_c": 6.068521051605602,
+            "delta_alpha_c": 0.0,
+            "A3": 22.990999019889664
+        },
+        "optical system values": {
+            "dispersion [um]": 997.5994262695312,
+            "deviation [deg]": -1.2456383542430332,
+            "max distortion [um]": 4.1210036277771,
+            "mean distortion [um]": 0.9684383869171143,
+            "beam_compression [no units]": 0.8092406392097473
+        },
+        "current_loss": 17065.142578125
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 110,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 23.008798492866717,
+            "A2": 33.766368633751604,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.843173047206195,
+            "delta_alpha_c": 0.0,
+            "A3": 23.008798492866717
+        },
+        "optical system values": {
+            "dispersion [um]": 995.994873046875,
+            "deviation [deg]": 0.8473510806368134,
+            "max distortion [um]": 4.635261058807373,
+            "mean distortion [um]": 1.0035594701766968,
+            "beam_compression [no units]": 0.8094462752342224
+        },
+        "current_loss": 17050.849609375
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 120,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.97472267909752,
+            "A2": 33.79438948482158,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.9253632748098966,
+            "delta_alpha_c": 0.0,
+            "A3": 22.97472267909752
+        },
+        "optical system values": {
+            "dispersion [um]": 998.6153564453125,
+            "deviation [deg]": -2.705829385458857,
+            "max distortion [um]": 4.2146196365356445,
+            "mean distortion [um]": 0.9505915641784668,
+            "beam_compression [no units]": 0.809183657169342
+        },
+        "current_loss": 17038.62890625
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 130,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.998006793978096,
+            "A2": 33.77616654011599,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.869655825052449,
+            "delta_alpha_c": 0.0,
+            "A3": 22.998006793978096
+        },
+        "optical system values": {
+            "dispersion [um]": 996.8770751953125,
+            "deviation [deg]": -0.3206061181130631,
+            "max distortion [um]": 4.49225378036499,
+            "mean distortion [um]": 0.9854212999343872,
+            "beam_compression [no units]": 0.8093551397323608
+        },
+        "current_loss": 17022.28515625
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 140,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.98362241558605,
+            "A2": 33.79100854118242,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.903532709562066,
+            "delta_alpha_c": 0.0,
+            "A3": 22.98362241558605
+        },
+        "optical system values": {
+            "dispersion [um]": 998.1434936523438,
+            "deviation [deg]": -1.9587595157421411,
+            "max distortion [um]": 4.316948413848877,
+            "mean distortion [um]": 0.957931637763977,
+            "beam_compression [no units]": 0.809210479259491
+        },
+        "current_loss": 17021.0390625
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 150,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.991996227508483,
+            "A2": 33.78198244619425,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.910397476564753,
+            "delta_alpha_c": 0.0,
+            "A3": 22.991996227508483
+        },
+        "optical system values": {
+            "dispersion [um]": 997.3704833984375,
+            "deviation [deg]": -0.9872554995926242,
+            "max distortion [um]": 4.37708854675293,
+            "mean distortion [um]": 0.9719693660736084,
+            "beam_compression [no units]": 0.8092995882034302
+        },
+        "current_loss": 17013.59375
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 160,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.98762149134509,
+            "A2": 33.784898936969846,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.917095330819596,
+            "delta_alpha_c": 0.0,
+            "A3": 22.98762149134509
+        },
+        "optical system values": {
+            "dispersion [um]": 997.6746826171875,
+            "deviation [deg]": -1.4124474753089058,
+            "max distortion [um]": 4.3403472900390625,
+            "mean distortion [um]": 0.9691932797431946,
+            "beam_compression [no units]": 0.809272825717926
+        },
+        "current_loss": 17018.9453125
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 170,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.98622130256524,
+            "A2": 33.787600276786584,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.893028732392233,
+            "delta_alpha_c": 0.0,
+            "A3": 22.98622130256524
+        },
+        "optical system values": {
+            "dispersion [um]": 997.8828125,
+            "deviation [deg]": -1.6289568947571995,
+            "max distortion [um]": 4.349056243896484,
+            "mean distortion [um]": 0.9640633463859558,
+            "beam_compression [no units]": 0.8092451095581055
+        },
+        "current_loss": 17013.47265625
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 180,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.997916293971592,
+            "A2": 33.77751891757165,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.863493286873806,
+            "delta_alpha_c": 0.0,
+            "A3": 22.997916293971592
+        },
+        "optical system values": {
+            "dispersion [um]": 996.9561767578125,
+            "deviation [deg]": -0.38909079741476776,
+            "max distortion [um]": 4.505630970001221,
+            "mean distortion [um]": 0.9856259822845459,
+            "beam_compression [no units]": 0.8093400597572327
+        },
+        "current_loss": 17023.80859375
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 190,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.98726461396096,
+            "A2": 33.784806729416054,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.911369070974187,
+            "delta_alpha_c": 0.0,
+            "A3": 22.98726461396096
+        },
+        "optical system values": {
+            "dispersion [um]": 997.68115234375,
+            "deviation [deg]": -1.4322102007855146,
+            "max distortion [um]": 4.335508823394775,
+            "mean distortion [um]": 0.9687976241111755,
+            "beam_compression [no units]": 0.8092743754386902
+        },
+        "current_loss": 17017.201171875
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 200,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 23.002707671674358,
+            "A2": 33.773137351219084,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.860239555507941,
+            "delta_alpha_c": 0.0,
+            "A3": 23.002707671674358
+        },
+        "optical system values": {
+            "dispersion [um]": 996.5634765625,
+            "deviation [deg]": 0.1312948988059436,
+            "max distortion [um]": 4.546271324157715,
+            "mean distortion [um]": 0.9914421439170837,
+            "beam_compression [no units]": 0.8093815445899963
+        },
+        "current_loss": 17032.0234375
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 210,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.99631802970581,
+            "A2": 33.77737206850449,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.896608605290966,
+            "delta_alpha_c": 0.0,
+            "A3": 22.99631802970581
+        },
+        "optical system values": {
+            "dispersion [um]": 996.99365234375,
+            "deviation [deg]": -0.4883935837362609,
+            "max distortion [um]": 4.439730644226074,
+            "mean distortion [um]": 0.981073796749115,
+            "beam_compression [no units]": 0.8093447089195251
+        },
+        "current_loss": 17011.23828125
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 220,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.988362566870038,
+            "A2": 33.78672259747824,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.890034548214829,
+            "delta_alpha_c": 0.0,
+            "A3": 22.988362566870038
+        },
+        "optical system values": {
+            "dispersion [um]": 997.7513427734375,
+            "deviation [deg]": -1.4468855025475218,
+            "max distortion [um]": 4.37497615814209,
+            "mean distortion [um]": 0.9676714539527893,
+            "beam_compression [no units]": 0.8092518448829651
+        },
+        "current_loss": 17011.0625
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 230,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.984173953361527,
+            "A2": 33.78795203152884,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.9214500033023025,
+            "delta_alpha_c": 0.0,
+            "A3": 22.984173953361527
+        },
+        "optical system values": {
+            "dispersion [um]": 997.95703125,
+            "deviation [deg]": -1.7818734110512664,
+            "max distortion [um]": 4.296047687530518,
+            "mean distortion [um]": 0.9621866941452026,
+            "beam_compression [no units]": 0.8092432022094727
+        },
+        "current_loss": 17024.05859375
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 240,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.988982406537218,
+            "A2": 33.78322212552861,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.9178522011569985,
+            "delta_alpha_c": 0.0,
+            "A3": 22.988982406537218
+        },
+        "optical system values": {
+            "dispersion [um]": 997.529052734375,
+            "deviation [deg]": -1.2452470057479326,
+            "max distortion [um]": 4.348055839538574,
+            "mean distortion [um]": 0.9751681685447693,
+            "beam_compression [no units]": 0.8092897534370422
+        },
+        "current_loss": 17017.796875
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 250,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.990502123627547,
+            "A2": 33.78443789920087,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.887236731976063,
+            "delta_alpha_c": 0.0,
+            "A3": 22.990502123627547
+        },
+        "optical system values": {
+            "dispersion [um]": 997.5679931640625,
+            "deviation [deg]": -1.1997536770074164,
+            "max distortion [um]": 4.392332077026367,
+            "mean distortion [um]": 0.9714061617851257,
+            "beam_compression [no units]": 0.8092742562294006
+        },
+        "current_loss": 17008.173828125
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 260,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.991825472779237,
+            "A2": 33.78247080471991,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.893494465916263,
+            "delta_alpha_c": 0.0,
+            "A3": 22.991825472779237
+        },
+        "optical system values": {
+            "dispersion [um]": 997.4144287109375,
+            "deviation [deg]": -1.021400042140341,
+            "max distortion [um]": 4.401736736297607,
+            "mean distortion [um]": 0.9736135005950928,
+            "beam_compression [no units]": 0.8092944025993347
+        },
+        "current_loss": 17008.62109375
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 270,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.99252556716916,
+            "A2": 33.78192097449172,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.890992482245923,
+            "delta_alpha_c": 0.0,
+            "A3": 22.99252556716916
+        },
+        "optical system values": {
+            "dispersion [um]": 997.3575439453125,
+            "deviation [deg]": -0.9493933064240105,
+            "max distortion [um]": 4.416804313659668,
+            "mean distortion [um]": 0.976030707359314,
+            "beam_compression [no units]": 0.8092994689941406
+        },
+        "current_loss": 17008.779296875
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 280,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.99161715200955,
+            "A2": 33.78265863492208,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.893185826743143,
+            "delta_alpha_c": 0.0,
+            "A3": 22.99161715200955
+        },
+        "optical system values": {
+            "dispersion [um]": 997.4304809570312,
+            "deviation [deg]": -1.0438042365567464,
+            "max distortion [um]": 4.399623870849609,
+            "mean distortion [um]": 0.973770260810852,
+            "beam_compression [no units]": 0.8092926144599915
+        },
+        "current_loss": 17008.625
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 290,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.991902312407397,
+            "A2": 33.782518616044094,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.891431321900097,
+            "delta_alpha_c": 0.0,
+            "A3": 22.991902312407397
+        },
+        "optical system values": {
+            "dispersion [um]": 997.4222412109375,
+            "deviation [deg]": -1.0185627388704355,
+            "max distortion [um]": 4.39841365814209,
+            "mean distortion [um]": 0.9727734327316284,
+            "beam_compression [no units]": 0.8092936873435974
+        },
+        "current_loss": 17007.91796875
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 300,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.991880114292595,
+            "A2": 33.78253569151702,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.891451385580783,
+            "delta_alpha_c": 0.0,
+            "A3": 22.991880114292595
+        },
+        "optical system values": {
+            "dispersion [um]": 997.4194946289062,
+            "deviation [deg]": -1.0208129660368372,
+            "max distortion [um]": 4.3938164710998535,
+            "mean distortion [um]": 0.9739224910736084,
+            "beam_compression [no units]": 0.8092936277389526
+        },
+        "current_loss": 17007.896484375
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 310,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.991905727501983,
+            "A2": 33.78252203113868,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.891308378495037,
+            "delta_alpha_c": 0.0,
+            "A3": 22.991905727501983
+        },
+        "optical system values": {
+            "dispersion [um]": 997.40673828125,
+            "deviation [deg]": -1.0187584664788385,
+            "max distortion [um]": 4.404221534729004,
+            "mean distortion [um]": 0.9730973839759827,
+            "beam_compression [no units]": 0.8092934489250183
+        },
+        "current_loss": 17008.154296875
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 320,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.99196036901534,
+            "A2": 33.782501540571175,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.890913508183645,
+            "delta_alpha_c": 0.0,
+            "A3": 22.99196036901534
+        },
+        "optical system values": {
+            "dispersion [um]": 997.4077758789062,
+            "deviation [deg]": -1.0138666636509344,
+            "max distortion [um]": 4.407334804534912,
+            "mean distortion [um]": 0.9749488830566406,
+            "beam_compression [no units]": 0.8092939257621765
+        },
+        "current_loss": 17008.20703125
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 330,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.99203208600163,
+            "A2": 33.78245714434156,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.890387583617554,
+            "delta_alpha_c": 0.0,
+            "A3": 22.99203208600163
+        },
+        "optical system values": {
+            "dispersion [um]": 997.4077758789062,
+            "deviation [deg]": -1.0068224974608297,
+            "max distortion [um]": 4.405608654022217,
+            "mean distortion [um]": 0.9775387048721313,
+            "beam_compression [no units]": 0.8092942237854004
+        },
+        "current_loss": 17008.322265625
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 340,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.991381510483183,
+            "A2": 33.782866955691766,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.892717531898175,
+            "delta_alpha_c": 0.0,
+            "A3": 22.991381510483183
+        },
+        "optical system values": {
+            "dispersion [um]": 997.4561767578125,
+            "deviation [deg]": -1.0687522495521584,
+            "max distortion [um]": 4.399865627288818,
+            "mean distortion [um]": 0.9734199643135071,
+            "beam_compression [no units]": 0.8092905879020691
+        },
+        "current_loss": 17008.599609375
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 350,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.991868161461547,
+            "A2": 33.78226248395022,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.893449642799835,
+            "delta_alpha_c": 0.0,
+            "A3": 22.991868161461547
+        },
+        "optical system values": {
+            "dispersion [um]": 997.3936157226562,
+            "deviation [deg]": -1.0088771037405342,
+            "max distortion [um]": 4.407544136047363,
+            "mean distortion [um]": 0.97734135389328,
+            "beam_compression [no units]": 0.809296727180481
+        },
+        "current_loss": 17008.58984375
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 360,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.994111878603896,
+            "A2": 33.781118427264246,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.881730318844562,
+            "delta_alpha_c": 0.0,
+            "A3": 22.994111878603896
+        },
+        "optical system values": {
+            "dispersion [um]": 997.2711181640625,
+            "deviation [deg]": -0.8071407964975963,
+            "max distortion [um]": 4.426419734954834,
+            "mean distortion [um]": 0.978771448135376,
+            "beam_compression [no units]": 0.8093060255050659
+        },
+        "current_loss": 17012.98828125
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 370,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.988154246100354,
+            "A2": 33.78537363511716,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.897829928491929,
+            "delta_alpha_c": 0.0,
+            "A3": 22.988154246100354
+        },
+        "optical system values": {
+            "dispersion [um]": 997.67236328125,
+            "deviation [deg]": -1.3992397037230995,
+            "max distortion [um]": 4.371137619018555,
+            "mean distortion [um]": 0.9703831076622009,
+            "beam_compression [no units]": 0.8092671036720276
+        },
+        "current_loss": 17013.138671875
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 380,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.99202696335975,
+            "A2": 33.78087937064329,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.901120372124582,
+            "delta_alpha_c": 0.0,
+            "A3": 22.99202696335975
+        },
+        "optical system values": {
+            "dispersion [um]": 997.311279296875,
+            "deviation [deg]": -0.9346201408578019,
+            "max distortion [um]": 4.402737140655518,
+            "mean distortion [um]": 0.975534200668335,
+            "beam_compression [no units]": 0.8093118071556091
+        },
+        "current_loss": 17010.375
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 390,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.988779208409408,
+            "A2": 33.784892106780674,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.900307579613351,
+            "delta_alpha_c": 0.0,
+            "A3": 22.988779208409408
+        },
+        "optical system values": {
+            "dispersion [um]": 997.6375732421875,
+            "deviation [deg]": -1.3347663464961756,
+            "max distortion [um]": 4.366717338562012,
+            "mean distortion [um]": 0.9694674015045166,
+            "beam_compression [no units]": 0.8092716336250305
+        },
+        "current_loss": 17013.11328125
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 400,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.999070595941326,
+            "A2": 33.77721497415358,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.869286567950446,
+            "delta_alpha_c": 0.0,
+            "A3": 22.999070595941326
+        },
+        "optical system values": {
+            "dispersion [um]": 996.8995361328125,
+            "deviation [deg]": -0.2982996807791535,
+            "max distortion [um]": 4.4988532066345215,
+            "mean distortion [um]": 0.9834317564964294,
+            "beam_compression [no units]": 0.8093419671058655
+        },
+        "current_loss": 17023.0546875
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 410,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.991367850104844,
+            "A2": 33.78429105013372,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.875937891541569,
+            "delta_alpha_c": 0.0,
+            "A3": 22.991367850104844
+        },
+        "optical system values": {
+            "dispersion [um]": 997.53515625,
+            "deviation [deg]": -1.1350845921720893,
+            "max distortion [um]": 4.413174629211426,
+            "mean distortion [um]": 0.9737062454223633,
+            "beam_compression [no units]": 0.8092744946479797
+        },
+        "current_loss": 17012.35546875
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 420,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.98477501000849,
+            "A2": 33.78672601257283,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.91467445564565,
+            "delta_alpha_c": 0.0,
+            "A3": 22.98477501000849
+        },
+        "optical system values": {
+            "dispersion [um]": 997.87451171875,
+            "deviation [deg]": -1.6852121470304229,
+            "max distortion [um]": 4.312946319580078,
+            "mean distortion [um]": 0.9648999571800232,
+            "beam_compression [no units]": 0.809256374835968
+        },
+        "current_loss": 17020.591796875
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 430,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.99728620902066,
+            "A2": 33.777850181746395,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.871545226131604,
+            "delta_alpha_c": 0.0,
+            "A3": 22.99728620902066
+        },
+        "optical system values": {
+            "dispersion [um]": 996.9857788085938,
+            "deviation [deg]": -0.4460309095544171,
+            "max distortion [um]": 4.479182720184326,
+            "mean distortion [um]": 0.9821062088012695,
+            "beam_compression [no units]": 0.8093376755714417
+        },
+        "current_loss": 17020.412109375
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 440,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 23.008093275834913,
+            "A2": 33.76272131273482,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.912532764454028,
+            "delta_alpha_c": 0.0,
+            "A3": 23.008093275834913
+        },
+        "optical system values": {
+            "dispersion [um]": 995.8010864257812,
+            "deviation [deg]": 0.9679819864153175,
+            "max distortion [um]": 4.533524990081787,
+            "mean distortion [um]": 1.0034860372543335,
+            "beam_compression [no units]": 0.8094912171363831
+        },
+        "current_loss": 17030.205078125
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 450,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 23.004048096298973,
+            "A2": 33.774499973958505,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.859155262977201,
+            "delta_alpha_c": 0.0,
+            "A3": 23.004048096298973
+        },
+        "optical system values": {
+            "dispersion [um]": 996.591064453125,
+            "deviation [deg]": 0.15712340589469226,
+            "max distortion [um]": 4.5493879318237305,
+            "mean distortion [um]": 0.9968239068984985,
+            "beam_compression [no units]": 0.8093644976615906
+        },
+        "current_loss": 17033.064453125
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 460,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 23.008468936239264,
+            "A2": 33.75841829355771,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.904148707247837,
+            "delta_alpha_c": 0.0,
+            "A3": 23.008468936239264
+        },
+        "optical system values": {
+            "dispersion [um]": 995.55322265625,
+            "deviation [deg]": 1.1908506321460104,
+            "max distortion [um]": 4.562642574310303,
+            "mean distortion [um]": 1.003346562385559,
+            "beam_compression [no units]": 0.8095382452011108
+        },
+        "current_loss": 17038.15234375
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 470,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 23.002209067864946,
+            "A2": 33.78054810646855,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.872017789844804,
+            "delta_alpha_c": 0.0,
+            "A3": 23.002209067864946
+        },
+        "optical system values": {
+            "dispersion [um]": 996.9827880859375,
+            "deviation [deg]": -0.2434140948779293,
+            "max distortion [um]": 4.510683059692383,
+            "mean distortion [um]": 0.9886239767074585,
+            "beam_compression [no units]": 0.8093006014823914
+        },
+        "current_loss": 17023.59765625
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 480,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.97745646231282,
+            "A2": 33.79266827715074,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.927813605174639,
+            "delta_alpha_c": 0.0,
+            "A3": 22.97745646231282
+        },
+        "optical system values": {
+            "dispersion [um]": 998.429931640625,
+            "deviation [deg]": -2.445000682755349,
+            "max distortion [um]": 4.2416672706604,
+            "mean distortion [um]": 0.9555607438087463,
+            "beam_compression [no units]": 0.8091992139816284
+        },
+        "current_loss": 17035.068359375
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 490,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.997984595863294,
+            "A2": 33.7778023704222,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.8709416081637045,
+            "delta_alpha_c": 0.0,
+            "A3": 22.997984595863294
+        },
+        "optical system values": {
+            "dispersion [um]": 996.9752197265625,
+            "deviation [deg]": -0.3971132814817709,
+            "max distortion [um]": 4.475373268127441,
+            "mean distortion [um]": 0.9841933250427246,
+            "beam_compression [no units]": 0.8093372583389282
+        },
+        "current_loss": 17020.8515625
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 500,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.99213624638647,
+            "A2": 33.76993399249835,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.965060761152834,
+            "delta_alpha_c": 0.0,
+            "A3": 22.99213624638647
+        },
+        "optical system values": {
+            "dispersion [um]": 996.6878662109375,
+            "deviation [deg]": -0.4241157940351816,
+            "max distortion [um]": 4.344570159912109,
+            "mean distortion [um]": 0.9880271553993225,
+            "beam_compression [no units]": 0.8094317317008972
+        },
+        "current_loss": 17027.9296875
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 510,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 23.017713597280874,
+            "A2": 33.74990787785187,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.930591357732719,
+            "delta_alpha_c": 0.0,
+            "A3": 23.017713597280874
+        },
+        "optical system values": {
+            "dispersion [um]": 994.79541015625,
+            "deviation [deg]": 2.196009978543942,
+            "max distortion [um]": 4.608800888061523,
+            "mean distortion [um]": 1.0235567092895508,
+            "beam_compression [no units]": 0.8096201419830322
+        },
+        "current_loss": 17056.640625
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 520,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.991361019915676,
+            "A2": 33.78964591844301,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.901820039627686,
+            "delta_alpha_c": 0.0,
+            "A3": 22.991361019915676
+        },
+        "optical system values": {
+            "dispersion [um]": 997.8247680664062,
+            "deviation [deg]": -1.3828033870939926,
+            "max distortion [um]": 4.35849142074585,
+            "mean distortion [um]": 0.9714526534080505,
+            "beam_compression [no units]": 0.8092151284217834
+        },
+        "current_loss": 17014.810546875
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 530,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.973255895973264,
+            "A2": 33.780339785698864,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.992355477736674,
+            "delta_alpha_c": 0.0,
+            "A3": 22.973255895973264
+        },
+        "optical system values": {
+            "dispersion [um]": 997.8690185546875,
+            "deviation [deg]": -2.1563867705082287,
+            "max distortion [um]": 4.163991928100586,
+            "mean distortion [um]": 0.9575426578521729,
+            "beam_compression [no units]": 0.8093372583389282
+        },
+        "current_loss": 17048.720703125
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 540,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 23.017679446335027,
+            "A2": 33.76146114283295,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.84131096688372,
+            "delta_alpha_c": 0.0,
+            "A3": 23.017679446335027
+        },
+        "optical system values": {
+            "dispersion [um]": 995.440673828125,
+            "deviation [deg]": 1.663003573500715,
+            "max distortion [um]": 4.710352420806885,
+            "mean distortion [um]": 1.0160080194473267,
+            "beam_compression [no units]": 0.8094870448112488
+        },
+        "current_loss": 17070.94140625
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 550,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 23.01308272902361,
+            "A2": 33.78204391789678,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.7339950346444795,
+            "delta_alpha_c": 0.0,
+            "A3": 23.01308272902361
+        },
+        "optical system values": {
+            "dispersion [um]": 996.759033203125,
+            "deviation [deg]": 0.41061453775847623,
+            "max distortion [um]": 4.767378330230713,
+            "mean distortion [um]": 1.0017132759094238,
+            "beam_compression [no units]": 0.8092526197433472
+        },
+        "current_loss": 17080.537109375
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 560,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.982765226845213,
+            "A2": 33.80510263653474,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.815103531038381,
+            "delta_alpha_c": 0.0,
+            "A3": 22.982765226845213
+        },
+        "optical system values": {
+            "dispersion [um]": 998.978515625,
+            "deviation [deg]": -2.6640538140609435,
+            "max distortion [um]": 4.382993221282959,
+            "mean distortion [um]": 0.9522976279258728,
+            "beam_compression [no units]": 0.8090535402297974
+        },
+        "current_loss": 17033.701171875
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 570,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 23.040560580054567,
+            "A2": 33.737282273171104,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.917665651615293,
+            "delta_alpha_c": 0.0,
+            "A3": 23.040560580054567
+        },
+        "optical system values": {
+            "dispersion [um]": 993.356689453125,
+            "deviation [deg]": 4.294967237850234,
+            "max distortion [um]": 4.812969207763672,
+            "mean distortion [um]": 1.055098056793213,
+            "beam_compression [no units]": 0.809725821018219
+        },
+        "current_loss": 17139.921875
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 580,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.983560943883518,
+            "A2": 33.769998879295464,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.941587108522793,
+            "delta_alpha_c": 0.0,
+            "A3": 22.983560943883518
+        },
+        "optical system values": {
+            "dispersion [um]": 996.9824829101562,
+            "deviation [deg]": -0.9958649530414252,
+            "max distortion [um]": 4.322556018829346,
+            "mean distortion [um]": 0.9745326042175293,
+            "beam_compression [no units]": 0.8094435334205627
+        },
+        "current_loss": 17022.048828125
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 590,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.9714937071674,
+            "A2": 33.80292039109492,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.986993779238214,
+            "delta_alpha_c": 0.0,
+            "A3": 22.9714937071674
+        },
+        "optical system values": {
+            "dispersion [um]": 999.169189453125,
+            "deviation [deg]": -3.3125057840030188,
+            "max distortion [um]": 4.08272123336792,
+            "mean distortion [um]": 0.941062331199646,
+            "beam_compression [no units]": 0.809086799621582
+        },
+        "current_loss": 17071.3125
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 600,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.995221784344025,
+            "A2": 33.76943538868894,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.973035433895647,
+            "delta_alpha_c": 0.0,
+            "A3": 22.995221784344025
+        },
+        "optical system values": {
+            "dispersion [um]": 996.5676879882812,
+            "deviation [deg]": -0.1961596712290341,
+            "max distortion [um]": 4.349650859832764,
+            "mean distortion [um]": 0.9856070280075073,
+            "beam_compression [no units]": 0.809432864189148
+        },
+        "current_loss": 17030.15625
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 610,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 23.015399870699532,
+            "A2": 33.755990161307764,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.837454471323602,
+            "delta_alpha_c": 0.0,
+            "A3": 23.015399870699532
+        },
+        "optical system values": {
+            "dispersion [um]": 995.2217407226562,
+            "deviation [deg]": 1.7633824881424554,
+            "max distortion [um]": 4.718347072601318,
+            "mean distortion [um]": 1.0203526020050049,
+            "beam_compression [no units]": 0.8095504641532898
+        },
+        "current_loss": 17074.810546875
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 620,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 23.002263709378308,
+            "A2": 33.78202001223469,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.875773967001488,
+            "delta_alpha_c": 0.0,
+            "A3": 23.002263709378308
+        },
+        "optical system values": {
+            "dispersion [um]": 997.053955078125,
+            "deviation [deg]": -0.3074961836510319,
+            "max distortion [um]": 4.495884895324707,
+            "mean distortion [um]": 0.9885810613632202,
+            "beam_compression [no units]": 0.8092844486236572
+        },
+        "current_loss": 17021.703125
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 630,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.976264594302652,
+            "A2": 33.795547201885896,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.887499267372285,
+            "delta_alpha_c": 0.0,
+            "A3": 22.976264594302652
+        },
+        "optical system values": {
+            "dispersion [um]": 998.6209716796875,
+            "deviation [deg]": -2.65603132999394,
+            "max distortion [um]": 4.281635761260986,
+            "mean distortion [um]": 0.9483039379119873,
+            "beam_compression [no units]": 0.8091700077056885
+        },
+        "current_loss": 17026.5703125
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 640,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.991601784083915,
+            "A2": 33.790899258155704,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.841607653225792,
+            "delta_alpha_c": 0.0,
+            "A3": 22.991601784083915
+        },
+        "optical system values": {
+            "dispersion [um]": 997.89501953125,
+            "deviation [deg]": -1.4236985044192094,
+            "max distortion [um]": 4.44611930847168,
+            "mean distortion [um]": 0.9702924489974976,
+            "beam_compression [no units]": 0.8091996908187866
+        },
+        "current_loss": 17023.501953125
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 650,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.990240868891792,
+            "A2": 33.79266144696157,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.862014124031675,
+            "delta_alpha_c": 0.0,
+            "A3": 22.990240868891792
+        },
+        "optical system values": {
+            "dispersion [um]": 998.024169921875,
+            "deviation [deg]": -1.595301564508785,
+            "max distortion [um]": 4.412513256072998,
+            "mean distortion [um]": 0.9678369164466858,
+            "beam_compression [no units]": 0.8091828227043152
+        },
+        "current_loss": 17016.203125
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 660,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.96448934817355,
+            "A2": 33.83514180850446,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.736630633890458,
+            "delta_alpha_c": 0.0,
+            "A3": 22.96448934817355
+        },
+        "optical system values": {
+            "dispersion [um]": 1001.22998046875,
+            "deviation [deg]": -5.259818543026453,
+            "max distortion [um]": 4.289400100708008,
+            "mean distortion [um]": 0.9149852991104126,
+            "beam_compression [no units]": 0.8087413311004639
+        },
+        "current_loss": 17101.203125
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 670,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.9717669147342,
+            "A2": 33.84301701661749,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.729068760705608,
+            "delta_alpha_c": 0.0,
+            "A3": 22.9717669147342
+        },
+        "optical system values": {
+            "dispersion [um]": 1001.4285888671875,
+            "deviation [deg]": -5.138600614505298,
+            "max distortion [um]": 4.318873882293701,
+            "mean distortion [um]": 0.9169857501983643,
+            "beam_compression [no units]": 0.808642566204071
+        },
+        "current_loss": 17107.72265625
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 680,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.98814570836389,
+            "A2": 33.80452207045529,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.758717331232164,
+            "delta_alpha_c": 0.0,
+            "A3": 22.98814570836389
+        },
+        "optical system values": {
+            "dispersion [um]": 998.7904663085938,
+            "deviation [deg]": -2.280148304164979,
+            "max distortion [um]": 4.494591236114502,
+            "mean distortion [um]": 0.9576850533485413,
+            "beam_compression [no units]": 0.8090474009513855
+        },
+        "current_loss": 17052.5625
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 690,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.968385971095042,
+            "A2": 33.80011318334605,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.943961453033018,
+            "delta_alpha_c": 0.0,
+            "A3": 22.968385971095042
+        },
+        "optical system values": {
+            "dispersion [um]": 999.1119995117188,
+            "deviation [deg]": -3.3893065654647576,
+            "max distortion [um]": 4.139716625213623,
+            "mean distortion [um]": 0.9376972913742065,
+            "beam_compression [no units]": 0.8091264367103577
+        },
+        "current_loss": 17058.453125
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 700,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 23.023100908988724,
+            "A2": 33.75348689697696,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.93623053266621,
+            "delta_alpha_c": 0.0,
+            "A3": 23.023100908988724
+        },
+        "optical system values": {
+            "dispersion [um]": 994.8021240234375,
+            "deviation [deg]": 2.388843294286327,
+            "max distortion [um]": 4.6235432624816895,
+            "mean distortion [um]": 1.026623010635376,
+            "beam_compression [no units]": 0.8095728754997253
+        },
+        "current_loss": 17060.716796875
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 710,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 23.03295687196105,
+            "A2": 33.75193302894078,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.8145186960906985,
+            "delta_alpha_c": 0.0,
+            "A3": 23.03295687196105
+        },
+        "optical system values": {
+            "dispersion [um]": 994.44677734375,
+            "deviation [deg]": 3.115954924361443,
+            "max distortion [um]": 4.867802619934082,
+            "mean distortion [um]": 1.0400309562683105,
+            "beam_compression [no units]": 0.8095647692680359
+        },
+        "current_loss": 17124.908203125
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 720,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.983318472167984,
+            "A2": 33.76850648296182,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.952439425340296,
+            "delta_alpha_c": 0.0,
+            "A3": 22.983318472167984
+        },
+        "optical system values": {
+            "dispersion [um]": 996.9027099609375,
+            "deviation [deg]": -0.9433274581108045,
+            "max distortion [um]": 4.313429832458496,
+            "mean distortion [um]": 0.9740102887153625,
+            "beam_compression [no units]": 0.8094600439071655
+        },
+        "current_loss": 17025.12890625
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 730,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.997323775061094,
+            "A2": 33.76413857698759,
+            "delta_beta_c": 0.0,
+            "alpha_c": 6.0193189301457695,
+            "delta_alpha_c": 0.0,
+            "A3": 22.997323775061094
+        },
+        "optical system values": {
+            "dispersion [um]": 996.1909790039062,
+            "deviation [deg]": 0.1869631550169425,
+            "max distortion [um]": 4.3116374015808105,
+            "mean distortion [um]": 0.9883836507797241,
+            "beam_compression [no units]": 0.809485912322998
+        },
+        "current_loss": 17045.3046875
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 740,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.987778585696002,
+            "A2": 33.77952016299846,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.976783927089515,
+            "delta_alpha_c": 0.0,
+            "A3": 22.987778585696002
+        },
+        "optical system values": {
+            "dispersion [um]": 997.3619384765625,
+            "deviation [deg]": -1.1548473176486982,
+            "max distortion [um]": 4.25973653793335,
+            "mean distortion [um]": 0.9717413783073425,
+            "beam_compression [no units]": 0.809329628944397
+        },
+        "current_loss": 17034.857421875
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 750,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.980485651209722,
+            "A2": 33.779479181863444,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.979544604174669,
+            "delta_alpha_c": 0.0,
+            "A3": 22.980485651209722
+        },
+        "optical system values": {
+            "dispersion [um]": 997.597900390625,
+            "deviation [deg]": -1.636588030329102,
+            "max distortion [um]": 4.215176105499268,
+            "mean distortion [um]": 0.967353105545044,
+            "beam_compression [no units]": 0.8093390464782715
+        },
+        "current_loss": 17039.056640625
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 760,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.989656887717757,
+            "A2": 33.773813539946914,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.969948615277624,
+            "delta_alpha_c": 0.0,
+            "A3": 22.989656887717757
+        },
+        "optical system values": {
+            "dispersion [um]": 996.989013671875,
+            "deviation [deg]": -0.7673218608534798,
+            "max distortion [um]": 4.3100433349609375,
+            "mean distortion [um]": 0.9786861538887024,
+            "beam_compression [no units]": 0.809391438961029
+        },
+        "current_loss": 17030.4140625
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 770,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.99961701107493,
+            "A2": 33.76768003007224,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.942715370396314,
+            "delta_alpha_c": 0.0,
+            "A3": 22.99961701107493
+        },
+        "optical system values": {
+            "dispersion [um]": 996.3318481445312,
+            "deviation [deg]": 0.17688613137130105,
+            "max distortion [um]": 4.4306793212890625,
+            "mean distortion [um]": 0.9902316927909851,
+            "beam_compression [no units]": 0.8094478845596313
+        },
+        "current_loss": 17021.244140625
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 780,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.973640094114074,
+            "A2": 33.80154069288258,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.88436976007195,
+            "delta_alpha_c": 0.0,
+            "A3": 22.973640094114074
+        },
+        "optical system values": {
+            "dispersion [um]": 999.0430908203125,
+            "deviation [deg]": -3.1062690757881297,
+            "max distortion [um]": 4.251648426055908,
+            "mean distortion [um]": 0.9445837140083313,
+            "beam_compression [no units]": 0.8091067671775818
+        },
+        "current_loss": 17034.978515625
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 790,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.98712117998839,
+            "A2": 33.78712557863927,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.896521520379048,
+            "delta_alpha_c": 0.0,
+            "A3": 22.98712117998839
+        },
+        "optical system values": {
+            "dispersion [um]": 997.8223876953125,
+            "deviation [deg]": -1.5478514932927658,
+            "max distortion [um]": 4.355313301086426,
+            "mean distortion [um]": 0.9648458361625671,
+            "beam_compression [no units]": 0.8092490434646606
+        },
+        "current_loss": 17013.9140625
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 800,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.988687000855613,
+            "A2": 33.78260399340872,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.924336612000279,
+            "delta_alpha_c": 0.0,
+            "A3": 22.988687000855613
+        },
+        "optical system values": {
+            "dispersion [um]": 997.515380859375,
+            "deviation [deg]": -1.2359527191131319,
+            "max distortion [um]": 4.329219341278076,
+            "mean distortion [um]": 0.9703884124755859,
+            "beam_compression [no units]": 0.8092968463897705
+        },
+        "current_loss": 17019.43359375
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 810,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.99719741656145,
+            "A2": 33.77950308752553,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.878178620476156,
+            "delta_alpha_c": 0.0,
+            "A3": 22.99719741656145
+        },
+        "optical system values": {
+            "dispersion [um]": 997.073974609375,
+            "deviation [deg]": -0.5282125193803774,
+            "max distortion [um]": 4.468354225158691,
+            "mean distortion [um]": 0.9840258955955505,
+            "beam_compression [no units]": 0.8093195557594299
+        },
+        "current_loss": 17017.45703125
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 820,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.989545897143742,
+            "A2": 33.7823581065986,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.9043215964112035,
+            "delta_alpha_c": 0.0,
+            "A3": 22.989545897143742
+        },
+        "optical system values": {
+            "dispersion [um]": 997.46728515625,
+            "deviation [deg]": -1.1677614978218998,
+            "max distortion [um]": 4.371314525604248,
+            "mean distortion [um]": 0.9712873101234436,
+            "beam_compression [no units]": 0.8092986941337585
+        },
+        "current_loss": 17012.880859375
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 830,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.99463951071728,
+            "A2": 33.78028855928009,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.882260085392062,
+            "delta_alpha_c": 0.0,
+            "A3": 22.99463951071728
+        },
+        "optical system values": {
+            "dispersion [um]": 997.20751953125,
+            "deviation [deg]": -0.7340578791001656,
+            "max distortion [um]": 4.434680461883545,
+            "mean distortion [um]": 0.978645920753479,
+            "beam_compression [no units]": 0.8093146085739136
+        },
+        "current_loss": 17013.515625
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 840,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.99192280297491,
+            "A2": 33.78264497454374,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.888496048104283,
+            "delta_alpha_c": 0.0,
+            "A3": 22.99192280297491
+        },
+        "optical system values": {
+            "dispersion [um]": 997.420166015625,
+            "deviation [deg]": -1.0227697085123402,
+            "max distortion [um]": 4.40902853012085,
+            "mean distortion [um]": 0.9734587073326111,
+            "beam_compression [no units]": 0.8092923164367676
+        },
+        "current_loss": 17009.03125
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 850,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.9868223592122,
+            "A2": 33.78645280500602,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.900064681010993,
+            "delta_alpha_c": 0.0,
+            "A3": 22.9868223592122
+        },
+        "optical system values": {
+            "dispersion [um]": 997.791015625,
+            "deviation [deg]": -1.5365026003782607,
+            "max distortion [um]": 4.3405561447143555,
+            "mean distortion [um]": 0.9664195775985718,
+            "beam_compression [no units]": 0.809256911277771
+        },
+        "current_loss": 17014.734375
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 860,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.992317246399477,
+            "A2": 33.78074618195448,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.898607289396841,
+            "delta_alpha_c": 0.0,
+            "A3": 22.992317246399477
+        },
+        "optical system values": {
+            "dispersion [um]": 997.3131103515625,
+            "deviation [deg]": -0.9093786431714908,
+            "max distortion [um]": 4.401559352874756,
+            "mean distortion [um]": 0.9783271551132202,
+            "beam_compression [no units]": 0.8093129992485046
+        },
+        "current_loss": 17009.25
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 870,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.992228453940264,
+            "A2": 33.78246055943615,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.888855913696179,
+            "delta_alpha_c": 0.0,
+            "A3": 22.992228453940264
+        },
+        "optical system values": {
+            "dispersion [um]": 997.411865234375,
+            "deviation [deg]": -0.9942018019785271,
+            "max distortion [um]": 4.411722660064697,
+            "mean distortion [um]": 0.976618230342865,
+            "beam_compression [no units]": 0.8092938661575317
+        },
+        "current_loss": 17008.9609375
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 880,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.99133711425358,
+            "A2": 33.78328701232572,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.889725909041709,
+            "delta_alpha_c": 0.0,
+            "A3": 22.99133711425358
+        },
+        "optical system values": {
+            "dispersion [um]": 997.4713745117188,
+            "deviation [deg]": -1.0917435200720678,
+            "max distortion [um]": 4.405640602111816,
+            "mean distortion [um]": 0.9747766852378845,
+            "beam_compression [no units]": 0.8092859983444214
+        },
+        "current_loss": 17008.181640625
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 890,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.991354189726504,
+            "A2": 33.783109427407304,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.890608710991933,
+            "delta_alpha_c": 0.0,
+            "A3": 22.991354189726504
+        },
+        "optical system values": {
+            "dispersion [um]": 997.4685668945312,
+            "deviation [deg]": -1.081960021137965,
+            "max distortion [um]": 4.407576560974121,
+            "mean distortion [um]": 0.9749071002006531,
+            "beam_compression [no units]": 0.8092879056930542
+        },
+        "current_loss": 17008.15625
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 900,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.991516406719292,
+            "A2": 33.78296257834015,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.890389291164847,
+            "delta_alpha_c": 0.0,
+            "A3": 22.991516406719292
+        },
+        "optical system values": {
+            "dispersion [um]": 997.451904296875,
+            "deviation [deg]": -1.0643496590235564,
+            "max distortion [um]": 4.399800777435303,
+            "mean distortion [um]": 0.972686767578125,
+            "beam_compression [no units]": 0.8092893362045288
+        },
+        "current_loss": 17007.962890625
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 910,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.99160349163121,
+            "A2": 33.78288061607011,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.890320562386323,
+            "delta_alpha_c": 0.0,
+            "A3": 22.99160349163121
+        },
+        "optical system values": {
+            "dispersion [um]": 997.4356689453125,
+            "deviation [deg]": -1.0548596447803527,
+            "max distortion [um]": 4.40615701675415,
+            "mean distortion [um]": 0.9752267003059387,
+            "beam_compression [no units]": 0.8092900514602661
+        },
+        "current_loss": 17008.18359375
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 920,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.99195695392076,
+            "A2": 33.782491295287414,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.890259517570616,
+            "delta_alpha_c": 0.0,
+            "A3": 22.99195695392076
+        },
+        "optical system values": {
+            "dispersion [um]": 997.424560546875,
+            "deviation [deg]": -1.0136710427642368,
+            "max distortion [um]": 4.3933000564575195,
+            "mean distortion [um]": 0.9728338718414307,
+            "beam_compression [no units]": 0.8092939853668213
+        },
+        "current_loss": 17008.240234375
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 930,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.992050869021845,
+            "A2": 33.782245408477294,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.890941255827149,
+            "delta_alpha_c": 0.0,
+            "A3": 22.992050869021845
+        },
+        "optical system values": {
+            "dispersion [um]": 997.3931274414062,
+            "deviation [deg]": -0.9957671959589294,
+            "max distortion [um]": 4.409722328186035,
+            "mean distortion [um]": 0.9767735600471497,
+            "beam_compression [no units]": 0.8092964887619019
+        },
+        "current_loss": 17008.322265625
+    },
+    {
+        "reason_for_stopping": "completed",
+        "iterations": 940,
+        "end_parameters": {
+            "lba_c": 520.0,
+            "A1": 22.990923887808794,
+            "A2": 33.78312991797481,
+            "delta_beta_c": 0.0,
+            "alpha_c": 5.892854562568398,
+            "delta_alpha_c": 0.0,
+            "A3": 22.990923887808794
+        },
+        "optical system values": {
+            "dispersion [um]": 997.4718017578125,
+            "deviation [deg]": -1.1114083817444749,
+            "max distortion [um]": 4.3903961181640625,
+            "mean distortion [um]": 0.9715368747711182,
+            "beam_compression [no units]": 0.8092882633209229
+        },
+        "current_loss": 17009.068359375
+    }
+]
