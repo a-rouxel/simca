@@ -84,18 +84,22 @@ def format_score_details(cost_details,weighted_cost_components,cost_weights):
 def initialize_optimizer(cassi_system, params_to_optimize, num_iterations):
     base_params = []
     glass_params = []
+    lba_c_param = []
     
     for name, param in cassi_system.optical_model.named_parameters():
         if name in params_to_optimize:
             if name in ['nd1', 'vd1', 'nd2', "vd2", "nd3", "vd3"]:
                 glass_params.append(param)
+            elif name =='lba_c':
+                lba_c_param.append(param)
             else:
                 base_params.append(param)
 
     # Define parameter groups with different initial learning rates
     param_groups = [
         {'params': base_params, 'lr': 0.01},  # Base initial learning rate
-        {'params': glass_params, 'lr': 0.01}  # Higher initial learning rate for glass parameters
+        {'params': glass_params, 'lr': 0.01},  # Higher initial learning rate for glass parameters
+        {'params': lba_c_param, 'lr': 0.1}  # Higher initial learning rate for lba_c parameter
     ]
 
     optimizer = Adam(param_groups)
@@ -493,7 +497,10 @@ def optimize_cassi_system(params_to_optimize, target_dispersion, cost_weights, c
     optimization_details = []
 
     for i in range(iterations):
+
         optimizer.zero_grad()
+
+
 
         if cassi_system.system_config['system architecture']['dispersive element']['type'] == 'amici':
 
@@ -550,6 +557,10 @@ def optimize_cassi_system(params_to_optimize, target_dispersion, cost_weights, c
 
 
         score.backward()
+
+        # for param in cassi_system.optical_model._parameters:
+        #     print(f"gradient {param}: {cassi_system.optical_model.lba_c.grad}")
+
         optimizer.step()
         scheduler.step()  # Step the scheduler
 
@@ -562,6 +573,7 @@ def optimize_cassi_system(params_to_optimize, target_dispersion, cost_weights, c
         if non_improvement_count >= patience:
             print(f'Stopping early at iteration {i} due to no improvement.')
             break
+
 
     # After the optimization loop
     final_config = cassi_system.system_config

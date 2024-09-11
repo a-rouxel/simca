@@ -22,7 +22,6 @@ class OpticalModel(pl.LightningModule):
         self.index_estimation_method = index_estimation_method
 
         self.lba_c = nn.Parameter(torch.tensor(config["system architecture"]["dispersive element"]["wavelength center"], dtype=torch.float,device=self.device,requires_grad=True))
-
         self.define_lenses_carac()
         self.define_dispersive_element_carac()
 
@@ -96,7 +95,6 @@ class OpticalModel(pl.LightningModule):
         # Calculation based on the above parameters
         alpha_c_transmis = -1 * self.propagate_central_microm_through_disperser(self.lba_c)
         self.alpha_c_transmis = alpha_c_transmis[0,0,0]
-        # print(self.alpha_c_transmis.detach().cpu().numpy()*180/np.pi)
 
     
     def get_corresponding_nd_vd(self,glass_name,catalog):
@@ -117,9 +115,8 @@ class OpticalModel(pl.LightningModule):
         return nd, vd
 
     def rerun_central_dispersion(self):
-        alpha_c_transmis = -1 * self.propagate_central_microm_through_disperser(self.lba_c.detach().cpu().numpy())
+        alpha_c_transmis = -1 * self.propagate_central_microm_through_disperser(self.lba_c)
         self.alpha_c_transmis = alpha_c_transmis
-
         return alpha_c_transmis
     
 
@@ -207,12 +204,11 @@ class OpticalModel(pl.LightningModule):
 
         index_square = 1 + B1*lambda_vec**2/(lambda_vec**2-C1) + B2*lambda_vec**2/(lambda_vec**2-C2)
 
-        index_square = torch.tensor(index_square,dtype=torch.float32)
+        # if index_square is not a tensor, convert it to a tensor
+        if not isinstance(index_square, torch.Tensor):
+            index_square = torch.tensor(index_square,dtype=torch.float32)
 
         index = torch.sqrt(index_square)
-
-        # print(lambda_vec)
-        # print("index = ",index)
 
         return index
 
@@ -487,18 +483,23 @@ class OpticalModel(pl.LightningModule):
 
     def propagate_central_microm_through_disperser(self,lambda_):
 
+       
         if self.index_estimation_method == "cauchy":
-            n1 = self.calculate_dispersion_with_cauchy(lambda_,self.nd1,self.vd1).clone().detach().requires_grad_(True).to(device=self.device)
-            n2 = self.calculate_dispersion_with_cauchy(lambda_,self.nd2,self.vd2).clone().detach().requires_grad_(True).to(device=self.device)
-            n3 = self.calculate_dispersion_with_cauchy(lambda_,self.nd3,self.vd3).clone().detach().requires_grad_(True).to(device=self.device)
+            n1 = self.calculate_dispersion_with_cauchy(lambda_,self.nd1,self.vd1)
+            n2 = self.calculate_dispersion_with_cauchy(lambda_,self.nd2,self.vd2)
+            n3 = self.calculate_dispersion_with_cauchy(lambda_,self.nd3,self.vd3)
+
         if self.index_estimation_method == "sellmeier":
-            n1 = self.sellmeier(lambda_,self.glass1).clone().detach().requires_grad_(True).to(device=self.device)
+            n1 = self.sellmeier(lambda_,self.glass1)
+        
             try:
-                n2 = self.sellmeier(lambda_,self.glass2).clone().detach().requires_grad_(True).to(device=self.device)
+                n2 = self.sellmeier(lambda_,self.glass2)
+
             except:
                 n2 = torch.tensor(1,device=self.device)
             try:
-                n3 = self.sellmeier(lambda_,self.glass3).clone().detach().requires_grad_(True).to(device=self.device)
+                n3 = self.sellmeier(lambda_,self.glass3)
+
             except:
                 n3 = torch.tensor(1,device=self.device)
 
@@ -519,8 +520,6 @@ class OpticalModel(pl.LightningModule):
             k = self.model_Grating_angle_to_angle(k, lambda_, self.m, self.G)
 
         alpha = torch.arctan(k[...,0] / k[...,2])
-        beta = torch.arctan(k[...,1] / k[...,2])
-
 
 
         return alpha
