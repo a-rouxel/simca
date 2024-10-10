@@ -24,6 +24,8 @@ from opticalglass.glassfactory import get_glass_catalog
 from torch.optim import Adam
 from torch.optim.lr_scheduler import CosineAnnealingLR
 
+from pprint import pprint
+
 def get_catalog_glass_infos(catalog, device="cpu"):
     glass_pd = get_glass_catalog(catalog)
     list_of_glasses = glass_pd.df.iloc[:, 0].index.tolist()
@@ -49,6 +51,8 @@ def plot_grids_coordinates(cassi_system,test_name='test',save_fig_dir=None,save_
         cassi_system.Y_coded_aper_coordinates,
         central_coordinates_X
     )
+
+
     plt.figure()
 
     # plot distorsion grids
@@ -65,9 +69,10 @@ def plot_grids_coordinates(cassi_system,test_name='test',save_fig_dir=None,save_
     plt.show()
 
     if save_fig:
-        np.save(save_fig_dir + f"x_coordinates_{test_name}",x_vec_no_dist.detach().cpu().numpy())
-        np.save(save_fig_dir + f"y_coordinates_{test_name}",y_vec_no_dist.detach().cpu().numpy())
-        np.save(save_fig_dir + f"wavelengths_{test_name}",cassi_system.wavelengths.detach().cpu().numpy())
+        np.save(save_fig_dir + f"/x_coordinates_{test_name}",X_coordinates_propagated_coded_aperture.detach().cpu().numpy())
+        np.save(save_fig_dir + f"/y_coordinates_{test_name}",Y_coordinates_propagated_coded_aperture.detach().cpu().numpy())
+        np.save(save_fig_dir + f"/wavelengths_{test_name}",cassi_system.wavelengths.detach().cpu().numpy())
+        
 
 
 
@@ -99,7 +104,7 @@ def initialize_optimizer(cassi_system, params_to_optimize, num_iterations):
     param_groups = [
         {'params': base_params, 'lr': 0.01},  # Base initial learning rate
         {'params': glass_params, 'lr': 0.01},  # Higher initial learning rate for glass parameters
-        {'params': lba_c_param, 'lr': 0.1}  # Higher initial learning rate for lba_c parameter
+        {'params': lba_c_param, 'lr': 0.01}  # Higher initial learning rate for lba_c parameter
     ]
 
     optimizer = Adam(param_groups)
@@ -122,6 +127,8 @@ def setup_results_directory(output_dir, step_name):
     return step_dir
 
 def evaluate_optical_performances(cassi_system,save_fig_dir=None):
+
+    
     cassi_system.optical_model.rerun_central_dispersion()
     x_vec_out, y_vec_out = cassi_system.propagate_coded_aperture_grid()
 
@@ -193,15 +200,13 @@ def evaluate_cost_functions(cassi_system, cost_weights, target_dispersion, nd_va
         'cost_non_linearity': 0.001 * y_second_derivative ** 2,
         'cost_distance_total_intern_reflection': 2 * softplus(cassi_system.optical_model.min_distance_from_total_intern_reflection) ** 2
     }
-
     interesting_values = {
         'dispersion [um]': dispersion,
-        'deviation [deg]': deviation*180/np.pi,
+        'deviation [deg]': deviation,
         'max distortion [um]': distortion_metric,
         'mean distortion [um]': mean_distortion,
         'beam_compression [no units]': beam_compression,}
     
-
     weighted_cost_components = {key: cost_weights[key] * value for key, value in cost_components.items()}   
     
     
@@ -242,27 +247,26 @@ def calculate_second_derivative(x, y):
     Calculate the second derivative of y with respect to x using central differences.
 
     Parameters:
-    - x: 1D numpy array of independent variable values.
-    - y: 1D numpy array of dependent variable values (e.g., spectral_dispersion).
+    - x: 1D torch tensor of independent variable values.
+    - y: 1D torch tensor of dependent variable values (e.g., spectral_dispersion).
 
     Returns:
     - Second derivative of y with respect to x.
     """
-    # # Ensure x and y are numpy arrays for element-wise operations
-    # x = np.asarray(x)
-    # y = np.asarray(y)
 
-    # Calculate spacings between points
-    h = torch.diff(x)
+    # plt.figure()
+    # plt.plot(x.detach().cpu().numpy(),y.detach().cpu().numpy())
+    # plt.show()
 
-
-    h = h[0]  # Spacing
+    # Calculate spacing between points
+    h = torch.diff(x)[0]  # Assuming uniform spacing
 
     # Calculate second derivative using central differences
-    y_second_derivative = (y[:-2] - 2 * y[1:-1] + y[2:]) / h**2
+    y_second_derivative = (y[:-2] - 2 * y[1:-1] + y[2:]) / (h**2)
 
-    sum_y = torch.sum(y)
-    return sum_y
+    # Return the mean of the absolute values of the second derivative
+
+    return torch.mean(torch.abs(y_second_derivative))
 
 def get_cassi_system_no_spectial_distorsions(X, Y, central_coordinates_X):
 
@@ -352,7 +356,6 @@ def evaluate_distortions(X_vec_out_distor, Y_vec_out_distors, X_vec_out, Y_vec_o
     # distortion_metric = torch.sum(torch.sum(torch.sum(distance_map)))
 
     if save_fig_dir is not None:
-        print(X_vec_out[0,13,13,:])
 
         for i in [0,5,-1]:
 
@@ -579,7 +582,7 @@ def optimize_cassi_system(params_to_optimize, target_dispersion, cost_weights, c
     final_config = cassi_system.system_config
     return final_config, latest_optical_params
 
-def test_cassi_system(config_path, index_estimation_method="sellmeier", save_fig_dir=None, save_fig=False):
+def test_cassi_system(config_path, index_estimation_method="cauchy", save_fig_dir=None, save_fig=False):
 
     config_system = load_yaml_config(config_path)
     cassi_system = CassiSystem(system_config=config_system, index_estimation_method=index_estimation_method, device="cpu")

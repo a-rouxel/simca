@@ -56,16 +56,19 @@ class CassiSystem(pl.LightningModule):
             delta_y (float): pixel size along Y axis
 
         Returns:
-            tuple: X coordinates grid (numpy.ndarray) and Y coordinates grid (numpy.ndarray)
+            tuple: X coordinates grid (torch.Tensor) and Y coordinates grid (torch.Tensor)
         """
-        x = np.arange(-(nb_of_pixels_along_x-1) * delta_x / 2, (nb_of_pixels_along_x+1) * delta_x / 2,delta_x)
-        y = np.arange(-(nb_of_pixels_along_y-1) * delta_y / 2, (nb_of_pixels_along_y+1) * delta_y / 2, delta_y)
-
+        x = torch.linspace(-nb_of_pixels_along_x * delta_x / 2, 
+                           nb_of_pixels_along_x * delta_x / 2, 
+                           nb_of_pixels_along_x)
+        y = torch.linspace(-nb_of_pixels_along_y * delta_y / 2, 
+                           nb_of_pixels_along_y * delta_y / 2, 
+                           nb_of_pixels_along_y)
 
         # Create a two-dimensional grid of coordinates
-        X_input_grid, Y_input_grid = np.meshgrid(x, y)
+        X_input_grid, Y_input_grid = torch.meshgrid(x, y, indexing='xy')
 
-        return torch.from_numpy(X_input_grid).float().to(self.device), torch.from_numpy(Y_input_grid).float().to(self.device)
+        return X_input_grid.to(self.device), Y_input_grid.to(self.device)
 
 
     
@@ -93,6 +96,7 @@ class CassiSystem(pl.LightningModule):
             n1 = self.optical_model.calculate_dispersion_with_cauchy(self.wavelengths,self.optical_model.nd1,self.optical_model.vd1)
             n2 = self.optical_model.calculate_dispersion_with_cauchy(self.wavelengths,self.optical_model.nd2,self.optical_model.vd2)
             n3 = self.optical_model.calculate_dispersion_with_cauchy(self.wavelengths,self.optical_model.nd3,self.optical_model.vd3)
+
         if self.optical_model.index_estimation_method == "sellmeier":
             n1 = self.optical_model.sellmeier(self.wavelengths,self.optical_model.glass1).clone().detach().requires_grad_(True).to(device=self.device)
             try:
@@ -103,7 +107,6 @@ class CassiSystem(pl.LightningModule):
                 n3 = self.optical_model.sellmeier(self.wavelengths,self.optical_model.glass3).clone().detach().requires_grad_(True).to(device=self.device)
             except:
                 n3 = torch.tensor(1,device=self.device).expand_as(self.wavelengths)
-
 
         n1 = n1.to(self.device)
         n2 = n2.to(self.device)

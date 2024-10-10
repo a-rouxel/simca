@@ -5,14 +5,14 @@ infos:
 
 system architecture:
     system type: DD-CASSI
-    focal lens: 75000
+    focal lens: 50000
     dispersive element:
     # dispersive element caracteristics
         catalog: Schott
         type: prism        # name of the dispersive element
         glass1: N-BK7       # glass type of the dispersive element (only used if type == 'prism')
-        A1: 50             # apex angle of the prism in degrees      (only used if type == 'prism')   -- in degrees
-        alpha_c: 40.9
+        A1: 60             # apex angle of the prism in degrees      (only used if type == 'prism')   -- in degrees
+        alpha_c: 49
         delta alpha c: 0
         delta beta c: 0
         wavelength center: 520  # central wavelength -- in nm

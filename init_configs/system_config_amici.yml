@@ -5,7 +5,7 @@ infos:
 
 system architecture:
     system type: DD-CASSI
-    focal lens: 75000
+    focal lens: 50000
     dispersive element:
     # dispersive element caracteristics
         catalog: Schott

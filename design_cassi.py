@@ -12,9 +12,6 @@ Date: 06/09/2024
 """
 
 
-
-
-
 import argparse
 from pprint import pprint
 import os
@@ -74,7 +71,7 @@ def main(prism_type, output_dir):
         output_dir (str): Directory to save output files.
     """
     
-    target_dispersion = 1000  # in [µm] ---> modify to spectral spreading
+    target_dispersion = 830  # in [µm] ---> modify to spectral spreading
     iterations = 2000
     patience = 500
     device = "cuda"
@@ -86,9 +83,9 @@ def main(prism_type, output_dir):
     final_config_path = os.path.join(output_dir, "config_system.yml")
 
     if prism_type == "amici":
-        params_step1 = ['lba_c', 'alpha_c', 'A1', 'A2', 'nd1', 'nd2', 'vd1', 'vd2']
+        params_step1 = ['alpha_c', 'A1', 'A2', 'nd1', 'nd2', 'vd1', 'vd2']
         init_config_path_step1 = "./init_configs/system_config_amici.yml"
-        params_step2 = ['lba_c', 'alpha_c', 'A1', 'A2']
+        params_step2 = ['alpha_c', 'A1', 'A2']
         cost_weights = {
             'cost_dispersion': 1.0,
             'cost_distance_glasses': 1.0,
@@ -96,16 +93,19 @@ def main(prism_type, output_dir):
             'cost_distorsion': 1.0,
             'cost_thickness': 1.0,
             'cost_beam_compression': 1.0,
-            'cost_non_linearity': 1.0,
+            'cost_non_linearity':1 ,
             'cost_distance_total_intern_reflection': 1.0
         }
     elif prism_type == "single":  # single prism
-        params_step1 = ['lba_c', 'alpha_c', 'A1', 'nd1', 'vd1']
+        # params_step1 = ['lba_c', 'alpha_c', 'A1', 'nd1', 'vd1']
+        params_step1 = ['alpha_c']
         init_config_path_step1 = "./init_configs/system_config_single.yml"
-        params_step2 = ['lba_c', 'alpha_c', 'A1']
+        # params_step2 = ['lba_c', 'alpha_c', 'A1']
+        params_step2 = params_step1
+
         cost_weights = {
-            'cost_dispersion': 20.0,
-            'cost_distance_glasses': 1.0,
+            'cost_dispersion': 0.0,
+            'cost_distance_glasses': 0.0,
             'cost_deviation': 1e-5,
             'cost_distorsion': 1.0,
             'cost_thickness': 1.0,
