@@ -4,3 +4,4 @@ pyyaml
 torch
 h5py
 lightning
+scikit-learn
