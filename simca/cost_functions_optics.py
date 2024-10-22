@@ -487,7 +487,7 @@ def optimize_cassi_system(params_to_optimize, target_dispersion, cost_weights, c
     results_dir = setup_results_directory(output_dir, step_name)
     
     config_system = load_yaml_config(config_path)
-    cassi_system = CassiSystem(system_config=config_system, device=device, index_estimation_method=index_estimation_method,device=device)
+    cassi_system = CassiSystem(system_config=config_system, device=device, index_estimation_method=index_estimation_method)
     device = cassi_system.device
 
     print(f"device: {device}")
