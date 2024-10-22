@@ -73,7 +73,7 @@ def plot_grids_coordinates(cassi_system,test_name='test',save_fig_dir=None,save_
         path_x = os.path.join(save_fig_dir,f"x_coordinates_{test_name}.npy")
         path_y = os.path.join(save_fig_dir,f"y_coordinates_{test_name}.npy")
         path_wavelengths = os.path.join(save_fig_dir,f"wavelengths_{test_name}.npy")
-        
+
         np.save(path_x,X_coordinates_propagated_coded_aperture.detach().cpu().numpy())
         np.save(path_y,Y_coordinates_propagated_coded_aperture.detach().cpu().numpy())
         np.save(path_wavelengths,cassi_system.wavelengths.detach().cpu().numpy())
@@ -381,7 +381,9 @@ def evaluate_distortions(X_vec_out_distor, Y_vec_out_distors, X_vec_out, Y_vec_o
             plt.ylabel("y [$\mu$m]",fontsize=18)
             plt.title(f"Distortion map at $\lambda$ = {i}",fontsize=14)
             plt.colorbar()
-            plt.savefig(save_fig_dir + f"distor_map_{i}.svg")
+
+            save_fig_path = os.path.join(save_fig_dir,f"distor_map_{i}.svg")
+            plt.savefig(save_fig_path)
             # plt.show()
     return distortion_metric, distance_map,mean_distortion
 
