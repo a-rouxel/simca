@@ -24,10 +24,10 @@ def save_config_system(output_config_path, results_dir, config_path, index_estim
         optimization_details = json.load(f)
 
     if iteration_nb is None:
-        iteration_nb = max(detail['iterations'] for detail in optimization_details)
+        iteration_nb = max(detail['iteration'] for detail in optimization_details)
 
 
-    iteration_details = next(detail for detail in optimization_details if detail['iterations'] == iteration_nb)
+    iteration_details = next(detail for detail in optimization_details if detail['iteration'] == iteration_nb)
     latest_optical_params = iteration_details['end_parameters']
 
     # test a given configuration

@@ -5,6 +5,10 @@ import numpy as np
 from datetime import datetime
 import h5py
 import torch
+import shutil
+import datetime
+import subprocess
+
 
 def load_yaml_config(file_path):
     """
@@ -19,6 +23,36 @@ def load_yaml_config(file_path):
     with open(file_path, "r") as file:
         config = yaml.safe_load(file)
     return config
+
+def save_simulation_state(args, output_dir):
+    """
+    Save the current simulation state, including the command, script, and Git HEAD.
+
+    Args:
+        args (argparse.Namespace): Command-line arguments.
+        output_dir (str): Directory to save the simulation state.
+    """
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    state_dir = os.path.join(output_dir, f"simulation_state_{timestamp}")
+    os.makedirs(state_dir, exist_ok=True)
+
+    # Save the command
+    command = f"python {__file__} --prism_type {args.prism_type} --output_dir {args.output_dir}"
+    with open(os.path.join(state_dir, "command.txt"), "w") as f:
+        f.write(command)
+
+    # Save the current script
+    shutil.copy(__file__, os.path.join(state_dir, "design_cassi.py"))
+
+    # Save the Git HEAD commit ID
+    try:
+        git_head = subprocess.check_output(["git", "rev-parse", "HEAD"]).decode().strip()
+        with open(os.path.join(state_dir, "git_head.txt"), "w") as f:
+            f.write(git_head)
+    except subprocess.CalledProcessError:
+        print("Warning: Unable to get Git HEAD commit ID. Is this a Git repository?")
+
+    print(f"Simulation state saved in: {state_dir}")
 
 
 

@@ -53,19 +53,31 @@ def plot_grids_coordinates(cassi_system,test_name='test',save_fig_dir=None,save_
     )
 
 
-    plt.figure()
+    plt.figure(figsize=(10, 8))  # Increase figure size for better readability
+
+    min_wave_idx = 0
+    mid_wave_idx = X_coordinates_propagated_coded_aperture.shape[-1] // 2
+    max_wave_idx = -1
 
     # plot distorsion grids
-    plt.scatter(x_vec_no_dist.detach().cpu().numpy()[..., 0], y_vec_no_dist.detach().cpu().numpy()[..., 0], label="no dist", color='grey',s=70)
-    plt.scatter(x_vec_no_dist.detach().cpu().numpy()[..., 3], y_vec_no_dist.detach().cpu().numpy()[..., 3], label="no dist", color='grey',s=70)
-    plt.scatter(x_vec_no_dist.detach().cpu().numpy()[..., -1], y_vec_no_dist.detach().cpu().numpy()[..., -1], label="no dist", color='grey',s=70)
-    plt.scatter(X_coordinates_propagated_coded_aperture.detach().cpu().numpy()[..., 0], Y_coordinates_propagated_coded_aperture.detach().cpu().numpy()[..., 0], color='blue', label="distor")
-    plt.scatter(X_coordinates_propagated_coded_aperture.detach().cpu().numpy()[..., 3], Y_coordinates_propagated_coded_aperture.detach().cpu().numpy()[..., 3], color='green', label="distor")
-    plt.scatter(X_coordinates_propagated_coded_aperture.detach().cpu().numpy()[..., -1], Y_coordinates_propagated_coded_aperture.detach().cpu().numpy()[..., -1], color='red', label="distor")
+    plt.scatter(x_vec_no_dist.detach().cpu().numpy()[..., min_wave_idx], y_vec_no_dist.detach().cpu().numpy()[..., min_wave_idx], label="No distortion", color='grey', s=70)
+    plt.scatter(x_vec_no_dist.detach().cpu().numpy()[..., mid_wave_idx], y_vec_no_dist.detach().cpu().numpy()[..., mid_wave_idx], color='grey', s=70)
+    plt.scatter(x_vec_no_dist.detach().cpu().numpy()[..., -max_wave_idx], y_vec_no_dist.detach().cpu().numpy()[..., max_wave_idx], color='grey', s=70)
+    plt.scatter(X_coordinates_propagated_coded_aperture.detach().cpu().numpy()[..., min_wave_idx], Y_coordinates_propagated_coded_aperture.detach().cpu().numpy()[..., min_wave_idx], color='blue', label="Distorted (λ min)")
+    plt.scatter(X_coordinates_propagated_coded_aperture.detach().cpu().numpy()[..., mid_wave_idx], Y_coordinates_propagated_coded_aperture.detach().cpu().numpy()[..., mid_wave_idx], color='green', label="Distorted (λ mid)")
+    plt.scatter(X_coordinates_propagated_coded_aperture.detach().cpu().numpy()[..., max_wave_idx], Y_coordinates_propagated_coded_aperture.detach().cpu().numpy()[..., max_wave_idx], color='red', label="Distorted (λ max)")
+
+    plt.xlabel('X Coordinate (μm)', fontsize=12)
+    plt.ylabel('Y Coordinate (μm)', fontsize=12)
+    plt.title('Coded Aperture Grid Distortion', fontsize=14)
+    plt.legend(fontsize=10)
+
+    plt.grid(True, linestyle='--', alpha=0.7)
+    plt.tight_layout()
 
     if save_fig:
-        save_path = os.path.join(save_fig_dir,f"grids_coordinates_{test_name}.svg")
-        plt.savefig(save_path)
+        save_path = os.path.join(save_fig_dir, f"grids_coordinates_{test_name}.svg")
+        plt.savefig(save_path, dpi=300, bbox_inches='tight')
     
     plt.show()
 
@@ -83,9 +95,9 @@ def plot_grids_coordinates(cassi_system,test_name='test',save_fig_dir=None,save_
 
 def format_score_details(cost_details,weighted_cost_components,cost_weights):
     score_details = {
-        'components non weights': {key: value for key, value in cost_weights.items()},
-        'components with weights': {key : float(value) for key, value in cost_details.items()},
-        'weighted components': {key : float(value) for key, value in weighted_cost_components.items()},
+        'weights': {key: value for key, value in cost_weights.items()},
+        'losses': {key : float(value) for key, value in cost_details.items()},
+        'weighted losses': {key : float(value) for key, value in weighted_cost_components.items()},
     }
     return score_details
     
@@ -225,7 +237,7 @@ def evaluate_cost_functions(cassi_system, cost_weights, target_dispersion, nd_va
 def save_optimization_details(results_dir, non_improvement_count, patience, i, latest_optical_params, current_loss,interesting_values):
     optimization_details = {
         'reason_for_stopping': 'no improvement' if non_improvement_count >= patience else 'completed',
-        'iterations': i,
+        'iteration': i,
         'end_parameters': {
             param_name: (param.item() if 'A' not in param_name and 'alpha_c' not in param_name and 'delta' not in param_name else math.degrees(param.item()))
             for param_name, param in latest_optical_params.items()
@@ -509,6 +521,7 @@ def optimize_cassi_system(params_to_optimize, target_dispersion, cost_weights, c
     best_loss = float('inf')
 
     optimization_details = []
+    score_details = []
 
     for i in range(iterations):
 
@@ -537,8 +550,8 @@ def optimize_cassi_system(params_to_optimize, target_dispersion, cost_weights, c
             print(f'Iteration {i}, Loss: {current_loss}')
 
             details = {
+                'iteration': i,
                 'reason_for_stopping': 'no improvement' if non_improvement_count >= patience else 'completed',
-                'iterations': i,
                 'end_parameters': {
                     param_name: (param.item() if 'A' not in param_name and 'alpha_c' not in param_name and 'delta' not in param_name else math.degrees(param.item()))
                     for param_name, param in latest_optical_params.items()
@@ -558,10 +571,13 @@ def optimize_cassi_system(params_to_optimize, target_dispersion, cost_weights, c
             with open(details_path, 'w') as f:
                 json.dump(optimization_details, f, indent=4)
 
-            score_details = format_score_details(cost_details, weighted_cost_components, cost_weights)
+            current_score_details = format_score_details(cost_details, weighted_cost_components, cost_weights)
+            current_score_details['iteration'] = i
+            score_details.append(current_score_details)
+
             # Save the cost functions score details
-            details_path = os.path.join(results_dir, f'score_details_iteration_{i}.json')
-            with open(details_path, 'a') as f:
+            score_details_path = os.path.join(results_dir, 'score_details.json')
+            with open(score_details_path, 'w') as f:
                 json.dump(score_details, f, indent=4)
 
         score.backward()
@@ -615,30 +631,34 @@ def plot_optimization_process(output_dir, step_name):
                     break
                 pos += 1
 
-    # Read all score details files
-    for filename in os.listdir(step_dir):
-        if filename.startswith("score_details_iteration_") and filename.endswith(".json"):
-            file_path = os.path.join(step_dir, filename)
-            try:
-                with open(file_path, 'r') as f:
-                    content = f.read()
-                    # Parse multiple JSON objects in the file
-                    for data in parse_json_objects(content):
-                        iteration = int(filename.split('_')[-1].split('.')[0])
-                        iterations.append(iteration)
-                        total_cost = 0
-                        for cost_name, cost_value in data['weighted components'].items():
-                            if cost_name not in weighted_costs:
-                                weighted_costs[cost_name] = []
-                            weighted_costs[cost_name].append(cost_value)
-                            total_cost += cost_value
-                        total_costs.append(total_cost)
-            except Exception as e:
-                print(f"Error processing file {filename}: {str(e)}")
-                continue  # Skip this file and continue with the next one
+    # Read the single score_details.json file
+    score_details_path = os.path.join(step_dir, 'score_details.json')
+    
+    if not os.path.exists(score_details_path):
+        print(f"No score_details.json found for step {step_name}. Skipping plot creation.")
+        return
+
+    try:
+        with open(score_details_path, 'r') as f:
+            score_details = json.load(f)
+
+        for data in score_details:
+            iteration = data['iteration']
+            iterations.append(iteration)
+            total_cost = 0
+            for cost_name, cost_value in data['weighted losses'].items():
+                if cost_name not in weighted_costs:
+                    weighted_costs[cost_name] = []
+                weighted_costs[cost_name].append(cost_value)
+                total_cost += cost_value
+            total_costs.append(total_cost)
+
+    except Exception as e:
+        print(f"Error processing score_details.json: {str(e)}")
+        return
 
     if not iterations:
-        print(f"No valid data found for step {step_name}. Skipping plot creation.")
+        print(f"No valid data found in score_details.json for step {step_name}. Skipping plot creation.")
         return
 
     # Sort data by iteration
@@ -683,3 +703,5 @@ def plot_optimization_process(output_dir, step_name):
 
     print(f"Individual costs plot saved as {individual_plot_path}")
     print(f"Total cost plot saved as {total_plot_path}")
+
+
