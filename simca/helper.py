@@ -24,7 +24,7 @@ def load_yaml_config(file_path):
         config = yaml.safe_load(file)
     return config
 
-def save_simulation_state(args, output_dir):
+def save_simulation_state(file,args, output_dir):
     """
     Save the current simulation state, including the command, script, and Git HEAD.
 
@@ -37,12 +37,12 @@ def save_simulation_state(args, output_dir):
     os.makedirs(state_dir, exist_ok=True)
 
     # Save the command
-    command = f"python {__file__} --prism_type {args.prism_type} --output_dir {args.output_dir}"
+    command = f"python {file} --prism_type {args.prism_type} --output_dir {args.output_dir}"
     with open(os.path.join(state_dir, "command.txt"), "w") as f:
         f.write(command)
 
     # Save the current script
-    shutil.copy(__file__, os.path.join(state_dir, "design_cassi.py"))
+    shutil.copy(file, os.path.join(state_dir, "design_cassi.py"))
 
     # Save the Git HEAD commit ID
     try:
@@ -51,7 +51,7 @@ def save_simulation_state(args, output_dir):
             f.write(git_head)
     except subprocess.CalledProcessError:
         print("Warning: Unable to get Git HEAD commit ID. Is this a Git repository?")
-
+    
     print(f"Simulation state saved in: {state_dir}")
 
 
