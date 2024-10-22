@@ -15,7 +15,7 @@ def save_config_system(output_config_path, results_dir, config_path, index_estim
     
     
     config_system = load_yaml_config(config_path)
-    cassi_system = CassiSystem(system_config=config_system, index_estimation_method=index_estimation_method, device=device)
+    cassi_system = CassiSystem(system_config=config_system, index_estimation_method=index_estimation_method)
     device = cassi_system.device
     catalog = config_system["system architecture"]["dispersive element"]["catalog"]
 

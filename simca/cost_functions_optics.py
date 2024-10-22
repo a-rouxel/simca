@@ -162,6 +162,7 @@ def evaluate_optical_performances(cassi_system,save_fig_dir=None):
 
 
 def evaluate_cost_functions(cassi_system, cost_weights, target_dispersion, nd_values, vd_values, iteration_number, list_of_glasses):
+
     cassi_system.optical_model.rerun_central_dispersion()
     x_vec_out, y_vec_out = cassi_system.propagate_coded_aperture_grid()
 
@@ -490,7 +491,6 @@ def optimize_cassi_system(params_to_optimize, target_dispersion, cost_weights, c
     cassi_system = CassiSystem(system_config=config_system, device=device, index_estimation_method=index_estimation_method)
     device = cassi_system.device
 
-    print(f"device: {device}")
     catalog = config_system["system architecture"]["dispersive element"]["catalog"]
 
     list_of_glasses, nd_values, vd_values = get_catalog_glass_infos(catalog=catalog, device=device)
@@ -504,8 +504,6 @@ def optimize_cassi_system(params_to_optimize, target_dispersion, cost_weights, c
     for i in range(iterations):
 
         optimizer.zero_grad()
-
-
 
         if cassi_system.system_config['system architecture']['dispersive element']['type'] == 'amici':
 
@@ -526,10 +524,8 @@ def optimize_cassi_system(params_to_optimize, target_dispersion, cost_weights, c
                 latest_optical_params['nd3'] = latest_optical_params['nd1']
                 latest_optical_params['vd3'] = latest_optical_params['vd1']
 
-
         if i % 10 == 0:
             print(f'Iteration {i}, Loss: {current_loss}')
-
 
             details = {
                 'reason_for_stopping': 'no improvement' if non_improvement_count >= patience else 'completed',
@@ -559,12 +555,7 @@ def optimize_cassi_system(params_to_optimize, target_dispersion, cost_weights, c
             with open(details_path, 'a') as f:
                 json.dump(score_details, f, indent=4)
 
-
-
         score.backward()
-
-        # for param in cassi_system.optical_model._parameters:
-        #     print(f"gradient {param}: {cassi_system.optical_model.lba_c.grad}")
 
         optimizer.step()
         scheduler.step()  # Step the scheduler
@@ -578,7 +569,6 @@ def optimize_cassi_system(params_to_optimize, target_dispersion, cost_weights, c
         if non_improvement_count >= patience:
             print(f'Stopping early at iteration {i} due to no improvement.')
             break
-
 
     # After the optimization loop
     final_config = cassi_system.system_config
