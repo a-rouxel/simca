@@ -24,6 +24,8 @@ from simca.cost_functions_optics import (
 )
 from simca.functions_optim import save_config_system
 
+from simca.helper import save_simulation_state
+
 def optimize_step(params_to_optimize, cost_weights, init_config_path, target_dispersion, iterations, patience, device, index_estimation_method, step_name, output_dir):
     """
     Perform a single optimization step for the CASSI system.
@@ -75,9 +77,10 @@ def main(prism_type, output_dir):
     iterations = 2000
     patience = 500
     device = "cpu"
-
     # Ensure the output directory exists
     os.makedirs(output_dir, exist_ok=True)
+    save_simulation_state(args, output_dir)
+
     
     # Set the final config path
     final_config_path = os.path.join(output_dir, "config_system.yml")
