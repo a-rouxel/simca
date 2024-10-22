@@ -2,4 +2,5 @@ matplotlib
 opticalglass
 pyyaml
 torch
+h5py
 
