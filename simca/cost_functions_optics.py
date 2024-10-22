@@ -64,14 +64,19 @@ def plot_grids_coordinates(cassi_system,test_name='test',save_fig_dir=None,save_
     plt.scatter(X_coordinates_propagated_coded_aperture.detach().cpu().numpy()[..., -1], Y_coordinates_propagated_coded_aperture.detach().cpu().numpy()[..., -1], color='red', label="distor")
 
     if save_fig:
-        plt.savefig(save_fig_dir +f"grids_coordinates_{test_name}.svg")
+        save_path = os.path.join(save_fig_dir,f"grids_coordinates_{test_name}.svg")
+        plt.savefig(save_path)
     
     plt.show()
 
     if save_fig:
-        np.save(save_fig_dir + f"/x_coordinates_{test_name}",X_coordinates_propagated_coded_aperture.detach().cpu().numpy())
-        np.save(save_fig_dir + f"/y_coordinates_{test_name}",Y_coordinates_propagated_coded_aperture.detach().cpu().numpy())
-        np.save(save_fig_dir + f"/wavelengths_{test_name}",cassi_system.wavelengths.detach().cpu().numpy())
+        path_x = os.path.join(save_fig_dir,f"x_coordinates_{test_name}.npy")
+        path_y = os.path.join(save_fig_dir,f"y_coordinates_{test_name}.npy")
+        path_wavelengths = os.path.join(save_fig_dir,f"wavelengths_{test_name}.npy")
+        
+        np.save(path_x,X_coordinates_propagated_coded_aperture.detach().cpu().numpy())
+        np.save(path_y,Y_coordinates_propagated_coded_aperture.detach().cpu().numpy())
+        np.save(path_wavelengths,cassi_system.wavelengths.detach().cpu().numpy())
         
 
 
@@ -307,8 +312,6 @@ def evaluate_beam_compression(list_theta_in, list_theta_out):
 
     product = 1
     for theta_in, theta_out in zip(list_theta_in, list_theta_out):
-        # print("theta_in", theta_in*180/np.pi)
-        # print("theta_out", theta_out*180/np.pi)
         product *= torch.abs(torch.cos(theta_in))/torch.abs(torch.cos(theta_out))
 
     return product
@@ -356,9 +359,13 @@ def evaluate_distortions(X_vec_out_distor, Y_vec_out_distors, X_vec_out, Y_vec_o
     # distortion_metric = np.sum(np.sum(distance_map))
     # distortion_metric = torch.sum(torch.sum(torch.sum(distance_map)))
 
+    min_wave_idx = 0
+    max_wave_idx = X_vec_out.shape[-1]-1
+    middle_wave_idx = int(X_vec_out.shape[-1]/2)
+
     if save_fig_dir is not None:
 
-        for i in [0,5,-1]:
+        for i in [min_wave_idx,middle_wave_idx,max_wave_idx]:
 
             max_x = X_vec_out[0,0,0,i].detach().cpu().numpy()
             min_x = X_vec_out[0,0,-1,i].detach().cpu().numpy()
