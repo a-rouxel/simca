@@ -1,8 +1,6 @@
 import torch
-import snoop
 import opticalglass as og
 from simca.helper import *
-# import snoop
 import torch
 from opticalglass.glassfactory import create_glass
 import pytorch_lightning as pl
