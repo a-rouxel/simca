@@ -487,8 +487,10 @@ def optimize_cassi_system(params_to_optimize, target_dispersion, cost_weights, c
     results_dir = setup_results_directory(output_dir, step_name)
     
     config_system = load_yaml_config(config_path)
-    cassi_system = CassiSystem(system_config=config_system, device=device, index_estimation_method=index_estimation_method)
+    cassi_system = CassiSystem(system_config=config_system, device=device, index_estimation_method=index_estimation_method,device=device)
     device = cassi_system.device
+
+    print(f"device: {device}")
     catalog = config_system["system architecture"]["dispersive element"]["catalog"]
 
     list_of_glasses, nd_values, vd_values = get_catalog_glass_infos(catalog=catalog, device=device)

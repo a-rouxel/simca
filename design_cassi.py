@@ -74,7 +74,7 @@ def main(prism_type, output_dir):
     target_dispersion = 830  # in [µm] ---> modify to spectral spreading
     iterations = 2000
     patience = 500
-    device = "cuda"
+    device = "cpu"
 
     # Ensure the output directory exists
     os.makedirs(output_dir, exist_ok=True)
